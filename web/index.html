@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus &mdash; Infrix Operations</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-text">INFRIX</span>
+        <span class="logo-sub">Nexus</span>
+      </div>
+      <nav class="header-workspaces" aria-label="Workspaces">
+        <a class="workspace-link" data-workspace="spine"   href="#/spine"   title="Cockpit — what needs attention now (g·l)"><span class="workspace-link-label">Cockpit</span></a>
+        <a class="workspace-link" data-workspace="inbox"   href="#/inbox"   title="Inbox — approvals + assigned + mentions + handoffs + drafts (g·i)"><span class="workspace-link-label">Inbox</span><span class="workspace-link-badge" id="headerInboxBadge" hidden></span></a>
+        <a class="workspace-link" data-workspace="compose" href="#/compose" title="Intent Studio — preview before submit (g·c)"><span class="workspace-link-label">Studio</span></a>
+        <a class="workspace-link" data-workspace="govern"  href="#/govern"  title="Authority Atlas — actors / roles / capabilities / policies / trust / plugins (g·a)"><span class="workspace-link-label">Atlas</span></a>
+        <a class="workspace-link" data-workspace="operate" href="#/operate" title="Operate Console — system health + governed action templates (g·o)"><span class="workspace-link-label">Console</span></a>
+        <a class="workspace-link" data-workspace="prove"   href="#/prove"   title="Evidence Verifier — drop-zone offline verifier + bundle reader (g·p)"><span class="workspace-link-label">Verifier</span></a>
+      </nav>
+      <div class="header-search">
+        <input id="globalSearch" class="header-search-input" type="text"
+               placeholder="Search intents, plans, hashes, accounts, blocks…"
+               spellcheck="false" autocomplete="off">
+        <div id="globalSearchResults" class="header-search-results" hidden></div>
+      </div>
+      <div class="header-right">
+        <div class="header-disclosure" id="headerDisclosure" title="Acting identity + purpose context">
+          <span class="header-disclosure-label">acting as</span>
+          <span class="header-disclosure-actor mono" id="headerActor">—</span>
+          <span class="header-disclosure-sep">·</span>
+          <span class="header-disclosure-label">purpose</span>
+          <span class="header-disclosure-purpose" id="headerPurpose">—</span>
+        </div>
+        <div class="header-pulse" id="headerPulse" title="Spine activity">
+          <span class="header-pulse-dot"></span>
+          <span class="header-pulse-label">live</span>
+        </div>
+        <div class="header-time-selector" id="headerTimeSelector"></div>
+        <div class="status-indicator">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Connected</span>
+        </div>
+        <div class="block-height-display" id="blockHeightDisplay">
+          Block <span id="headerBlockHeight">-</span>
+        </div>
+        <select id="themeSelect" class="header-theme-select" aria-label="Theme">
+          <option value="dark">Aurora</option>
+          <option value="light">Daylight</option>
+          <option value="contrast">Phosphor</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!--
+  Header workspace nav (Cockpit / Studio / Atlas / Console / Verifier)
+  is the canonical navigation. Each workspace is a different lens over
+  the same operations: cockpit watches health, studio composes new
+  actions, atlas explores authority, console runs governed
+  maintenance, verifier proves outcomes.
+-->
+<div id="view-container"></div>
+
+<script type="module" src="/app.js"></script>
+
+</body>
+</html>
