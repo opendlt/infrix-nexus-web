@@ -62,6 +62,11 @@ export function renderEvidenceProof(proof, opts = {}) {
   // 1. Banner
   root.appendChild(renderProofBanner(proof));
 
+  // 1.5 Assurance & verification panel (platform-review-3 Epic 6):
+  // proof level, governance, L0 / replay / witness status, what was
+  // proven, what was not required, and the one-click verify commands.
+  root.appendChild(renderAssurancePanel(proof));
+
   // 2. Plain-language summary
   if (Array.isArray(proof.summary) && proof.summary.length > 0) {
     const ul = document.createElement('ul');
@@ -139,6 +144,107 @@ function renderProofBanner(p) {
     banner.textContent = `Partial — ${passed} of ${total} checks pass; the rest can't be verified from local data alone.`;
   }
   return banner;
+}
+
+// renderAssurancePanel renders the Epic 6 proof-viewer assurance block:
+// the achieved tier, the per-layer verification status (crypto / L0 /
+// replay / witness), the substrate link, what was proven, what was not
+// required, and the copy-paste independent-verification commands.
+function renderAssurancePanel(p) {
+  const sec = panelSection('Assurance & verification');
+
+  // Tier badge.
+  const tierRow = document.createElement('div');
+  tierRow.className = 'assurance-tier';
+  const tier = document.createElement('span');
+  tier.className = 'assurance-tier-badge mono';
+  tier.textContent = p.tier || `${p.proofLevel || 'L?'}/${p.governanceLevel || 'G?'}`;
+  tierRow.appendChild(tier);
+  sec.body.appendChild(tierRow);
+
+  // Per-layer status chips.
+  const chips = document.createElement('div');
+  chips.className = 'assurance-status-chips';
+  chips.appendChild(statusChip('Cryptographic', p.cryptographicallyVerified ?? p.localVerified));
+  chips.appendChild(statusChip('L0 anchor', p.l0Verified, p.anchorStatus !== 'anchored' && p.anchorStatus !== 'verified'));
+  chips.appendChild(statusChip('Replay', p.replayVerified, !p.replayAvailable));
+  chips.appendChild(statusChip('Witness', (p.witnessCount || 0) > 0, !p.witnessAvailable));
+  chips.appendChild(statusChip('Fully verified', p.fullyVerified));
+  sec.body.appendChild(chips);
+
+  // What was proven.
+  if (Array.isArray(p.whatWasProven) && p.whatWasProven.length) {
+    sec.body.appendChild(bulletBlock('What was proven', p.whatWasProven, 'proven'));
+  }
+  // What was NOT required (honest caveats).
+  if (Array.isArray(p.whatWasNotRequired) && p.whatWasNotRequired.length) {
+    sec.body.appendChild(bulletBlock('What was not required', p.whatWasNotRequired, 'not-required'));
+  }
+
+  // Substrate readiness link.
+  const sub = document.createElement('p');
+  sub.className = 'assurance-substrate-link';
+  sub.innerHTML = 'Substrate status: <a href="#/operate/readiness">Readiness dashboard</a>';
+  sec.body.appendChild(sub);
+
+  // One-click independent-verification commands.
+  if (p.verifyCommand) sec.body.appendChild(commandBlock('Verify independently (live L0)', p.verifyCommand));
+  if (p.runLocally) sec.body.appendChild(commandBlock('Run locally', p.runLocally));
+  if (p.verifyCommandWitness) sec.body.appendChild(commandBlock('Verify with witness threshold', p.verifyCommandWitness));
+
+  return sec.element;
+}
+
+function statusChip(label, ok, notApplicable) {
+  const chip = document.createElement('span');
+  let cls = ok ? 'pass' : 'fail';
+  let mark = ok ? '✓' : '✗';
+  if (notApplicable && !ok) {
+    cls = 'na';
+    mark = '–';
+  }
+  chip.className = `assurance-chip assurance-chip-${cls}`;
+  chip.textContent = `${mark} ${label}`;
+  return chip;
+}
+
+function bulletBlock(title, items, kind) {
+  const wrap = document.createElement('div');
+  wrap.className = `assurance-bullets assurance-bullets-${kind}`;
+  const h = document.createElement('div');
+  h.className = 'assurance-bullets-title';
+  h.textContent = title;
+  wrap.appendChild(h);
+  const ul = document.createElement('ul');
+  for (const it of items) {
+    const li = document.createElement('li');
+    li.textContent = it;
+    ul.appendChild(li);
+  }
+  wrap.appendChild(ul);
+  return wrap;
+}
+
+function commandBlock(label, cmd) {
+  const wrap = document.createElement('div');
+  wrap.className = 'assurance-command';
+  const lbl = document.createElement('div');
+  lbl.className = 'assurance-command-label';
+  lbl.textContent = label;
+  wrap.appendChild(lbl);
+  const pre = document.createElement('pre');
+  pre.className = 'assurance-command-code mono';
+  pre.textContent = cmd;
+  wrap.appendChild(pre);
+  const copy = document.createElement('button');
+  copy.type = 'button';
+  copy.className = 'verify-btn assurance-copy-btn';
+  copy.textContent = 'Copy';
+  copy.addEventListener('click', () => {
+    if (navigator.clipboard) navigator.clipboard.writeText(cmd);
+  });
+  wrap.appendChild(copy);
+  return wrap;
 }
 
 function renderProofIdentityPanel(p) {
