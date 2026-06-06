@@ -14,9 +14,11 @@
 import { networkView } from '/views/network.js';
 import { verifyView } from '/views/verify.js';
 import { subsystemsView } from '/views/subsystems.js';
+import { readinessView } from '/views/readiness.js';
 
 const TABS = [
   { id: 'network',    label: 'Network',    sub: 'anchor mode · plugin admission · trust drift' },
+  { id: 'readiness',  label: 'Readiness',  sub: 'substrate dashboard · red/yellow/green' },
   { id: 'verify',     label: 'Verify',     sub: 'portable-package + L0 cross-check' },
   { id: 'subsystems', label: 'Subsystems', sub: 'peer execution families' },
 ];
@@ -88,6 +90,7 @@ function render() {
 
   switch (activeTab) {
     case 'network':    networkView.mount(body, subSubpath); break;
+    case 'readiness':  readinessView.mount(body, subSubpath); break;
     case 'verify':     verifyView.mount(body, subSubpath); break;
     case 'subsystems': subsystemsView.mount(body, subSubpath); break;
   }
