@@ -61,6 +61,10 @@ function render() {
   for (const opt of [
     { v: '', label: 'No profile (status only)' },
     { v: 'public_production', label: 'Evaluate: public_production' },
+    { v: 'bridge_public_production', label: 'Evaluate: bridge_public_production' },
+    { v: 'confidential_public_production', label: 'Evaluate: confidential_public_production' },
+    { v: 'multi_region_public_production', label: 'Evaluate: multi_region_public_production' },
+    { v: 'full_public_production', label: 'Evaluate: full_public_production' },
   ]) {
     const o = document.createElement('option');
     o.value = opt.v;
