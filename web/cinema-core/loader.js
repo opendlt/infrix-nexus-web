@@ -19,6 +19,9 @@ const SCRIPTS = [
   'legend.js',
   'exportPanel.js',
   'proofPanel.js',
+  'narrativeTemplates.js',
+  'narrativePanel.js',
+  'narrativeSync.js',
   'app.js',
 ];
 const STYLES = ['cinemaTokens.css', 'styles.css'];
