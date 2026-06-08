@@ -20,6 +20,8 @@
 import { rpcWithDisclosure, errorStateNode, jsonBlock } from '/lib/spineCommon.js';
 import { renderEvidenceProof } from '/lib/evidenceProof.js';
 import { verifyPortablePackage } from '/lib/portableVerifier.js';
+import { buildReceiptFromVerifier } from '/lib/proofReceipt.js';
+import { mountProofReceipt } from '/components/proofReceiptView.js';
 
 let rootEl = null;
 let bodyEl = null;
@@ -219,6 +221,21 @@ function renderDropZone() {
       banner.textContent = out.passed
         ? `✓ Verified — ${out.checks.length} checks passed.`
         : `✗ Failed — ${out.checks.filter((c) => !c.passed).length} of ${out.checks.length} checks didn't pass.`;
+      // adoption-06 — the compact proof receipt the user actually reads first.
+      const bundle = (parsed && typeof parsed.bundleData === 'object') ? parsed.bundleData : {};
+      const receipt = buildReceiptFromVerifier(out, {
+        subjectType: 'evidence',
+        subjectId: String(bundle.id || bundle.bundleId || ''),
+        evidenceId: String(bundle.id || bundle.bundleId || ''),
+        intentId: String(bundle.intentId || ''),
+        anchorTx: String(bundle.anchorTxHash || ''),
+        verifier: 'Nexus offline verifier',
+        verifiedAt: new Date().toISOString(),
+      });
+      const receiptHost = document.createElement('div');
+      receiptHost.className = 'prove-receipt-host';
+      result.appendChild(receiptHost);
+      mountProofReceipt(receiptHost, receipt);
       result.appendChild(renderPortableChecks(out.checks));
     } catch (err) {
       banner.classList.remove('verify-warn');

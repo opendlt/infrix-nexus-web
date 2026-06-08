@@ -7985,4 +7985,38 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 .guided-expert { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border); }
 .guided-expert-link { font-size: 0.85rem; font-weight: 700; color: var(--accent); text-decoration: none; }
 .guided-expert-link:hover { text-decoration: underline; }
+
+/* adoption-06 — proof receipt card (shared by the prove view + Cinema proof mode) */
+.proof-receipt {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--text-dim);
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: var(--surface);
+  margin: 0 0 14px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.proof-receipt.receipt-verified { border-left-color: var(--success, #46a758); }
+.proof-receipt.receipt-partial { border-left-color: var(--warning, #f5a623); }
+.proof-receipt.receipt-failed { border-left-color: var(--danger, #e5484d); }
+.proof-receipt.proof-receipt-invalid { border-left-color: var(--danger, #e5484d); }
+.proof-receipt-status { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.04em; }
+.proof-receipt-summary { font-size: 0.85rem; color: var(--text-dim); margin-top: 3px; }
+.proof-receipt-assurance { font-size: 0.95rem; font-weight: 800; margin-top: 6px; }
+.proof-receipt-badges { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 10px 0 0; }
+.proof-receipt-badge {
+  font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+  background: var(--surface-alt); color: var(--text-dim); border: 1px solid var(--border);
+}
+.proof-receipt-badge[data-on="on"] { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--border)); }
+.proof-receipt-warnings { font-size: 0.76rem; color: var(--warning, #f5a623); margin-top: 8px; font-weight: 600; }
+.proof-receipt-invalid-note { font-size: 0.76rem; color: var(--danger, #e5484d); margin-top: 8px; font-weight: 700; }
+.proof-receipt-details { margin-top: 10px; }
+.proof-receipt-details > summary { cursor: pointer; font-size: 0.8rem; font-weight: 700; color: var(--text-dim); }
+.proof-receipt-fields { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 8px 0; font-size: 0.78rem; }
+.proof-receipt-fields dt { color: var(--text-dim); font-weight: 700; }
+.proof-receipt-fields dd { margin: 0; overflow-wrap: anywhere; word-break: break-word; font-family: var(--mono, monospace); }
+.proof-receipt-json { font-size: 0.72rem; background: var(--surface-alt); padding: 10px; border-radius: 7px; overflow-x: auto; white-space: pre; max-height: 280px; }
+.cinema-receipt-host { margin-bottom: 10px; }
 </content>
