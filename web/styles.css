@@ -8019,4 +8019,38 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 .proof-receipt-fields dd { margin: 0; overflow-wrap: anywhere; word-break: break-word; font-family: var(--mono, monospace); }
 .proof-receipt-json { font-size: 0.72rem; background: var(--surface-alt); padding: 10px; border-radius: 7px; overflow-x: auto; white-space: pre; max-height: 280px; }
 .cinema-receipt-host { margin-bottom: 10px; }
+
+/* adoption-08 — translated error card (shared error panel) */
+.user-error {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--danger, #e5484d);
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: var(--surface);
+  margin: 0 0 14px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.user-error.user-error-retryable { border-left-color: var(--warning, #f5a623); }
+.user-error-title { font-size: 1.02rem; font-weight: 800; }
+.user-error-message { font-size: 0.9rem; color: var(--text); margin-top: 4px; }
+.user-error-impact { font-size: 0.85rem; margin-top: 8px; }
+.user-error-impact-label { color: var(--text-dim); font-weight: 700; }
+.user-error-impact-text { color: var(--text); }
+.user-error-fixes { margin-top: 10px; }
+.user-error-fixes-label { font-size: 0.82rem; font-weight: 700; color: var(--text-dim); }
+.user-error-fix-list { list-style: none; padding: 0; margin: 6px 0 0; }
+.user-error-fix { margin: 0 0 7px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.user-error-fix-label { font-size: 0.86rem; color: var(--text); }
+.user-error-fix-command { font-family: var(--mono, monospace); font-size: 0.8rem; background: var(--surface-alt); padding: 2px 6px; border-radius: 5px; overflow-wrap: anywhere; }
+.user-error-fix-command[data-safe-to-run="yes"] { border: 1px solid var(--success, #46a758); }
+.user-error-fix-safe { font-size: 0.72rem; font-weight: 700; color: var(--success, #46a758); }
+.user-error-retryable { font-size: 0.82rem; color: var(--text-dim); margin-top: 8px; }
+.user-error-docs { display: inline-block; margin-top: 10px; font-size: 0.84rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+.user-error-docs:hover { text-decoration: underline; }
+.user-error-details { margin-top: 10px; }
+.user-error-details summary { cursor: pointer; font-size: 0.82rem; color: var(--text-dim); }
+.user-error-fields { display: grid; grid-template-columns: max-content 1fr; gap: 3px 12px; margin: 8px 0 0; font-size: 0.8rem; }
+.user-error-fields dt { color: var(--text-dim); font-weight: 700; }
+.user-error-fields dd { margin: 0; overflow-wrap: anywhere; word-break: break-word; font-family: var(--mono, monospace); }
 </content>
