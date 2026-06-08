@@ -127,6 +127,15 @@ export const startView = {
     sub.className = 'workspace-subtitle';
     sub.textContent = 'Pick a task. Each one walks you through it in plain language — switch to Expert in the header any time for the full spine.';
     head.appendChild(sub);
+
+    // adoption-11 — a low-key door into the learning ladder for newcomers who
+    // want the concepts before a task.
+    const learnLink = document.createElement('a');
+    learnLink.className = 'start-learn-link';
+    learnLink.href = '#/learn';
+    learnLink.textContent = 'New to Infrix? Learn the concepts →';
+    head.appendChild(learnLink);
+
     shell.appendChild(head);
 
     const grid = document.createElement('section');

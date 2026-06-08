@@ -22,6 +22,32 @@ function statusHeadline(status) {
   return status === 'verified' ? 'VERIFIED' : status === 'partial' ? 'PARTIALLY VERIFIED' : 'NOT VERIFIED';
 }
 
+// adoption-11 — plain-language explanations for the trust badges and the
+// assurance label, surfaced on hover so a receipt teaches the learning-ladder
+// terms (L4/G2, replay, witness) in place. Kept inline (no extra import) so the
+// shared component stays self-contained for embedders.
+const BADGE_HELP = Object.freeze({
+  'node trust': 'No node trust required: the proof is verified by maths anyone can re-run, not by trusting the node that produced it.',
+  L0: 'L0 (Accumulate): whether the anchor was confirmed against Accumulate L0. Confirmed = durable beyond Infrix and reaches L4; not checked = offline, caps at L3.',
+  replay: 'Replay: whether the recorded steps were independently re-run and reproduced the same outcome.',
+  witness: 'Witness: whether an independent quorum of operators co-signed this proof (not required for a valid proof).',
+});
+
+function explainAssurance(label, a) {
+  const level = String(label || '').toUpperCase();
+  const proof = a.l0Verified
+    ? 'L4 — the anchor is confirmed against Accumulate L0 (durable, neutral).'
+    : 'L3 — cryptographically valid offline; the L0 anchor is not confirmed here.';
+  const gov = level.includes('G2')
+    ? ' G2 — backed by an approval plus a verified condition.'
+    : level.includes('G1')
+      ? ' G1 — backed by a bound approval.'
+      : level.includes('G0')
+        ? ' G0 — backed by an allowed policy decision.'
+        : '';
+  return proof + gov;
+}
+
 /**
  * mountProofReceipt builds the receipt card into container and returns the
  * card element. Pass { expanded: true } to open the details by default.
@@ -47,13 +73,19 @@ export function buildProofReceiptCard(receipt, opts = {}) {
 
   card.appendChild(elt('div', 'proof-receipt-status', statusHeadline(r.status)));
   if (r.summary) card.appendChild(elt('div', 'proof-receipt-summary', r.summary));
-  card.appendChild(elt('div', 'proof-receipt-assurance', view.assurance));
+  // adoption-11 — the assurance label is hover/expand-explained so "L4/G2"
+  // teaches itself.
+  const assuranceEl = elt('div', 'proof-receipt-assurance', view.assurance);
+  assuranceEl.setAttribute('title', explainAssurance(view.assurance, r.assurance || {}));
+  card.appendChild(assuranceEl);
 
   const badges = elt('ul', 'proof-receipt-badges');
   for (const b of view.badges) {
     const li = elt('li', 'proof-receipt-badge', b.text);
     li.dataset.badge = b.name;
     li.dataset.on = b.on ? 'on' : 'off';
+    // adoption-11 — every badge carries a plain-language explanation on hover.
+    if (BADGE_HELP[b.name]) li.setAttribute('title', BADGE_HELP[b.name]);
     badges.appendChild(li);
   }
   card.appendChild(badges);

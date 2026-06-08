@@ -19,6 +19,7 @@
 
 import { verifyPortablePackage } from '/lib/portableVerifier.js';
 import { assuranceSummary, PLAIN } from '/lib/guidedAssurance.js';
+import { mountLearnPanel } from '/lib/learnPanels.js';
 
 // The deterministic UX-demo fixture intent the guided flows reference.
 const DEMO_INTENT = 'int-fixture-1';
@@ -41,10 +42,13 @@ function expertFooter(href, label) {
   wrap.appendChild(a);
   return wrap;
 }
-function flowHead(title, subtitle) {
+function flowHead(title, subtitle, concept) {
   const head = el('header', 'workspace-header');
   head.appendChild(el('h2', 'workspace-title', title));
   if (subtitle) head.appendChild(el('p', 'workspace-subtitle', subtitle));
+  // adoption-11 — a dismissible "What is this?" learn panel ties the flow to
+  // the relevant learning-ladder concept, in context, with no modal wall.
+  if (concept) mountLearnPanel(head, concept, { open: false });
   return head;
 }
 function backToStart() {
@@ -111,7 +115,7 @@ function renderIndex(shell) {
 
 // ---- Guided escrow ----
 function renderEscrow(shell) {
-  shell.appendChild(flowHead('Run a governed escrow', 'Submit a governed escrow and watch it become a verifiable proof.'));
+  shell.appendChild(flowHead('Run a governed escrow', 'Submit a governed escrow and watch it become a verifiable proof.', 'intent'));
 
   const form = el('div', 'guided-form');
 
@@ -218,7 +222,7 @@ function renderEscrowResult(result, intentId, mode) {
 
 // ---- Guided verify ----
 function renderVerify(shell) {
-  shell.appendChild(flowHead('Verify a proof', 'Check a proof here in your browser — ' + PLAIN.noNodeTrust + '.'));
+  shell.appendChild(flowHead('Verify a proof', 'Check a proof here in your browser — ' + PLAIN.noNodeTrust + '.', 'proof'));
 
   const drop = el('div', 'guided-drop');
   drop.appendChild(el('p', 'guided-drop-hint', 'Drag a proof file here, paste its JSON below, or use the bundled sample.'));
@@ -323,7 +327,7 @@ function renderVerifyResult(result, r) {
 
 // ---- Guided inspect ----
 function renderInspect(shell, subpath) {
-  shell.appendChild(flowHead('Watch execution replay', 'See what happened, who approved it, and what proof backs it.'));
+  shell.appendChild(flowHead('Watch execution replay', 'See what happened, who approved it, and what proof backs it.', 'spine'));
 
   const preset = (subpath && subpath[1]) ? subpath[1] : DEMO_INTENT;
   const form = el('div', 'guided-form');
@@ -396,7 +400,7 @@ function renderInspectResult(result, id, graph, proof, policy, approvals) {
 
 // ---- Guided readiness ----
 function renderReadiness(shell) {
-  shell.appendChild(flowHead('Check production readiness', 'Can this node make public-production claims — and what is missing?'));
+  shell.appendChild(flowHead('Check production readiness', 'Can this node make public-production claims — and what is missing?', 'anchor'));
 
   const result = el('div', 'guided-result');
   result.id = 'guidedReadinessResult';
@@ -452,7 +456,7 @@ function renderReadinessResult(result, rep) {
 
 // ---- Guided MetaMask (honest) ----
 function renderMetamask(shell) {
-  shell.appendChild(flowHead('Sign with MetaMask', 'Use your existing wallet to sign a typed-data governed intent.'));
+  shell.appendChild(flowHead('Sign with MetaMask', 'Use your existing wallet to sign a typed-data governed intent.', 'policy'));
 
   // Honesty banner: no bundled provider pass → SDK/API support + acceptance harness only.
   const honest = el('div', 'guided-honest');

@@ -9,6 +9,7 @@
 import { createRouter } from '/lib/router.js';
 import { startView } from '/views/start.js';
 import { guidedView } from '/views/guided.js';
+import { learnView } from '/views/learn.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -62,6 +63,11 @@ const routes = {
   // adoption-04 — guided task flows: #/guided/<escrow|verify|inspect|
   // readiness|metamask>. Each ends with a link into the matching expert view.
   guided: guidedView,
+
+  // adoption-11 — learning ladder. #/learn teaches the six concepts (intent →
+  // policy → outcome → proof → anchor → spine) as dismissible "learn as you go"
+  // panels, linked to the docs/learn lessons.
+  learn: learnView,
 
   // The single canonical view
   spine: spineView,
