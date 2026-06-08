@@ -1,14 +1,11 @@
-// adoption-02 — Nexus start page smoke tests (no browser, no devnet).
+// adoption-02 + adoption-04 — Nexus guided start page smoke tests (no browser).
 //
 // Verifies that:
-//   1. The start view mounts and renders exactly four persona cards.
-//   2. Each card is a navigable link into a real guided flow (#/...).
-//   3. The start page shows plain language — no raw internal "spine"
-//      vocabulary leaks onto the newcomer's first screen.
-//   4. app.js registers the `start` route and index.html links to it.
-//
-// Mounted against a tiny DOM polyfill — we exercise structure
-// (createElement / appendChild / className / href), not real layout.
+//   1. The start view mounts and renders exactly five guided task cards.
+//   2. Each card has a Start link into a #/guided/<task> flow.
+//   3. The start page shows plain language — no raw internal "spine" vocab.
+//   4. app.js registers the `start` AND `guided` routes; index.html links to
+//      #/start and ships the Guided|Expert mode toggle.
 
 import { strict as assert } from 'node:assert';
 import { readFileSync } from 'node:fs';
@@ -38,13 +35,11 @@ class FakeNode {
   setAttribute(k, v) { this.attributes[k] = String(v); }
   getAttribute(k) { return this.attributes[k]; }
   hasClass(name) { return String(this.className).split(/\s+/).includes(name); }
-  // depth-first collect of nodes whose class list contains `name`.
   collect(name, out = []) {
     if (this.hasClass(name)) out.push(this);
     for (const c of this.children) if (c.collect) c.collect(name, out);
     return out;
   }
-  // depth-first concatenated text content.
   allText() {
     let t = this.textContent || '';
     for (const c of this.children) if (c.allText) t += ' ' + c.allText();
@@ -56,56 +51,57 @@ globalThis.document = { createElement: (tag) => new FakeNode(tag) };
 
 const { startView } = await import('../views/start.js');
 
-// 1 + 2: mount and inspect cards.
 const root = new FakeNode('div');
 startView.mount(root);
 
 const cards = root.collect('start-card');
-if (cards.length === 4) ok('renders exactly four persona cards');
-else fail('four cards', `got ${cards.length}`);
+if (cards.length === 5) ok('renders exactly five guided task cards');
+else fail('five cards', `got ${cards.length}`);
 
-const expectedFlows = new Set(['#/spine', '#/operate', '#/prove', '#/compose']);
-const seenFlows = new Set();
-let allNavigable = true;
-for (const c of cards) {
-  if (!c.href || !c.href.startsWith('#/')) allNavigable = false;
-  seenFlows.add(c.href);
-}
-if (allNavigable) ok('every card navigates to a #/ guided flow');
-else fail('navigable cards', 'a card is missing an #/ href');
+const starts = root.collect('start-card-start');
+const flows = new Set(starts.map((s) => s.href));
+const expected = new Set(['#/guided/escrow', '#/guided/verify', '#/guided/inspect', '#/guided/readiness', '#/guided/metamask']);
+let allGuided = starts.length === 5 && starts.every((s) => s.href && s.href.startsWith('#/guided/'));
+if (allGuided) ok('every card has a Start link into a #/guided/ flow');
+else fail('guided start links', `got ${[...flows].join(', ')}`);
 
-let flowsMatch = expectedFlows.size === seenFlows.size;
-for (const f of expectedFlows) if (!seenFlows.has(f)) flowsMatch = false;
-if (flowsMatch) ok('cards open the four intended guided flows');
-else fail('intended flows', `got ${[...seenFlows].join(', ')}`);
+let flowsMatch = expected.size === flows.size && [...expected].every((f) => flows.has(f));
+if (flowsMatch) ok('cards open the five intended guided flows');
+else fail('intended flows', `got ${[...flows].join(', ')}`);
 
-// each card has a data-path id (ties to the CLI personas).
-const ids = cards.map((c) => c.dataset.path).filter(Boolean);
-if (new Set(ids).size === 4) ok('each card carries a distinct persona id');
-else fail('persona ids', `got ${ids.join(', ')}`);
+const ids = cards.map((c) => c.dataset.flow).filter(Boolean);
+if (new Set(ids).size === 5) ok('each card carries a distinct task id');
+else fail('task ids', `got ${ids.join(', ')}`);
 
-// 3: no raw internal vocabulary in visible text.
+// Each card has a "learn what this proves" link.
+const learns = root.collect('start-card-learn');
+if (learns.length === 5) ok('each card has a "learn what this proves" link');
+else fail('learn links', `got ${learns.length}`);
+
 const text = root.allText().toLowerCase();
 const forbidden = ['objectregistry', 'canonical spine', 'evidence emission', 'subsystem', 'taxonomy'];
 const leaked = forbidden.filter((w) => text.includes(w));
 if (leaked.length === 0) ok('start page shows no raw internal vocabulary');
 else fail('plain language', `leaked: ${leaked.join(', ')}`);
 
-// the page must actually ask the routing question.
-if (text.includes('what are you trying to do')) ok('asks "what are you trying to do?"');
+if (text.includes('what do you want to do')) ok('asks "what do you want to do?"');
 else fail('routing question', 'missing the prompt');
 
-// 4: app.js + index.html wiring.
 const appJs = readFileSync(join(webRoot, 'app.js'), 'utf8');
-if (/\bstart:\s*startView\b/.test(appJs) && appJs.includes("from '/views/start.js'")) {
-  ok('app.js registers the start route');
+if (/\bstart:\s*startView\b/.test(appJs) && /\bguided:\s*guidedView\b/.test(appJs)) {
+  ok('app.js registers the start and guided routes');
 } else {
-  fail('route registration', 'app.js does not wire start: startView');
+  fail('route registration', 'app.js does not wire start + guided');
 }
 
 const indexHtml = readFileSync(join(webRoot, 'index.html'), 'utf8');
 if (indexHtml.includes('href="#/start"')) ok('index.html links to #/start');
 else fail('header link', 'index.html has no #/start link');
+if (indexHtml.includes('headerModeToggle') && indexHtml.includes('data-mode="guided"') && indexHtml.includes('data-mode="expert"')) {
+  ok('index.html ships the Guided | Expert toggle');
+} else {
+  fail('mode toggle', 'index.html missing the guided/expert toggle');
+}
 
 if (failed > 0) {
   console.log(`\nstart_route_smoke: ${failed} failure(s)`);

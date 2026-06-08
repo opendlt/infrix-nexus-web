@@ -8,6 +8,7 @@
 
 import { createRouter } from '/lib/router.js';
 import { startView } from '/views/start.js';
+import { guidedView } from '/views/guided.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -53,10 +54,14 @@ function anchorToIntent(anchorID) {
 }
 
 const routes = {
-  // adoption-02 — persona start page. "What are you trying to do?" routes a
-  // newcomer to one of four guided flows (same names as `infrix start` and
-  // docs/personas/*).
+  // adoption-02 + adoption-04 — guided-mode front door. "What do you want to
+  // do?" routes a newcomer to one of five guided task flows. Expert mode (the
+  // spine and the surfaces below) is always one header toggle away.
   start: startView,
+
+  // adoption-04 — guided task flows: #/guided/<escrow|verify|inspect|
+  // readiness|metamask>. Each ends with a link into the matching expert view.
+  guided: guidedView,
 
   // The single canonical view
   spine: spineView,
@@ -131,6 +136,16 @@ window.addEventListener('DOMContentLoaded', () => {
   // first paint reads the URL's at-coordinate, not a stale live read.
   initTimeContext();
   initHeader();
+
+  // adoption-04 — first-time / guided landing. With no explicit hash, guided
+  // users land on the #/start task chooser; experts (who toggled the header to
+  // Expert) keep landing on the spine. Any direct expert URL still works.
+  const noHash = !window.location.hash || window.location.hash === '#' || window.location.hash === '#/';
+  if (noHash) {
+    const mode = (() => { try { return localStorage.getItem('nexus.mode'); } catch (_) { return null; } })();
+    if (mode !== 'expert') window.location.hash = '#/start';
+  }
+
   const container = document.getElementById('view-container');
   const navLinks = document.querySelectorAll('[data-route]');
   createRouter({

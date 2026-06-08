@@ -14,10 +14,14 @@ import { mountTimeSelector, mountTimeBanner } from '/lib/timeSelector.js';
 const THEME_KEY = 'nexus.theme';
 const THEMES = ['light', 'dark', 'contrast'];
 
+const MODE_KEY = 'nexus.mode';
+const MODES = ['guided', 'expert'];
+
 /** Initialise the header controllers. Call once on DOMContentLoaded. */
 export function initHeader() {
   initSearch();
   initTheme();
+  initMode();
   initPulse();
   initDisclosure();
   initShortcuts();
@@ -321,4 +325,46 @@ function initTheme() {
 function applyTheme(theme) {
   if (!THEMES.includes(theme)) theme = 'light';
   document.documentElement.dataset.theme = theme;
+}
+
+// -----------------------------------------------------------------
+// Guided | Expert mode toggle (adoption-04)
+// -----------------------------------------------------------------
+// Mirrors the theme switcher: a localStorage-persisted [data-mode] attribute
+// on <html>. Guided is the default for new users; Expert is always available
+// and never hidden. The toggle sends the user to that mode's home (#/start vs
+// #/spine) but every direct expert URL keeps working regardless of mode.
+function initMode() {
+  const toggle = document.getElementById('headerModeToggle');
+  let saved = 'guided';
+  try { saved = localStorage.getItem(MODE_KEY) || 'guided'; } catch (_) { saved = 'guided'; }
+  if (!MODES.includes(saved)) saved = 'guided';
+  applyMode(saved);
+  if (!toggle) return;
+  const btns = toggle.querySelectorAll('[data-mode]');
+  paintMode(btns, saved);
+  btns.forEach((b) => {
+    b.addEventListener('click', () => {
+      const v = b.dataset.mode;
+      if (!MODES.includes(v)) return;
+      applyMode(v);
+      try { localStorage.setItem(MODE_KEY, v); } catch (_) { /* private mode */ }
+      paintMode(btns, v);
+      const home = v === 'expert' ? '#/spine' : '#/start';
+      if (window.location.hash !== home) window.location.hash = home;
+    });
+  });
+}
+
+function applyMode(mode) {
+  if (!MODES.includes(mode)) mode = 'guided';
+  document.documentElement.dataset.mode = mode;
+}
+
+function paintMode(btns, mode) {
+  btns.forEach((b) => {
+    const on = b.dataset.mode === mode;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
 }
