@@ -152,6 +152,11 @@ function renderStageHeader(g) {
   const currentIdx = stages.indexOf(g.spineStage || 'execution');
   const track = document.createElement('div');
   track.className = 'execution-stage-track';
+  // The stage strip scrolls horizontally on narrow viewports; make the
+  // scrollable region keyboard-accessible (axe scrollable-region-focusable).
+  track.tabIndex = 0;
+  track.setAttribute('role', 'group');
+  track.setAttribute('aria-label', 'Execution stages — scroll to see all stages');
   stages.forEach((s, idx) => {
     const node = document.createElement('div');
     node.className = 'execution-stage-node';

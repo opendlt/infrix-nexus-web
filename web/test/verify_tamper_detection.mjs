@@ -1,135 +1,116 @@
-// Phase 5 tamper-detection test.
+// Nexus browser-verifier tamper matrix (Priority 03).
 //
-// Loads the fixture portable package and applies a series of
-// targeted tampers. Each tamper MUST cause the JS verifier to fail
-// — otherwise the verifier is degraded.
+// Every tamper MUST make the browser verifier fail closed at the expected
+// check. Covers wrong version, integrity (export hash), plan hash, outcome
+// digest, inclusion proof, the stale-vs-recomputed policy-decision pair,
+// anchor proof / tx hash, plugin version identity, malformed bundle data, and
+// an unreferenced trust-snapshot entry. Run with: node --test ...
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { webcrypto } from 'node:crypto';
-if (typeof globalThis.crypto === 'undefined') globalThis.crypto = webcrypto;
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const libDir = path.join(__dirname, '..', 'lib');
+import { loadVerifier, loadFixture } from './_verifier_harness.mjs';
 
-const cjsSource = fs.readFileSync(path.join(libDir, 'canonicalJson.js'), 'utf8');
-const pvSource = fs.readFileSync(path.join(libDir, 'portableVerifier.js'), 'utf8')
-  .replace("from '/lib/canonicalJson.js'", "from './canonicalJson.js'");
+const clone = (o) => JSON.parse(JSON.stringify(o));
 
-const tmp = fs.mkdtempSync(path.join(path.dirname(__dirname), '.verify-tmp-'));
-fs.writeFileSync(path.join(tmp, 'canonicalJson.js'), cjsSource);
-fs.writeFileSync(path.join(tmp, 'portableVerifier.js'), pvSource);
-const { verifyPortablePackage } = await import(
-  pathToFileURL(path.resolve(tmp, 'portableVerifier.js')).href
-);
-
-const fixturePath = process.env.PORTABLE_FIXTURE ||
-  'C:\\Users\\jason\\AppData\\Local\\Temp\\portable-fixture.json';
-const original = JSON.parse(fs.readFileSync(fixturePath, 'utf8'));
-
-const tampers = [
-  {
-    name: 'wrong version',
-    apply: (p) => { p.version = '2'; return p; },
-    expect: 'version',
-  },
-  {
-    name: 'flip a byte in exportHash',
-    apply: (p) => { p.exportHash[0] = (p.exportHash[0] + 1) & 0xff; return p; },
-    expect: 'export_hash',
-  },
-  {
-    name: 'flip a byte in planHash (no rehash)',
-    apply: (p) => { p.planHash[0] = (p.planHash[0] + 1) & 0xff; return p; },
-    expect: 'export_hash', // ExportHash check fires first
-  },
-  {
-    name: 'flip a byte in outcomeDigest',
-    apply: (p) => { p.outcomeDigest[0] = (p.outcomeDigest[0] + 1) & 0xff; return p; },
-    expect: 'export_hash',
-  },
-  {
-    name: 'tamper an inclusion proof sibling',
-    apply: (p) => {
-      if (p.inclusionProofs && p.inclusionProofs[0] && p.inclusionProofs[0].proof && p.inclusionProofs[0].proof[0]) {
-        p.inclusionProofs[0].proof[0][0] = (p.inclusionProofs[0].proof[0][0] + 1) & 0xff;
-      }
-      return p;
-    },
-    expect: 'export_hash', // again — anything in the package mutates ExportHash
-  },
-  {
-    name: 'tamper bundleData policy decision (cross-binding catch)',
-    apply: (p) => {
-      if (p.bundleData && p.bundleData.policyDecisions && p.bundleData.policyDecisions[0]) {
-        p.bundleData.policyDecisions[0].decision = 'deny';
-      }
-      return p;
-    },
-    expect: 'policy_decision_digest', // ExportHash and outer fields untouched, but the bundle commitment broke
-  },
-];
-
-// Sophisticated tamper: rewrite a policy decision AND rehash
-// ExportHash to bypass the integrity check. This is the exact
-// scenario P1-005's PolicyDecisionDigest cross-binding was added
-// to defeat. The verifier MUST catch it via the digest mismatch.
-const cjs = await import(pathToFileURL(path.resolve(tmp, 'canonicalJson.js')).href);
-async function rehashExportHash(pkg) {
-  const intermediate = {
-    version: pkg.version,
-    bundleData: pkg.bundleData,
-    planHash: Array.from(cjs.coerce32(pkg.planHash)),
-    outcomeDigest: Array.from(cjs.coerce32(pkg.outcomeDigest)),
-    trustSnapshot: pkg.trustSnapshot || null,
-    inclusionProofs: pkg.inclusionProofs || null,
-    anchorProof: pkg.anchorProof || null,
-    anchorTxHash: pkg.anchorTxHash || '',
-    anchorBlockHeight: Number(pkg.anchorBlockHeight || 0),
-    pluginVersions: pkg.pluginVersions || null,
-    policyDecisionDigest: Array.from(cjs.coerce32(pkg.policyDecisionDigest)),
-  };
-  const utf8 = new TextEncoder().encode(cjs.canonicalJSON(intermediate));
-  const buf = await crypto.subtle.digest('SHA-256', utf8);
-  pkg.exportHash = Array.from(new Uint8Array(buf));
-  return pkg;
-}
-tampers.push({
-  name: 'P1-005 sophisticated: tamper policy decision + rehash ExportHash',
-  apply: async (p) => {
-    if (p.bundleData && p.bundleData.policyDecisions && p.bundleData.policyDecisions[0]) {
-      p.bundleData.policyDecisions[0].decision = 'deny';
+/** Mirror of portableVerifier.computeExportHash (incl. v4 replayCapsule). */
+function bundleVal(bd) {
+  if (bd === null || bd === undefined) return null;
+  if (typeof bd === 'string') {
+    try {
+      return JSON.parse(bd);
+    } catch {
+      return bd;
     }
-    return rehashExportHash(p);
-  },
-  expect: 'policy_decision_digest',
-  async: true,
+  }
+  return bd;
+}
+async function rehash(p, canonicalJSON, coerce32) {
+  const intermediate = {
+    version: p.version,
+    bundleData: bundleVal(p.bundleData),
+    planHash: Array.from(coerce32(p.planHash)),
+    outcomeDigest: Array.from(coerce32(p.outcomeDigest)),
+    trustSnapshot: p.trustSnapshot || null,
+    inclusionProofs: p.inclusionProofs || null,
+    anchorProof: p.anchorProof || null,
+    anchorTxHash: p.anchorTxHash || '',
+    anchorBlockHeight: Number(p.anchorBlockHeight || 0),
+    pluginVersions: p.pluginVersions || null,
+    policyDecisionDigest: Array.from(coerce32(p.policyDecisionDigest)),
+    replayCapsule: bundleVal(p.replayCapsule),
+  };
+  const utf8 = new TextEncoder().encode(canonicalJSON(intermediate));
+  const buf = await crypto.subtle.digest('SHA-256', utf8);
+  p.exportHash = Array.from(new Uint8Array(buf));
+}
+
+test('tamper matrix: every mutation fails the browser verifier at the expected check', async () => {
+  const { pkg: original } = loadFixture();
+  const v = await loadVerifier();
+  try {
+    const rh = (p) => rehash(p, v.canonicalJSON, v.coerce32);
+
+    const tampers = [
+      { name: 'wrong version', expect: 'version', apply: (p) => { p.version = '2'; } },
+      { name: 'flipped exportHash byte', expect: 'export_hash', apply: (p) => { p.exportHash[0] = (p.exportHash[0] + 1) & 0xff; } },
+      { name: 'changed planHash (rehashed)', expect: 'plan_hash', apply: async (p) => { p.planHash[0] = (p.planHash[0] + 1) & 0xff; await rh(p); } },
+      { name: 'changed outcomeDigest (rehashed)', expect: 'outcome_digest', apply: async (p) => { p.outcomeDigest[0] = (p.outcomeDigest[0] + 1) & 0xff; await rh(p); } },
+      {
+        name: 'changed inclusion-proof sibling (rehashed)',
+        expect: 'inclusion_proof',
+        apply: async (p) => {
+          const pr = p.inclusionProofs?.[0]?.proof?.[0];
+          assert.ok(pr, 'fixture must have an inclusion proof sibling to tamper');
+          pr[0] = (pr[0] + 1) & 0xff;
+          await rh(p);
+        },
+      },
+      {
+        name: 'policy decision changed, STALE export hash',
+        expect: 'export_hash',
+        apply: (p) => { p.bundleData.policyDecisions[0].decision = 'deny'; /* no rehash */ },
+      },
+      {
+        name: 'policy decision changed, RECOMPUTED export hash',
+        expect: 'policy_decision_digest',
+        apply: async (p) => { p.bundleData.policyDecisions[0].decision = 'deny'; await rh(p); },
+      },
+      { name: 'missing anchor proof (anchored bundle)', expect: 'anchor_proof', apply: async (p) => { p.anchorProof = null; await rh(p); } },
+      { name: 'wrong anchor tx hash', expect: 'anchor_proof', apply: async (p) => { p.anchorTxHash = 'attacker-tx-hash'; await rh(p); } },
+      { name: 'blanked plugin implementationHash', expect: 'plugin_versions', apply: async (p) => { p.pluginVersions[0].implementationHash = ''; await rh(p); } },
+      { name: 'malformed bundle data', expect: 'bundle_data', apply: async (p) => { p.bundleData = '{ not valid json'; await rh(p); } },
+      {
+        name: 'trust-snapshot entry not in trust assumptions',
+        expect: 'trust_snapshot',
+        apply: async (p) => { (p.trustSnapshot ||= []).push({ profileId: 'fabricated-profile', status: 'active', blockHeight: 999 }); await rh(p); },
+      },
+    ];
+
+    for (const t of tampers) {
+      const p = clone(original);
+      await t.apply(p);
+      const result = await v.verifyPortablePackage(p);
+      assert.equal(result.passed, false, `tamper "${t.name}" must be rejected (verifier wrongly passed)`);
+      const failed = result.checks.find((c) => !c.passed);
+      assert.ok(failed, `tamper "${t.name}" produced no failed check`);
+      assert.ok(
+        failed.name.startsWith(t.expect),
+        `tamper "${t.name}" failed at "${failed.name}", expected "${t.expect}"`,
+      );
+    }
+  } finally {
+    v.cleanup();
+  }
 });
 
-let allOk = true;
-for (const t of tampers) {
-  const tampered = JSON.parse(JSON.stringify(original));
-  if (t.async) await t.apply(tampered);
-  else t.apply(tampered);
-  const result = await verifyPortablePackage(tampered);
-  if (result.passed) {
-    console.log(`✗ ${t.name}: VERIFIER WRONGLY PASSED`);
-    allOk = false;
-    continue;
+test('positive control: the untampered fixture still passes', async () => {
+  const { pkg } = loadFixture();
+  const v = await loadVerifier();
+  try {
+    const result = await v.verifyPortablePackage(pkg);
+    assert.equal(result.passed, true, 'baseline fixture must pass (else the tamper matrix is meaningless)');
+  } finally {
+    v.cleanup();
   }
-  const failedCheck = result.checks.find((c) => !c.passed);
-  if (!failedCheck) {
-    console.log(`✗ ${t.name}: passed=false but no failed check found`);
-    allOk = false;
-    continue;
-  }
-  if (!failedCheck.name.startsWith(t.expect)) {
-    console.log(`~ ${t.name}: failed at ${failedCheck.name} (expected ${t.expect})`);
-    // Acceptable — failure is detected, just at a different check.
-  }
-  console.log(`✓ ${t.name}: rejected at ${failedCheck.name}`);
-}
-
-fs.rmSync(tmp, { recursive: true, force: true });
-process.exit(allOk ? 0 : 1);
+});

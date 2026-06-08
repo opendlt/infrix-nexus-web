@@ -27,6 +27,11 @@ let bodyEl = null;
 let pollTimer = null;
 let currentIntentId = null;
 let mode = 'live'; // 'live' | 'replay'
+// Priority 05: the latest execution-graph projection, so the on-demand scene
+// cinema (canonical core, cinema.nexus mode) can render the same run without
+// adding its own polling.
+let lastGraph = null;
+let sceneCinemaCtl = null;
 
 export const executeView = {
   async mount(root, subpath) {
@@ -61,6 +66,12 @@ export const executeView = {
     bodyEl.id = 'executeBody';
     main.appendChild(bodyEl);
 
+    // Priority 05: opt-in canonical scene cinema. Lives OUTSIDE bodyEl so the
+    // 3s poll (which replaces bodyEl) never tears it down, and it stays
+    // collapsed until the operator asks — so the core is loaded lazily and the
+    // execute view's first paint / polling budget is unchanged.
+    appendSceneCinema(main);
+
     const intentId = subpath && subpath[0];
     if (!intentId) {
       bodyEl.replaceChildren(textNode('No intent ID supplied. Open this view from a row in the spine timeline.', 'execute-empty'));
@@ -88,14 +99,65 @@ export const executeView = {
 
   unmount() {
     stopPolling();
+    if (sceneCinemaCtl && sceneCinemaCtl.destroy) { try { sceneCinemaCtl.destroy(); } catch (e) {} }
+    sceneCinemaCtl = null;
+    lastGraph = null;
   },
 };
+
+// appendSceneCinema adds the collapsed "Scene cinema" affordance. On open it
+// lazily loads the canonical Cinema core and mounts the current run in
+// cinema.nexus mode (the SAME renderer the standalone product + embed widget +
+// proof viewer use). Additive: the step-DAG above is untouched.
+function appendSceneCinema(main) {
+  const section = document.createElement('section');
+  section.className = 'execute-scene-cinema';
+
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'execute-scene-cinema-toggle';
+  toggle.id = 'executeSceneCinemaToggle';
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.textContent = 'View as scene cinema';
+  section.appendChild(toggle);
+
+  const host = document.createElement('div');
+  host.className = 'execute-scene-cinema-host';
+  host.id = 'executeSceneCinemaHost';
+  host.style.display = 'none';
+  host.style.height = '420px';
+  host.style.position = 'relative';
+  section.appendChild(host);
+
+  let open = false;
+  toggle.addEventListener('click', async () => {
+    open = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    host.style.display = open ? 'block' : 'none';
+    toggle.textContent = open ? 'Hide scene cinema' : 'View as scene cinema';
+    if (open) {
+      if (!lastGraph) {
+        host.replaceChildren(textNode('No execution graph yet — it will appear once this run reports steps.', 'execute-empty'));
+        return;
+      }
+      try {
+        const { mountNexusCinema } = await import('/lib/cinemaMount.js');
+        sceneCinemaCtl = await mountNexusCinema(host, { graph: lastGraph, disclosureContext: {} });
+      } catch (err) {
+        host.replaceChildren(textNode('Scene cinema unavailable: ' + (err && err.message ? err.message : err), 'execute-empty'));
+      }
+    }
+  });
+
+  main.appendChild(section);
+}
 
 function startPolling() {
   stopPolling();
   pollTimer = setInterval(async () => {
     try {
       const g = await rpcWithDisclosure('nexus.executionGraph', { intentId: currentIntentId });
+      lastGraph = g;
       // Stop polling once outcome is terminal — spine is at rest.
       const terminal = g && g.outcome && ['completed', 'failed', 'compensated'].includes(g.outcome.overallStatus);
       bodyEl.replaceChildren(renderExecutionGraph(g, {
@@ -118,6 +180,7 @@ async function refreshGraph() {
   if (!currentIntentId || !bodyEl) return;
   try {
     const g = await rpcWithDisclosure('nexus.executionGraph', { intentId: currentIntentId });
+    lastGraph = g;
     if (mode === 'replay') {
       bodyEl.replaceChildren(renderReplayMode(g));
     } else {

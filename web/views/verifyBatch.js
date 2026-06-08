@@ -110,6 +110,9 @@ function buildLauncher() {
   limit.min = '1';
   limit.value = '100';
   limit.className = 'verify-batch-limit';
+  // a11y: a number input needs an accessible name (WCAG label).
+  limit.setAttribute('aria-label', 'Maximum number of evidence bundles to verify');
+  limit.title = 'Maximum number of evidence bundles to verify';
   row.appendChild(limit);
   card.appendChild(row);
 

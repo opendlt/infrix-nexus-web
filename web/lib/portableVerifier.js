@@ -36,7 +36,10 @@ import {
   concatBytes,
 } from '/lib/canonicalJson.js';
 
-const PORTABLE_VERSION = '3';
+// Must track pkg/evidence.PortableEvidencePackageVersion. v4 added the
+// replayCapsule + witnessReceipts fields (replayCapsule is committed to
+// ExportHash; see computeExportHash below).
+const PORTABLE_VERSION = '4';
 
 /**
  * Run the 10-check verifier against a parsed PortableEvidencePackage.
@@ -165,7 +168,10 @@ export async function verifyPortablePackage(pkg) {
   }
 
   // ── 7. Anchor proof cross-binding when bundle is anchored
-  const anchorState = embedded.anchor || embedded.Anchor || '';
+  // The canonical EvidenceBundle wire form names these "anchorStatus" /
+  // "anchorBlockHeight" (pkg/evidence/bundle.go json tags). Reading the wrong
+  // key would silently skip the whole anchor cross-binding — match Go exactly.
+  const anchorState = embedded.anchorStatus || embedded.anchor || embedded.Anchor || '';
   const isAnchored = anchorState === 'anchored' || anchorState === 'verified';
   if (isAnchored) {
     if (!pkg.anchorProof) {
@@ -191,7 +197,7 @@ export async function verifyPortablePackage(pkg) {
       });
       return { passed: false, checks };
     }
-    const embBlock = embedded.anchorBlock || embedded.AnchorBlock || 0;
+    const embBlock = embedded.anchorBlockHeight || embedded.anchorBlock || embedded.AnchorBlock || 0;
     if (embBlock !== 0 && Number(pkg.anchorBlockHeight || 0) !== Number(embBlock)) {
       checks.push({
         name: 'anchor_proof',
@@ -292,6 +298,10 @@ async function computeExportHash(pkg) {
     anchorBlockHeight: Number(pkg.anchorBlockHeight || 0),
     pluginVersions: pkg.pluginVersions || null,
     policyDecisionDigest: arrayifyHash(pkg.policyDecisionDigest),
+    // v4: the replay capsule is committed to ExportHash (Go encodes the raw
+    // message, or null when absent). Omitting this key would diverge from
+    // pkg/evidence.computePortableExportHash and fail every v4 package.
+    replayCapsule: bundleDataAsCanonicalValue(pkg.replayCapsule),
   };
   return canonicalJSONSha256(intermediate);
 }
