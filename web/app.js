@@ -7,6 +7,7 @@
 // Legacy routes auto-redirect into the canonical hash form.
 
 import { createRouter } from '/lib/router.js';
+import { startView } from '/views/start.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -52,6 +53,11 @@ function anchorToIntent(anchorID) {
 }
 
 const routes = {
+  // adoption-02 — persona start page. "What are you trying to do?" routes a
+  // newcomer to one of four guided flows (same names as `infrix start` and
+  // docs/personas/*).
+  start: startView,
+
   // The single canonical view
   spine: spineView,
 
