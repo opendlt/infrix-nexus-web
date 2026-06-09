@@ -11,6 +11,7 @@ import { startView } from '/views/start.js';
 import { guidedView } from '/views/guided.js';
 import { learnView } from '/views/learn.js';
 import { agentView } from '/views/agent.js';
+import { scenarioBuilderView } from '/views/scenario_builder.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -74,6 +75,11 @@ const routes = {
   // Protocol: list actions, dry-run, approve, run, and see proof receipts +
   // structured failures from a running `infrix agent serve`.
   agent: agentView,
+
+  // nextux-02 — Scenario Builder. #/scenarios lets a non-expert build a
+  // scenario, run it for a real proof, and verify a shared proof story in the
+  // browser.
+  scenarios: scenarioBuilderView,
 
   // The single canonical view
   spine: spineView,

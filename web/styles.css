@@ -8138,4 +8138,50 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 .agent-raw-summary { cursor: pointer; font-size: 0.76rem; color: var(--text-dim, #8b949e); }
 .agent-raw-pre { font-family: var(--mono, monospace); font-size: 0.72rem; background: var(--bg, #010409); padding: 10px; border-radius: 6px; overflow: auto; max-height: 320px; }
 .agent-loading { color: var(--text-dim, #8b949e); font-size: 0.85rem; }
+
+/* nextux-02 — Scenario Builder */
+.scenario-view { padding: 18px 22px; max-width: 1100px; }
+.scenario-view-title { font-size: 1.4rem; margin: 0 0 4px; }
+.scenario-view-intro { color: var(--text-dim, #8b949e); font-size: 0.9rem; margin: 0 0 16px; max-width: 72ch; }
+.scenario-section-title { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim, #8b949e); margin: 18px 0 8px; }
+.scenario-entry-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+.scenario-entry-choice { text-align: left; font-size: 0.85rem; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border, #30363d); background: var(--surface, #161b22); color: var(--text, #e6edf3); cursor: pointer; }
+.scenario-entry-choice:hover { border-color: var(--accent, #58a6ff); }
+.scenario-template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .scenario-template-grid { grid-template-columns: 1fr; } }
+.scenario-template-card { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 12px; border-radius: 8px; border: 1px solid var(--border, #30363d); background: var(--surface, #161b22); color: var(--text, #e6edf3); cursor: pointer; }
+.scenario-template-card:hover { border-color: var(--accent, #58a6ff); }
+.scenario-template-title { font-weight: 600; font-size: 0.9rem; }
+.scenario-template-promise { font-size: 0.78rem; color: var(--text-dim, #8b949e); }
+.scenario-template-support { font-size: 0.7rem; color: var(--text-dim, #8b949e); font-family: var(--mono, monospace); }
+.scenario-detail { margin-top: 14px; border: 1px solid var(--border, #30363d); border-radius: 8px; padding: 16px; background: var(--surface, #0d1117); }
+.scenario-detail-empty { color: var(--text-dim, #8b949e); font-size: 0.9rem; }
+.scenario-detail-title { font-size: 1.05rem; margin: 0 0 4px; }
+.scenario-detail-promise { font-size: 0.85rem; color: var(--text-dim, #8b949e); margin: 0 0 10px; }
+.scenario-mode-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.scenario-mode-label, .scenario-run-label { font-size: 0.8rem; color: var(--text-dim, #8b949e); }
+.scenario-mode-select, .scenario-agent-input { font-size: 0.82rem; padding: 5px 8px; border: 1px solid var(--border, #30363d); border-radius: 6px; background: var(--bg, #010409); color: var(--text, #e6edf3); }
+.scenario-agent-input { flex: 1 1 240px; font-family: var(--mono, monospace); }
+.scenario-assurance-preview { font-size: 0.82rem; color: var(--text, #e6edf3); background: var(--bg, #010409); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; }
+.scenario-run-section { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.scenario-btn { font-size: 0.82rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--accent, #238636); background: var(--accent, #238636); color: var(--bg, #010409); cursor: pointer; }
+.scenario-verify-input { width: 100%; box-sizing: border-box; font-family: var(--mono, monospace); font-size: 0.78rem; padding: 8px; border: 1px solid var(--border, #30363d); border-radius: 6px; background: var(--bg, #010409); color: var(--text, #e6edf3); resize: vertical; margin-bottom: 8px; }
+.scenario-verify-intro { font-size: 0.82rem; color: var(--text-dim, #8b949e); margin: 0 0 8px; max-width: 72ch; }
+.scenario-result-card { margin-top: 12px; border-radius: 8px; padding: 12px; border: 1px solid var(--border, #30363d); }
+.scenario-ok { border-left: 3px solid var(--ok, #3fb950); }
+.scenario-fail { border-left: 3px solid var(--alert, #f85149); }
+.scenario-result-summary { font-weight: 600; margin-bottom: 6px; }
+.scenario-assurance { font-size: 0.82rem; font-family: var(--mono, monospace); margin-bottom: 6px; }
+.scenario-receipt { font-size: 0.82rem; color: var(--text-dim, #8b949e); margin-bottom: 6px; }
+.scenario-cinema { background: var(--bg, #010409); border-radius: 6px; padding: 8px 10px; margin: 6px 0; }
+.scenario-cinema-title { font-size: 0.72rem; text-transform: uppercase; color: var(--text-dim, #8b949e); }
+.scenario-cinema-steps { font-size: 0.84rem; }
+.scenario-cinema-capsule { font-size: 0.74rem; color: var(--text-dim, #8b949e); }
+.scenario-checks-summary { cursor: pointer; font-size: 0.78rem; color: var(--text-dim, #8b949e); }
+.scenario-checks-list { list-style: none; margin: 6px 0 0; padding: 0; font-family: var(--mono, monospace); font-size: 0.74rem; }
+.scenario-check-ok { color: var(--ok, #3fb950); }
+.scenario-check-fail { color: var(--alert, #f85149); }
+.scenario-artifact-cmd { display: block; font-family: var(--mono, monospace); font-size: 0.76rem; background: var(--bg, #010409); padding: 4px 6px; border-radius: 4px; margin: 4px 0; word-break: break-all; }
+.scenario-run-error { color: var(--alert, #f85149); font-size: 0.8rem; }
+.scenario-loading { color: var(--text-dim, #8b949e); font-size: 0.85rem; }
 </content>
