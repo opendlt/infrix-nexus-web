@@ -1,0 +1,319 @@
+{
+  "plan": {
+    "version": 1,
+    "planId": "repair_f27e87bbca57",
+    "planHash": "sha256:f27e87bbca57cd29b7d9a423cf1546e1bec7e7d334b1e0e193cacfb8c673b17e",
+    "createdAt": "2023-11-14T22:13:20Z",
+    "configPath": "..\\..\\testdata\\bad-profile.yaml",
+    "profile": "public_production",
+    "findings": [
+      {
+        "id": "finding_billing_throttle_enabled",
+        "severity": "blocking",
+        "field": "billing.throttle.enabled",
+        "plain": "Per-actor throttling is disabled on shared infrastructure.",
+        "technical": "billing.throttle.enabled: required=\"true\" actual=\"false\"",
+        "impact": "public_production cannot be claimed until this is fixed.",
+        "fixes": [
+          {
+            "id": "fix_enable_throttle",
+            "kind": "auto_safe",
+            "summary": "Enable per-actor throttling.",
+            "risk": "config_only",
+            "requiresApproval": true,
+            "edit": {
+              "path": [
+                "billing",
+                "throttle",
+                "enabled"
+              ],
+              "newValue": "true",
+              "valType": "bool"
+            }
+          }
+        ]
+      },
+      {
+        "id": "finding_evidencestrictmode",
+        "severity": "blocking",
+        "field": "evidenceStrictMode",
+        "plain": "Strict evidence mode is disabled.",
+        "technical": "evidenceStrictMode: required=\"absent or true\" actual=\"false\"",
+        "impact": "public_production cannot be claimed until this is fixed.",
+        "fixes": [
+          {
+            "id": "fix_enable_strict_evidence",
+            "kind": "auto_safe",
+            "summary": "Enable strict evidence mode.",
+            "risk": "config_only",
+            "requiresApproval": true,
+            "edit": {
+              "path": [
+                "evidenceStrictMode"
+              ],
+              "newValue": "true",
+              "valType": "bool"
+            }
+          }
+        ]
+      },
+      {
+        "id": "finding_identity_identityverifier_type",
+        "severity": "blocking",
+        "field": "identity.identityVerifier.type",
+        "plain": "Identity verification is operator-attested, not cryptographic.",
+        "technical": "identity.identityVerifier.type: required=\"l0_keypage\" actual=\"operator_attested\"",
+        "impact": "public_production cannot be claimed until this is fixed.",
+        "fixes": [
+          {
+            "id": "fix_set_identity_verifier",
+            "kind": "auto_safe",
+            "summary": "Use the L0 key-page identity verifier.",
+            "risk": "config_only",
+            "requiresApproval": true,
+            "edit": {
+              "path": [
+                "identity",
+                "identityVerifier",
+                "type"
+              ],
+              "newValue": "l0_keypage",
+              "valType": "string"
+            }
+          }
+        ]
+      },
+      {
+        "id": "finding_l0_anchormode",
+        "severity": "blocking",
+        "field": "l0.anchorMode",
+        "plain": "Anchoring is off; the node must anchor on a testnet.",
+        "technical": "l0.anchorMode: required=\"testnet | mainnet\" actual=\"off\"",
+        "impact": "public_production cannot be claimed until this is fixed.",
+        "fixes": [
+          {
+            "id": "fix_set_anchor_mode",
+            "kind": "auto_safe",
+            "summary": "Set anchorMode to testnet.",
+            "risk": "behavioral",
+            "requiresApproval": true,
+            "edit": {
+              "path": [
+                "l0",
+                "anchorMode"
+              ],
+              "newValue": "testnet",
+              "valType": "string"
+            }
+          }
+        ]
+      },
+      {
+        "id": "finding_l0_endpoint_placeholder",
+        "severity": "advisory",
+        "field": "l0.endpoint",
+        "plain": "The L0 endpoint looks like a placeholder, not a live endpoint.",
+        "technical": "l0.endpoint=https://devnet.accumulatenetwork.io/v3 matches a placeholder pattern",
+        "impact": "A placeholder endpoint is not live; live L0 verification (L4) will not reach it.",
+        "fixes": [
+          {
+            "id": "fix_set_l0_endpoint",
+            "kind": "auto_safe",
+            "summary": "Set the L0 endpoint to Kermit.",
+            "risk": "config_only",
+            "requiresApproval": true,
+            "edit": {
+              "path": [
+                "l0",
+                "endpoint"
+              ],
+              "newValue": "https://kermit.accumulatenetwork.io/v3",
+              "valType": "string"
+            }
+          }
+        ]
+      },
+      {
+        "id": "finding_l0_statemirrorenabled",
+        "severity": "blocking",
+        "field": "l0.stateMirrorEnabled",
+        "plain": "The L0 state mirror is disabled, so state is not recoverable from L0.",
+        "technical": "l0.stateMirrorEnabled: required=\"true\" actual=\"false\"",
+        "impact": "public_production cannot be claimed until this is fixed.",
+        "fixes": [
+          {
+            "id": "fix_enable_state_mirror",
+            "kind": "auto_safe",
+            "summary": "Enable the L0 state mirror.",
+            "risk": "config_only",
+            "requiresApproval": true,
+            "edit": {
+              "path": [
+                "l0",
+                "stateMirrorEnabled"
+              ],
+              "newValue": "true",
+              "valType": "bool"
+            }
+          }
+        ]
+      },
+      {
+        "id": "finding_signer_custody",
+        "severity": "advisory",
+        "field": "l0.signerBackend",
+        "plain": "The L0 signer uses a local key file; production should use managed custody.",
+        "technical": "l0.signerBackend is file (plaintext seed); prefer aws-kms / azure-keyvault / MPC.",
+        "impact": "A plaintext file signer is acceptable for testnet hardening but should be HSM/KMS-backed for production.",
+        "fixes": [
+          {
+            "id": "fix_use_managed_signer",
+            "kind": "external_required",
+            "summary": "Move the signer to HSM/KMS/MPC custody.",
+            "risk": "none",
+            "requiresApproval": false,
+            "command": "set l0.signerBackend to aws-kms or azure-keyvault and reference the managed key"
+          }
+        ]
+      }
+    ]
+  },
+  "receipt": {
+    "version": 1,
+    "planId": "repair_f27e87bbca57",
+    "planHash": "sha256:f27e87bbca57cd29b7d9a423cf1546e1bec7e7d334b1e0e193cacfb8c673b17e",
+    "appliedAt": "2023-11-14T22:13:20Z",
+    "dryRun": true,
+    "configPath": "..\\..\\testdata\\bad-profile.yaml",
+    "profile": "public_production",
+    "beforeStateHash": "sha256:7663bc9c88d67bccd30320d3bbb08033ec5abac9486d8cd4af64fdf349185fbb",
+    "afterStateHash": "sha256:06e4803513c0267a92dabd93c75a14c13ac5b8e03ca8941dce56855865a5df3e",
+    "appliedFixes": [
+      {
+        "findingId": "finding_billing_throttle_enabled",
+        "fixId": "fix_enable_throttle",
+        "summary": "Enable per-actor throttling.",
+        "path": [
+          "billing",
+          "throttle",
+          "enabled"
+        ],
+        "oldValue": "false",
+        "newValue": "true"
+      },
+      {
+        "findingId": "finding_evidencestrictmode",
+        "fixId": "fix_enable_strict_evidence",
+        "summary": "Enable strict evidence mode.",
+        "path": [
+          "evidenceStrictMode"
+        ],
+        "oldValue": "false",
+        "newValue": "true"
+      },
+      {
+        "findingId": "finding_identity_identityverifier_type",
+        "fixId": "fix_set_identity_verifier",
+        "summary": "Use the L0 key-page identity verifier.",
+        "path": [
+          "identity",
+          "identityVerifier",
+          "type"
+        ],
+        "oldValue": "operator_attested",
+        "newValue": "l0_keypage"
+      },
+      {
+        "findingId": "finding_l0_anchormode",
+        "fixId": "fix_set_anchor_mode",
+        "summary": "Set anchorMode to testnet.",
+        "path": [
+          "l0",
+          "anchorMode"
+        ],
+        "oldValue": "off",
+        "newValue": "testnet"
+      },
+      {
+        "findingId": "finding_l0_endpoint_placeholder",
+        "fixId": "fix_set_l0_endpoint",
+        "summary": "Set the L0 endpoint to Kermit.",
+        "path": [
+          "l0",
+          "endpoint"
+        ],
+        "oldValue": "https://devnet.accumulatenetwork.io/v3",
+        "newValue": "https://kermit.accumulatenetwork.io/v3"
+      },
+      {
+        "findingId": "finding_l0_statemirrorenabled",
+        "fixId": "fix_enable_state_mirror",
+        "summary": "Enable the L0 state mirror.",
+        "path": [
+          "l0",
+          "stateMirrorEnabled"
+        ],
+        "oldValue": "false",
+        "newValue": "true"
+      }
+    ],
+    "skippedFixes": [
+      {
+        "findingId": "finding_signer_custody",
+        "fixId": "fix_use_managed_signer",
+        "kind": "external_required",
+        "reason": "not auto-applicable (external_required)"
+      }
+    ],
+    "verification": {
+      "before": {
+        "profile": "public_production",
+        "passed": false,
+        "failures": [
+          {
+            "field": "identity.identityVerifier.type",
+            "required": "l0_keypage",
+            "actual": "operator_attested",
+            "severity": "fatal"
+          },
+          {
+            "field": "evidenceStrictMode",
+            "required": "absent or true",
+            "actual": "false",
+            "severity": "fatal"
+          },
+          {
+            "field": "l0.anchorMode",
+            "required": "testnet | mainnet",
+            "actual": "off",
+            "severity": "fatal"
+          },
+          {
+            "field": "l0.stateMirrorEnabled",
+            "required": "true",
+            "actual": "false",
+            "severity": "fatal"
+          },
+          {
+            "field": "billing.throttle.enabled",
+            "required": "true",
+            "actual": "false",
+            "severity": "fatal"
+          }
+        ]
+      },
+      "after": {
+        "profile": "public_production",
+        "passed": true,
+        "failures": null
+      },
+      "passed": true
+    },
+    "verifierCommand": "infrix node-validate --config ..\\..\\testdata\\bad-profile.yaml --profile public_production --json",
+    "remainingManual": [
+      "[external_required] The L0 signer uses a local key file; production should use managed custody. — Move the signer to HSM/KMS/MPC custody. (set l0.signerBackend to aws-kms or azure-keyvault and reference the managed key)"
+    ],
+    "hash": "sha256:5755e6138bbd76d4b22b275fd839d30d1f9ff5d365a99ba0bd721ca04836d1bf"
+  },
+  "version": 1
+}

@@ -14,6 +14,7 @@ import { agentView } from '/views/agent.js';
 import { scenarioBuilderView } from '/views/scenario_builder.js';
 import { designView } from '/views/design.js';
 import { tasksView } from '/views/tasks.js';
+import { autopilotView } from '/views/autopilot.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -93,6 +94,11 @@ const routes = {
   // ready-to-run task templates with trust badges, loaded from the same
   // Go-generated catalog the CLI + SDK use.
   tasks: tasksView,
+
+  // nextux-05 — Autopilot remediation. #/autopilot shows diagnosed findings,
+  // safe fixes, a dry-run diff, and the remediation receipt (a Go-generated
+  // sample). Apply is approval-gated and runs via the CLI / agent, never here.
+  autopilot: autopilotView,
 
   // The single canonical view
   spine: spineView,
