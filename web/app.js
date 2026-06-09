@@ -13,6 +13,7 @@ import { learnView } from '/views/learn.js';
 import { agentView } from '/views/agent.js';
 import { scenarioBuilderView } from '/views/scenario_builder.js';
 import { designView } from '/views/design.js';
+import { tasksView } from '/views/tasks.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -87,6 +88,11 @@ const routes = {
   // glossary, persona switcher) from the SAME Go-generated registry every
   // surface uses. Testable via the ux-gate design-system spec.
   design: designView,
+
+  // nextux-04 — Task Template Marketplace. #/tasks is a gallery of signed,
+  // ready-to-run task templates with trust badges, loaded from the same
+  // Go-generated catalog the CLI + SDK use.
+  tasks: tasksView,
 
   // The single canonical view
   spine: spineView,

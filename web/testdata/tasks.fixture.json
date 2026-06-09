@@ -1,0 +1,413 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "id": "infrix/agent-approved-workflow",
+      "title": "Agent-approved workflow",
+      "summary": "Plan a governed workflow, then execute it under an explicit, input-bound approval.",
+      "category": "agent",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "local",
+      "networks": [
+        "local",
+        "kermit"
+      ],
+      "outputs": [
+        "proofReceipt",
+        "verifierCommand",
+        "cinemaReplay"
+      ],
+      "actions": [
+        {
+          "id": "plan",
+          "uses": "workflow.plan"
+        },
+        {
+          "id": "execute",
+          "uses": "workflow.execute"
+        }
+      ]
+    },
+    {
+      "id": "infrix/bring-your-own-proof",
+      "title": "Bring your own proof",
+      "summary": "Independently verify a proof bundle you already have — no node trust.",
+      "category": "verification",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "local",
+      "networks": [
+        "local",
+        "kermit"
+      ],
+      "outputs": [
+        "proofReceipt",
+        "verifierCommand"
+      ],
+      "actions": [
+        {
+          "id": "verify",
+          "uses": "proof.verify"
+        }
+      ],
+      "inputsSchema": {
+        "type": "object",
+        "description": "The proof to verify.",
+        "properties": {
+          "bundle": {
+            "type": "object",
+            "description": "A portable evidence package (or a {\"bundle\": ...} envelope)."
+          },
+          "l0Endpoint": {
+            "type": "string",
+            "description": "Optional Accumulate L0 endpoint for live L4 confirmation."
+          },
+          "requiredLevel": {
+            "type": "string",
+            "description": "Optional required assurance level, e.g. L4/G2."
+          }
+        },
+        "required": [
+          "bundle"
+        ]
+      }
+    },
+    {
+      "id": "infrix/first-proof",
+      "title": "Your first verifiable proof",
+      "summary": "Run a governed flow on your machine and get a proof anyone can verify.",
+      "category": "getting-started",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "local",
+      "networks": [
+        "local",
+        "kermit"
+      ],
+      "outputs": [
+        "proofReceipt",
+        "verifierCommand",
+        "cinemaReplay"
+      ],
+      "actions": [
+        {
+          "id": "prove",
+          "uses": "workflow.execute"
+        }
+      ]
+    },
+    {
+      "id": "infrix/metamask-typed-data",
+      "title": "MetaMask typed-data signing",
+      "summary": "Learn exactly how a human connects MetaMask and signs a canonical EIP-712 Infrix intent.",
+      "category": "wallet",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "local",
+      "networks": [
+        "local",
+        "kermit"
+      ],
+      "outputs": [],
+      "actions": [
+        {
+          "id": "connect",
+          "uses": "wallet.connect.metamask"
+        }
+      ],
+      "inputsSchema": {
+        "type": "object",
+        "description": "MetaMask connection context.",
+        "properties": {
+          "keyPageUrl": {
+            "type": "string",
+            "description": "Optional Accumulate ADI key-page URL to bind the signer to."
+          }
+        }
+      }
+    },
+    {
+      "id": "infrix/node-readiness",
+      "title": "Node readiness",
+      "summary": "Check a running node's substrate readiness dashboard in one honest vocabulary.",
+      "category": "operations",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "local",
+      "networks": [
+        "local",
+        "kermit",
+        "public_production"
+      ],
+      "outputs": [
+        "report"
+      ],
+      "actions": [
+        {
+          "id": "check",
+          "uses": "readiness.check"
+        }
+      ],
+      "inputsSchema": {
+        "type": "object",
+        "description": "Readiness options.",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "description": "Base URL of the node's v4 API."
+          },
+          "profile": {
+            "type": "string",
+            "description": "Optional deployment profile to evaluate against."
+          }
+        }
+      }
+    },
+    {
+      "id": "infrix/profile-hardening",
+      "title": "Profile hardening",
+      "summary": "Diagnose the environment and confirm a node meets the public-production profile.",
+      "category": "operations",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "local",
+      "networks": [
+        "local",
+        "kermit",
+        "public_production"
+      ],
+      "outputs": [
+        "report"
+      ],
+      "actions": [
+        {
+          "id": "diagnose",
+          "uses": "doctor.run"
+        },
+        {
+          "id": "readiness",
+          "uses": "readiness.check"
+        }
+      ],
+      "inputsSchema": {
+        "type": "object",
+        "description": "Hardening options.",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "description": "Base URL of the node's v4 API."
+          },
+          "l0Endpoint": {
+            "type": "string",
+            "description": "Optional L0 endpoint to check connectivity."
+          }
+        }
+      }
+    },
+    {
+      "id": "infrix/regulated-escrow",
+      "title": "Regulated escrow",
+      "summary": "Create, release, prove, and independently re-verify a governed escrow.",
+      "category": "payments",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "local",
+      "networks": [
+        "local",
+        "kermit"
+      ],
+      "outputs": [
+        "proofReceipt",
+        "verifierCommand",
+        "cinemaReplay"
+      ],
+      "actions": [
+        {
+          "id": "execute",
+          "uses": "workflow.execute"
+        },
+        {
+          "id": "verify",
+          "uses": "proof.verify"
+        }
+      ]
+    },
+    {
+      "id": "infrix/release-evidence-make",
+      "title": "Make release evidence",
+      "summary": "Generate and L0-anchor a signed release evidence package for the current commit.",
+      "category": "release",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "kermit",
+      "networks": [
+        "kermit"
+      ],
+      "outputs": [
+        "evidencePackage",
+        "verifierCommand"
+      ],
+      "actions": [
+        {
+          "id": "make",
+          "uses": "release.evidence.make"
+        }
+      ],
+      "inputsSchema": {
+        "type": "object",
+        "description": "Release generation options.",
+        "properties": {
+          "l0Endpoint": {
+            "type": "string",
+            "description": "L0 endpoint to anchor the evidence root on."
+          },
+          "profile": {
+            "type": "string",
+            "description": "Deployment profile to attest."
+          },
+          "repoDir": {
+            "type": "string",
+            "description": "Repository root to package from."
+          },
+          "witnesses": {
+            "type": "integer",
+            "description": "Independent witnesses to gather."
+          }
+        },
+        "required": [
+          "repoDir",
+          "l0Endpoint"
+        ]
+      }
+    },
+    {
+      "id": "infrix/release-evidence-verify",
+      "title": "Verify release evidence",
+      "summary": "Confirm a signed release evidence package is bound to a commit and an Accumulate L0 anchor.",
+      "category": "release",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "local",
+      "networks": [
+        "local",
+        "kermit",
+        "public_production"
+      ],
+      "outputs": [
+        "report"
+      ],
+      "actions": [
+        {
+          "id": "verify",
+          "uses": "release.evidence.verify"
+        }
+      ],
+      "inputsSchema": {
+        "type": "object",
+        "description": "The release evidence to verify.",
+        "properties": {
+          "approvedFingerprint": {
+            "type": "string",
+            "description": "The expected signer fingerprint."
+          },
+          "expectedCommit": {
+            "type": "string",
+            "description": "The exact git commit the evidence must prove."
+          },
+          "l0Endpoint": {
+            "type": "string",
+            "description": "Optional L0 endpoint for live anchor confirmation."
+          },
+          "path": {
+            "type": "string",
+            "description": "Path to the evidence dir or tarball."
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    },
+    {
+      "id": "infrix/restore-drill",
+      "title": "Restore drill readiness",
+      "summary": "Confirm a node is ready to restore its state from Accumulate L0.",
+      "category": "operations",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "kermit",
+      "networks": [
+        "kermit",
+        "public_production"
+      ],
+      "outputs": [
+        "report"
+      ],
+      "actions": [
+        {
+          "id": "check",
+          "uses": "readiness.check"
+        }
+      ],
+      "inputsSchema": {
+        "type": "object",
+        "description": "Restore-readiness options.",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "description": "Base URL of the node's v4 API."
+          }
+        }
+      }
+    },
+    {
+      "id": "infrix/selective-disclosure",
+      "title": "Selective disclosure",
+      "summary": "Prove a hidden fact to an approved party without revealing the underlying data.",
+      "category": "privacy",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "local",
+      "networks": [
+        "local",
+        "kermit"
+      ],
+      "outputs": [
+        "proofReceipt",
+        "cinemaReplay",
+        "verifierCommand"
+      ],
+      "actions": [
+        {
+          "id": "run",
+          "uses": "scenario.run"
+        }
+      ]
+    },
+    {
+      "id": "infrix/witness-quorum",
+      "title": "Witness quorum",
+      "summary": "Run a governed event and have independent witnesses confirm it.",
+      "category": "assurance",
+      "publisher": "infrix",
+      "trust": "official_verified",
+      "defaultNetwork": "local",
+      "networks": [
+        "local",
+        "kermit"
+      ],
+      "outputs": [
+        "proofReceipt",
+        "cinemaReplay",
+        "verifierCommand"
+      ],
+      "actions": [
+        {
+          "id": "run",
+          "uses": "scenario.run"
+        }
+      ]
+    }
+  ]
+}
