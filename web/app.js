@@ -15,6 +15,7 @@ import { scenarioBuilderView } from '/views/scenario_builder.js';
 import { designView } from '/views/design.js';
 import { tasksView } from '/views/tasks.js';
 import { autopilotView } from '/views/autopilot.js';
+import { workbenchView } from '/views/workbench.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -99,6 +100,11 @@ const routes = {
   // safe fixes, a dry-run diff, and the remediation receipt (a Go-generated
   // sample). Apply is approval-gated and runs via the CLI / agent, never here.
   autopilot: autopilotView,
+
+  // nextux-06 — Intent Copilot Workbench. #/workbench turns plain language into a
+  // grounded, typed plan (candidates, safety, refusals), from the same registries
+  // the CLI + agent use. Running is approval-gated and happens via the CLI/agent.
+  workbench: workbenchView,
 
   // The single canonical view
   spine: spineView,

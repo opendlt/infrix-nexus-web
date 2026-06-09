@@ -1,0 +1,272 @@
+{
+  "version": 1,
+  "ask": {
+    "request": "prove a regulated escrow release and verify it for an auditor",
+    "plan": {
+      "version": 1,
+      "request": "prove a regulated escrow release and verify it for an auditor",
+      "requestHash": "sha256:141699db99edf7703e7e0de742574bdb26bde1e17dc37eb9f75197b5ce4c5573",
+      "candidates": [
+        {
+          "kind": "task",
+          "id": "infrix/regulated-escrow",
+          "title": "Regulated escrow",
+          "confidence": 0.9795,
+          "why": "Matches task on: escrow, prove, regulated, release, verify.",
+          "missingInputs": null,
+          "requiredAuthority": "a local session; writes need an approval. Never mainnet by default.",
+          "expectedProofLevel": "L3 offline (local) / L4 live (kermit), from the verifier",
+          "networkWrites": false,
+          "mutatesState": true,
+          "supportedNetworks": [
+            "local",
+            "kermit"
+          ]
+        },
+        {
+          "kind": "scenario",
+          "id": "regulated-escrow",
+          "title": "Regulated escrow with selective disclosure",
+          "confidence": 0.9031,
+          "why": "Matches scenario on: escrow, regulated, release, verify.",
+          "missingInputs": null,
+          "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
+          "expectedProofLevel": "L3",
+          "networkWrites": false,
+          "mutatesState": true,
+          "supportedNetworks": [
+            "local",
+            "kermit"
+          ]
+        },
+        {
+          "kind": "task",
+          "id": "infrix/release-evidence-verify",
+          "title": "Verify release evidence",
+          "confidence": 0.6791,
+          "why": "Matches task on: release, verify.",
+          "missingInputs": [
+            "path"
+          ],
+          "requiredAuthority": "a local session; writes need an approval. Never mainnet by default.",
+          "networkWrites": false,
+          "mutatesState": false,
+          "supportedNetworks": [
+            "local",
+            "kermit",
+            "public_production"
+          ]
+        },
+        {
+          "kind": "task",
+          "id": "infrix/selective-disclosure",
+          "title": "Selective disclosure",
+          "confidence": 0.6208,
+          "why": "Matches task on: prove.",
+          "missingInputs": null,
+          "requiredAuthority": "a local session; writes need an approval. Never mainnet by default.",
+          "expectedProofLevel": "L3 offline (local) / L4 live (kermit), from the verifier",
+          "networkWrites": false,
+          "mutatesState": true,
+          "supportedNetworks": [
+            "local",
+            "kermit"
+          ]
+        },
+        {
+          "kind": "action",
+          "id": "demo.start",
+          "title": "Start the one-command demo",
+          "confidence": 0.6106,
+          "why": "Matches action on: escrow, verify.",
+          "missingInputs": null,
+          "requiredAuthority": "Runs locally with no keys (local mode) or bootstraps a funded Kermit identity (kermit mode). Never touches mainnet.",
+          "expectedProofLevel": "L3 offline (local mode); L4/G2 live (kermit mode)",
+          "networkWrites": false,
+          "mutatesState": true,
+          "supportedNetworks": [
+            "local",
+            "kermit"
+          ]
+        }
+      ],
+      "selected": {
+        "kind": "task",
+        "id": "infrix/regulated-escrow",
+        "title": "Regulated escrow"
+      },
+      "inputs": {},
+      "network": "local",
+      "safety": {
+        "requiresDryRun": true,
+        "requiresApproval": true,
+        "networkWrites": false,
+        "mainnetWrite": false,
+        "approvalMode": "ask_before_write"
+      },
+      "summary": "Selected the task \"infrix/regulated-escrow\" (Regulated escrow). It will dry-run first and needs a plan-hash-bound approval before it runs.",
+      "planHash": "sha256:969ee7287ecca482b888e1d613184baf4a6748c8c928fefc0aec7a6b3fe4a451"
+    }
+  },
+  "refusal": {
+    "request": "mark this proof L4 without L0",
+    "plan": {
+      "version": 1,
+      "request": "mark this proof L4 without L0",
+      "requestHash": "sha256:4a228a22b97110503773fb7f286fd21381445e106ddcfba6a3b46f20422a2440",
+      "candidates": [
+        {
+          "kind": "scenario",
+          "id": "release-evidence",
+          "title": "Release evidence matches a commit and L0 anchor",
+          "confidence": 0.8181,
+          "why": "Matches scenario on: l0, l4, proof.",
+          "missingInputs": null,
+          "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
+          "expectedProofLevel": "L3",
+          "networkWrites": false,
+          "mutatesState": true,
+          "supportedNetworks": [
+            "local",
+            "kermit"
+          ]
+        },
+        {
+          "kind": "action",
+          "id": "release.evidence.verify",
+          "title": "Verify release evidence",
+          "confidence": 0.6212,
+          "why": "Matches action on: l0, without.",
+          "missingInputs": [
+            "path"
+          ],
+          "networkWrites": false,
+          "mutatesState": false,
+          "supportedNetworks": [
+            "local",
+            "kermit",
+            "public_production"
+          ]
+        },
+        {
+          "kind": "scenario",
+          "id": "ai-agent-approved-workflow",
+          "title": "An AI agent ran a governed workflow under approval",
+          "confidence": 0.5867,
+          "why": "Matches scenario on: proof, without.",
+          "missingInputs": null,
+          "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
+          "expectedProofLevel": "L3",
+          "networkWrites": false,
+          "mutatesState": true,
+          "supportedNetworks": [
+            "local",
+            "kermit"
+          ]
+        },
+        {
+          "kind": "scenario",
+          "id": "regulated-escrow",
+          "title": "Regulated escrow with selective disclosure",
+          "confidence": 0.5867,
+          "why": "Matches scenario on: proof, without.",
+          "missingInputs": null,
+          "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
+          "expectedProofLevel": "L3",
+          "networkWrites": false,
+          "mutatesState": true,
+          "supportedNetworks": [
+            "local",
+            "kermit"
+          ]
+        },
+        {
+          "kind": "scenario",
+          "id": "selective-disclosure",
+          "title": "A user disclosed only approved encrypted data",
+          "confidence": 0.5867,
+          "why": "Matches scenario on: proof, without.",
+          "missingInputs": null,
+          "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
+          "expectedProofLevel": "L3",
+          "networkWrites": false,
+          "mutatesState": true,
+          "supportedNetworks": [
+            "local",
+            "kermit"
+          ]
+        }
+      ],
+      "inputs": {},
+      "network": "local",
+      "safety": {
+        "requiresDryRun": false,
+        "requiresApproval": false,
+        "networkWrites": false,
+        "mainnetWrite": false,
+        "approvalMode": ""
+      },
+      "refusals": [
+        {
+          "code": "overclaim_l4_without_l0",
+          "reason": "This asks to claim L4 (L0-settled) assurance without an L0 confirmation. The proof level is computed from the verifier, never asserted.",
+          "safeAlternative": "Run on Kermit so the anchor is independently confirmed on L0 — then the verifier may legitimately report L4. Offline runs honestly top out below L4."
+        }
+      ],
+      "alternatives": [
+        {
+          "kind": "scenario",
+          "id": "release-evidence",
+          "title": "Release evidence matches a commit and L0 anchor",
+          "confidence": 0.8181,
+          "why": "Matches scenario on: l0, l4, proof.",
+          "missingInputs": null,
+          "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
+          "expectedProofLevel": "L3",
+          "networkWrites": false,
+          "mutatesState": true,
+          "supportedNetworks": [
+            "local",
+            "kermit"
+          ]
+        },
+        {
+          "kind": "action",
+          "id": "release.evidence.verify",
+          "title": "Verify release evidence",
+          "confidence": 0.6212,
+          "why": "Matches action on: l0, without.",
+          "missingInputs": [
+            "path"
+          ],
+          "networkWrites": false,
+          "mutatesState": false,
+          "supportedNetworks": [
+            "local",
+            "kermit",
+            "public_production"
+          ]
+        },
+        {
+          "kind": "scenario",
+          "id": "ai-agent-approved-workflow",
+          "title": "An AI agent ran a governed workflow under approval",
+          "confidence": 0.5867,
+          "why": "Matches scenario on: proof, without.",
+          "missingInputs": null,
+          "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
+          "expectedProofLevel": "L3",
+          "networkWrites": false,
+          "mutatesState": true,
+          "supportedNetworks": [
+            "local",
+            "kermit"
+          ]
+        }
+      ],
+      "summary": "Refused — this cannot be done safely:\n• This asks to claim L4 (L0-settled) assurance without an L0 confirmation. The proof level is computed from the verifier, never asserted. Nearest safe alternative: Run on Kermit so the anchor is independently confirmed on L0 — then the verifier may legitimately report L4. Offline runs honestly top out below L4.",
+      "planHash": "sha256:6c2e510557ba150321bdef002cc28b1b37f03a1068e6e876246f29bf8707fdd6"
+    }
+  },
+  "catalogSize": 51
+}
