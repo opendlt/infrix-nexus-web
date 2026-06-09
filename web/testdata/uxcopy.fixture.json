@@ -1597,9 +1597,8 @@
       "plainMeaning": "The requested balance could not be read (gas/IU accounting not available).",
       "fixes": [
         {
-          "label": "Query the account directly",
-          "command": "infrix query \u003caccount\u003e",
-          "safeToRun": true
+          "label": "Read the account's IU balance from the v4 REST surface (GET /v4/...)",
+          "safeToRun": false
         }
       ],
       "retryGuidance": "This is often transient — wait a moment and try again.",
