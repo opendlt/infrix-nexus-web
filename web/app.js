@@ -12,6 +12,7 @@ import { guidedView } from '/views/guided.js';
 import { learnView } from '/views/learn.js';
 import { agentView } from '/views/agent.js';
 import { scenarioBuilderView } from '/views/scenario_builder.js';
+import { designView } from '/views/design.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -80,6 +81,12 @@ const routes = {
   // scenario, run it for a real proof, and verify a shared proof story in the
   // browser.
   scenarios: scenarioBuilderView,
+
+  // nextux-03 — Progressive Disclosure component gallery. #/design showcases
+  // every design-system component (badges, receipts, error cards, trust map,
+  // glossary, persona switcher) from the SAME Go-generated registry every
+  // surface uses. Testable via the ux-gate design-system spec.
+  design: designView,
 
   // The single canonical view
   spine: spineView,

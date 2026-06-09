@@ -1,0 +1,1956 @@
+{
+  "version": "1",
+  "labels": [
+    {
+      "id": "action.approve",
+      "category": "action",
+      "short": "Approve",
+      "plain": "Sign off on an action before it runs.",
+      "technical": "Bind an approval to the exact action + input hash."
+    },
+    {
+      "id": "action.inspect",
+      "category": "action",
+      "short": "Inspect",
+      "plain": "Open the step-by-step view of what happened.",
+      "technical": "Open the Cinema replay / proof inspector for the workflow."
+    },
+    {
+      "id": "action.replay",
+      "category": "action",
+      "short": "Replay",
+      "plain": "Re-run exactly what happened and confirm it reproduces.",
+      "technical": "Deterministic re-execution from the replay capsule."
+    },
+    {
+      "id": "action.share",
+      "category": "action",
+      "short": "Share proof",
+      "plain": "Send someone a self-contained story they can verify on their own.",
+      "technical": "Export a portable .infrixstory.json proof story bundle."
+    },
+    {
+      "id": "action.verify",
+      "category": "action",
+      "short": "Verify",
+      "plain": "Check a proof yourself, without trusting the node that made it.",
+      "technical": "Run the independent verifier over the portable evidence bundle."
+    },
+    {
+      "id": "assurance.cryptographic",
+      "category": "assurance",
+      "short": "Cryptographically verified",
+      "plain": "The maths binding every step together checks out.",
+      "technical": "All cryptographic bindings (hashes, signatures, anchor consistency) verified."
+    },
+    {
+      "id": "assurance.disclosure",
+      "category": "assurance",
+      "short": "Disclosure proof verified",
+      "plain": "A selective-disclosure proof checked out — the hidden facts are backed without revealing them.",
+      "technical": "Selective-disclosure proof verified against its commitment."
+    },
+    {
+      "id": "assurance.distinct_operators",
+      "category": "assurance",
+      "short": "Distinct operators met",
+      "plain": "The confirmations came from genuinely separate operators, not one party.",
+      "technical": "Valid witnesses span the required number of DISTINCT independent operators."
+    },
+    {
+      "id": "assurance.live_l0",
+      "category": "assurance",
+      "short": "Live L0 verified",
+      "plain": "Confirmed against Accumulate L0 right now — durable beyond Infrix.",
+      "technical": "Proof level L4: bundle anchor confirmed through a live L0 lookup.",
+      "neverUseWhen": [
+        "l0Verified=false",
+        "verificationMode=local_only"
+      ]
+    },
+    {
+      "id": "assurance.local",
+      "category": "assurance",
+      "short": "Local proof",
+      "plain": "Checked on this machine only — not yet confirmed against the chain.",
+      "technical": "Structurally consistent; no live L0 confirmation. Caps below L4."
+    },
+    {
+      "id": "assurance.no_node_trust",
+      "category": "assurance",
+      "short": "No node trust required",
+      "plain": "You don't have to trust the Infrix node — the proof stands on its own.",
+      "technical": "Verdict reproducible from the portable bundle without trusting the producing node.",
+      "neverUseWhen": [
+        "nodeTrusted=true"
+      ]
+    },
+    {
+      "id": "assurance.offline",
+      "category": "assurance",
+      "short": "Offline verified",
+      "plain": "Every cryptographic link checks out without any network — no node trust needed.",
+      "technical": "Cryptographic bindings recomputed offline; L0 anchor not independently confirmed (caps at L3)."
+    },
+    {
+      "id": "assurance.operator_attested",
+      "category": "assurance",
+      "short": "Operator attested",
+      "plain": "An operator vouches for this. It is their word, not a verified proof.",
+      "technical": "Operator attestation / configuration; NOT a cryptographic or L0 verification."
+    },
+    {
+      "id": "assurance.release_evidence",
+      "category": "assurance",
+      "short": "Release evidence verified",
+      "plain": "This release's evidence was checked and matches the exact code that shipped.",
+      "technical": "Release evidence bundle verified: signer custody + commit binding + manifest integrity."
+    },
+    {
+      "id": "assurance.replay",
+      "category": "assurance",
+      "short": "Replay matched",
+      "plain": "We re-ran exactly what happened and got the same result.",
+      "technical": "Deterministic replay from the capsule reproduced the recorded outcome."
+    },
+    {
+      "id": "assurance.witness_quorum",
+      "category": "assurance",
+      "short": "Witness quorum met",
+      "plain": "Independent parties confirmed the same event.",
+      "technical": "A threshold of independent witness receipts attests the bundle reproduces.",
+      "neverUseWhen": [
+        "l0Verified=false"
+      ]
+    },
+    {
+      "id": "error.AGENT_APPROVAL_EXPIRED",
+      "category": "error",
+      "short": "The approval has expired",
+      "plain": "The approval token's validity window has passed.",
+      "technical": "error_code: AGENT_APPROVAL_EXPIRED"
+    },
+    {
+      "id": "error.AGENT_APPROVAL_INVALID",
+      "category": "error",
+      "short": "The approval token is invalid",
+      "plain": "The approval token's signature does not verify against the session that minted it.",
+      "technical": "error_code: AGENT_APPROVAL_INVALID"
+    },
+    {
+      "id": "error.AGENT_APPROVAL_MISMATCH",
+      "category": "error",
+      "short": "The approval does not match this input",
+      "plain": "The approval token is bound to a different action or a different input hash than the one submitted.",
+      "technical": "error_code: AGENT_APPROVAL_MISMATCH"
+    },
+    {
+      "id": "error.AGENT_APPROVAL_REQUIRED",
+      "category": "error",
+      "short": "This action needs explicit approval",
+      "plain": "The session's approval mode requires a human to approve this write before it runs.",
+      "technical": "error_code: AGENT_APPROVAL_REQUIRED"
+    },
+    {
+      "id": "error.AGENT_CAPABILITY_DENIED",
+      "category": "error",
+      "short": "This action is outside the session's capabilities",
+      "plain": "The session was not granted the capability to run this action.",
+      "technical": "error_code: AGENT_CAPABILITY_DENIED"
+    },
+    {
+      "id": "error.AGENT_DRY_RUN_REQUIRED",
+      "category": "error",
+      "short": "A dry-run is required before this action",
+      "plain": "This action mutates state and must be dry-run before it can be executed.",
+      "technical": "error_code: AGENT_DRY_RUN_REQUIRED"
+    },
+    {
+      "id": "error.AGENT_INPUT_INVALID",
+      "category": "error",
+      "short": "The action input is invalid",
+      "plain": "The input does not satisfy the action's input schema (a required field is missing or has the wrong type).",
+      "technical": "error_code: AGENT_INPUT_INVALID"
+    },
+    {
+      "id": "error.AGENT_MAINNET_WRITE_BLOCKED",
+      "category": "error",
+      "short": "Mainnet writes are blocked for agents",
+      "plain": "This action would write to mainnet, which the agent path blocks by default.",
+      "technical": "error_code: AGENT_MAINNET_WRITE_BLOCKED"
+    },
+    {
+      "id": "error.AGENT_PROFILE_DENIED",
+      "category": "error",
+      "short": "This action is disabled under the current profile",
+      "plain": "The action's supported profiles do not include the session's profile.",
+      "technical": "error_code: AGENT_PROFILE_DENIED"
+    },
+    {
+      "id": "error.AGENT_PUBLISH_UNVERIFIED",
+      "category": "error",
+      "short": "Release evidence must verify before publish",
+      "plain": "The release evidence did not verify, so it cannot be published.",
+      "technical": "error_code: AGENT_PUBLISH_UNVERIFIED"
+    },
+    {
+      "id": "error.AGENT_SESSION_EXPIRED",
+      "category": "error",
+      "short": "The agent session has expired",
+      "plain": "The session's time-to-live has elapsed.",
+      "technical": "error_code: AGENT_SESSION_EXPIRED"
+    },
+    {
+      "id": "error.AGENT_SESSION_NOT_FOUND",
+      "category": "error",
+      "short": "The agent session was not found",
+      "plain": "No session with that id exists (it may have been revoked).",
+      "technical": "error_code: AGENT_SESSION_NOT_FOUND"
+    },
+    {
+      "id": "error.AGENT_SIGNING_DENIED",
+      "category": "error",
+      "short": "This session may not sign",
+      "plain": "The action requires a signer, but the session does not permit signing.",
+      "technical": "error_code: AGENT_SIGNING_DENIED"
+    },
+    {
+      "id": "error.AGENT_UNKNOWN_ACTION",
+      "category": "error",
+      "short": "That agent action does not exist",
+      "plain": "No action with that id is registered in the Agent Action Protocol.",
+      "technical": "error_code: AGENT_UNKNOWN_ACTION"
+    },
+    {
+      "id": "error.AGENT_WRITE_BUDGET_EXCEEDED",
+      "category": "error",
+      "short": "The session's write budget is exhausted",
+      "plain": "The session has already performed the maximum number of writes it was granted.",
+      "technical": "error_code: AGENT_WRITE_BUDGET_EXCEEDED"
+    },
+    {
+      "id": "error.L0_ANCHOR_UNAVAILABLE",
+      "category": "error",
+      "short": "The L0 anchor is unavailable",
+      "plain": "Infrix could not fetch the anchor transaction from Accumulate L0.",
+      "technical": "error_code: L0_ANCHOR_UNAVAILABLE"
+    },
+    {
+      "id": "error.L0_ENDPOINT_UNREACHABLE",
+      "category": "error",
+      "short": "The Accumulate L0 endpoint is unreachable",
+      "plain": "Infrix could not reach the configured Accumulate L0 endpoint.",
+      "technical": "error_code: L0_ENDPOINT_UNREACHABLE"
+    },
+    {
+      "id": "error.L0_FINALITY_TIMEOUT",
+      "category": "error",
+      "short": "Timed out waiting for L0 finality",
+      "plain": "The anchor did not confirm on Accumulate L0 within the timeout.",
+      "technical": "error_code: L0_FINALITY_TIMEOUT"
+    },
+    {
+      "id": "error.L0_KEY_NOT_ON_PAGE",
+      "category": "error",
+      "short": "The signing key is not on the key page",
+      "plain": "The key that signed the request is not an authorized key on the declared L0 key page.",
+      "technical": "error_code: L0_KEY_NOT_ON_PAGE"
+    },
+    {
+      "id": "error.L0_KEY_PAGE_NOT_FOUND",
+      "category": "error",
+      "short": "The signer's key page was not found on L0",
+      "plain": "Accumulate L0 has no key page at the signer's declared URL.",
+      "technical": "error_code: L0_KEY_PAGE_NOT_FOUND"
+    },
+    {
+      "id": "error.L0_KEY_PAGE_RESOLVER_MISSING",
+      "category": "error",
+      "short": "This node cannot verify the signer against Accumulate L0",
+      "plain": "This node cannot verify the signer against Accumulate L0.",
+      "technical": "error_code: L0_KEY_PAGE_RESOLVER_MISSING\ncause: the L0 key-page resolver is not configured on this node"
+    },
+    {
+      "id": "error.L0_SIGNER_VERSION_MISMATCH",
+      "category": "error",
+      "short": "The signer key-page version is stale",
+      "plain": "The submitted signer version does not match the current key-page version on L0.",
+      "technical": "error_code: L0_SIGNER_VERSION_MISMATCH"
+    },
+    {
+      "id": "error.L0_WRONG_NETWORK",
+      "category": "error",
+      "short": "The endpoint is the wrong network",
+      "plain": "The configured endpoint does not match the expected Accumulate network.",
+      "technical": "error_code: L0_WRONG_NETWORK"
+    },
+    {
+      "id": "error.METAMASK_ADDRESS_MISMATCH",
+      "category": "error",
+      "short": "The recovered address does not match MetaMask",
+      "plain": "The address recovered from the signature does not match the connected MetaMask account.",
+      "technical": "error_code: METAMASK_ADDRESS_MISMATCH"
+    },
+    {
+      "id": "error.METAMASK_KEY_PAGE_BINDING_FAILED",
+      "category": "error",
+      "short": "The key is not authorized on the L0 key page",
+      "plain": "MetaMask signed correctly, but the key is not a current authorized key on the declared Accumulate key page.",
+      "technical": "error_code: METAMASK_KEY_PAGE_BINDING_FAILED"
+    },
+    {
+      "id": "error.METAMASK_PROVIDER_MISSING",
+      "category": "error",
+      "short": "No MetaMask provider was found",
+      "plain": "No EIP-1193 wallet provider (window.ethereum) is available.",
+      "technical": "error_code: METAMASK_PROVIDER_MISSING"
+    },
+    {
+      "id": "error.METAMASK_PUBLIC_KEY_RECOVERY_FAILED",
+      "category": "error",
+      "short": "Could not recover the public key from the signature",
+      "plain": "The secp256k1 public key could not be recovered from the MetaMask signature.",
+      "technical": "error_code: METAMASK_PUBLIC_KEY_RECOVERY_FAILED"
+    },
+    {
+      "id": "error.METAMASK_TYPED_DATA_UNSUPPORTED",
+      "category": "error",
+      "short": "Typed-data signing is not supported",
+      "plain": "The wallet provider does not support eth_signTypedData_v4.",
+      "technical": "error_code: METAMASK_TYPED_DATA_UNSUPPORTED"
+    },
+    {
+      "id": "error.METAMASK_USER_REJECTED",
+      "category": "error",
+      "short": "The signature was rejected in MetaMask",
+      "plain": "The user declined the connection or the signing prompt in MetaMask.",
+      "technical": "error_code: METAMASK_USER_REJECTED"
+    },
+    {
+      "id": "error.PROFILE_LIVE_L0_MISSING",
+      "category": "error",
+      "short": "A live L0 endpoint is required for this profile",
+      "plain": "The selected profile requires a reachable, cryptographically-verified L0 anchor, but none is configured.",
+      "technical": "error_code: PROFILE_LIVE_L0_MISSING"
+    },
+    {
+      "id": "error.PROFILE_REQUIREMENT_FAILED",
+      "category": "error",
+      "short": "A profile requirement is not met",
+      "plain": "One or more load-bearing substrates do not meet the selected deployment profile.",
+      "technical": "error_code: PROFILE_REQUIREMENT_FAILED"
+    },
+    {
+      "id": "error.PROFILE_STATE_MIRROR_MISSING",
+      "category": "error",
+      "short": "State mirror is required for this profile",
+      "plain": "The selected profile requires the L0 state mirror, but it is not enabled.",
+      "technical": "error_code: PROFILE_STATE_MIRROR_MISSING"
+    },
+    {
+      "id": "error.PROFILE_TLS_MISSING",
+      "category": "error",
+      "short": "TLS is required for this profile",
+      "plain": "The selected production profile requires the API to serve over TLS, but TLS is not enabled.",
+      "technical": "error_code: PROFILE_TLS_MISSING"
+    },
+    {
+      "id": "error.PROOF_L0_UNAVAILABLE",
+      "category": "error",
+      "short": "L0 confirmation is unavailable for this proof",
+      "plain": "The verifier could not confirm the anchor against Accumulate L0.",
+      "technical": "error_code: PROOF_L0_UNAVAILABLE"
+    },
+    {
+      "id": "error.PROOF_LEVEL_OVERCLAIMED",
+      "category": "error",
+      "short": "The proof claims more than it backs",
+      "plain": "A receipt or claim asserts a higher assurance than the evidence supports (e.g. L4 without an L0 anchor).",
+      "technical": "error_code: PROOF_LEVEL_OVERCLAIMED"
+    },
+    {
+      "id": "error.PROOF_MALFORMED",
+      "category": "error",
+      "short": "The proof bundle is malformed",
+      "plain": "The portable evidence package could not be parsed or is structurally invalid.",
+      "technical": "error_code: PROOF_MALFORMED"
+    },
+    {
+      "id": "error.PROOF_OPERATOR_DIVERSITY_FAILED",
+      "category": "error",
+      "short": "Witness operator diversity not met",
+      "plain": "The valid witnesses do not span enough distinct independent operators.",
+      "technical": "error_code: PROOF_OPERATOR_DIVERSITY_FAILED"
+    },
+    {
+      "id": "error.PROOF_REPLAY_UNAVAILABLE",
+      "category": "error",
+      "short": "Deterministic replay is unavailable",
+      "plain": "The bundle carries no replay capsule, so deterministic re-execution cannot run.",
+      "technical": "error_code: PROOF_REPLAY_UNAVAILABLE"
+    },
+    {
+      "id": "error.PROOF_WITNESS_QUORUM_MISSING",
+      "category": "error",
+      "short": "The required witness quorum is missing",
+      "plain": "Not enough independent witness receipts attest this proof.",
+      "technical": "error_code: PROOF_WITNESS_QUORUM_MISSING"
+    },
+    {
+      "id": "error.SDK_BALANCE_UNAVAILABLE",
+      "category": "error",
+      "short": "The balance is unavailable",
+      "plain": "The requested balance could not be read (gas/IU accounting not available).",
+      "technical": "error_code: SDK_BALANCE_UNAVAILABLE"
+    },
+    {
+      "id": "error.SDK_INCOMPLETE_GOVERNED_RESULT",
+      "category": "error",
+      "short": "The governed result is incomplete",
+      "plain": "A required field of the governed result (plan, outcome, or evidence) is missing.",
+      "technical": "error_code: SDK_INCOMPLETE_GOVERNED_RESULT"
+    },
+    {
+      "id": "error.SDK_MISSING_OUTCOME",
+      "category": "error",
+      "short": "The governed result has no outcome",
+      "plain": "The intent was submitted but no outcome record was produced.",
+      "technical": "error_code: SDK_MISSING_OUTCOME"
+    },
+    {
+      "id": "error.SDK_PROOF_UNAVAILABLE",
+      "category": "error",
+      "short": "A proof was requested but is unavailable",
+      "plain": "The flow could not export a portable proof for this result.",
+      "technical": "error_code: SDK_PROOF_UNAVAILABLE"
+    },
+    {
+      "id": "error.SETUP_GO_MISSING",
+      "category": "error",
+      "short": "Go is not installed",
+      "plain": "Infrix needs the Go toolchain to build and run, but `go` was not found.",
+      "technical": "error_code: SETUP_GO_MISSING"
+    },
+    {
+      "id": "error.SETUP_GO_VERSION",
+      "category": "error",
+      "short": "Go is older than go.mod requires",
+      "plain": "Your Go toolchain is older than the version go.mod declares.",
+      "technical": "error_code: SETUP_GO_VERSION"
+    },
+    {
+      "id": "error.SETUP_NODE_DEPS_MISSING",
+      "category": "error",
+      "short": "Node dependencies are not installed",
+      "plain": "The TypeScript SDK or tooling needs its npm dependencies installed.",
+      "technical": "error_code: SETUP_NODE_DEPS_MISSING"
+    },
+    {
+      "id": "error.SETUP_PORT_IN_USE",
+      "category": "error",
+      "short": "The port is already in use",
+      "plain": "Another process is already listening on the port Infrix wants to bind.",
+      "technical": "error_code: SETUP_PORT_IN_USE"
+    },
+    {
+      "id": "error.SETUP_RUST_WASM_TARGET_MISSING",
+      "category": "error",
+      "short": "Rust wasm32 target is missing",
+      "plain": "Authoring WASM contracts needs the wasm32-unknown-unknown Rust target.",
+      "technical": "error_code: SETUP_RUST_WASM_TARGET_MISSING"
+    },
+    {
+      "id": "error.UNKNOWN",
+      "category": "error",
+      "short": "Something went wrong",
+      "plain": "Infrix hit an error it could not translate into specific guidance.",
+      "technical": "error_code: UNKNOWN"
+    },
+    {
+      "id": "glossary.accumulate-l0",
+      "category": "glossary",
+      "short": "Accumulate L0",
+      "plain": "The base chain Infrix anchors to.",
+      "technical": "Accumulate's layer-0 identity + settlement substrate; the neutral chain Infrix anchors evidence digests to and confirms them against."
+    },
+    {
+      "id": "glossary.anchor",
+      "category": "glossary",
+      "short": "anchor",
+      "plain": "The record on the base chain that pins your evidence in time.",
+      "technical": "An L0 transaction committing an evidence digest; confirming it raises the proof level to L4."
+    },
+    {
+      "id": "glossary.assurance-level",
+      "category": "glossary",
+      "short": "assurance level",
+      "plain": "How strongly a result is backed.",
+      "technical": "The proof level (L0..L4) and governance level (ungoverned/G0..G2) an evidence bundle achieves; L4 requires a confirmed live L0 anchor."
+    },
+    {
+      "id": "glossary.canonical-spine",
+      "category": "glossary",
+      "short": "canonical spine",
+      "plain": "The internal record structure Infrix uses to make workflows replayable.",
+      "technical": "The Intent -\u003e Plan -\u003e Approval -\u003e Execution -\u003e Outcome -\u003e Evidence -\u003e Anchor chain every governed operation flows through."
+    },
+    {
+      "id": "glossary.disclosure-proof",
+      "category": "glossary",
+      "short": "disclosure proof",
+      "plain": "A way to prove a hidden fact without revealing it.",
+      "technical": "A selective-disclosure proof verified against a commitment, so a fact is backed without exposing the underlying data."
+    },
+    {
+      "id": "glossary.distinct-operators",
+      "category": "glossary",
+      "short": "distinct operators",
+      "plain": "Genuinely separate parties, not one party wearing many hats.",
+      "technical": "Witnesses judged by the independent operator that runs them (via a witness registry), so a quorum reflects distinct operators, not distinct keys."
+    },
+    {
+      "id": "glossary.key-page",
+      "category": "glossary",
+      "short": "key page",
+      "plain": "The list of keys allowed to act for an identity.",
+      "technical": "An Accumulate ADI key page: the on-chain set of authorized signing keys (and their version) Infrix checks a signer against."
+    },
+    {
+      "id": "glossary.profile",
+      "category": "glossary",
+      "short": "profile",
+      "plain": "How strong a posture a deployment promises to back.",
+      "technical": "A capability profile (local/kermit/public_production/full_public_production) whose claims are gated by substrate readiness."
+    },
+    {
+      "id": "glossary.proof-receipt",
+      "category": "glossary",
+      "short": "proof receipt",
+      "plain": "A compact summary of what was verified.",
+      "technical": "The single canonical receipt (pkg/proofreceipt) every proof surface emits: outcome, assurance, trust answer, and the artifacts behind it."
+    },
+    {
+      "id": "glossary.replay-capsule",
+      "category": "glossary",
+      "short": "replay capsule",
+      "plain": "A portable package that lets anyone re-run what happened.",
+      "technical": "The self-contained capsule carried inside a bundle (contract bytecode, state, recorded steps) enabling deterministic re-execution."
+    },
+    {
+      "id": "glossary.substrate",
+      "category": "glossary",
+      "short": "substrate",
+      "plain": "A load-bearing service Infrix depends on (like the chain it anchors to).",
+      "technical": "A pluggable backing service (L0 anchoring, state mirror, witness network, disclosure) whose readiness gates a deployment profile."
+    },
+    {
+      "id": "glossary.witness-quorum",
+      "category": "glossary",
+      "short": "witness quorum",
+      "plain": "Independent parties confirming the same event.",
+      "technical": "A threshold of distinct, independent witness receipts that each re-verify a bundle; full_public_production requires a 2-of-3 distinct-operator quorum."
+    },
+    {
+      "id": "network.devnet",
+      "category": "network",
+      "short": "Devnet",
+      "plain": "A development network endpoint you point Infrix at.",
+      "technical": "Operator-supplied Accumulate devnet endpoint."
+    },
+    {
+      "id": "network.kermit",
+      "category": "network",
+      "short": "Kermit testnet",
+      "plain": "Accumulate's public test network — the only network used for pre-launch verification.",
+      "technical": "Accumulate Kermit testnet (NetworkName=DevNet); the canonical L0 endpoint for verification."
+    },
+    {
+      "id": "network.local",
+      "category": "network",
+      "short": "Local",
+      "plain": "Everything runs on your machine — fast, deterministic, no network needed.",
+      "technical": "Local deterministic mode; no L0 endpoint, proofs cap below L4."
+    },
+    {
+      "id": "network.mainnet",
+      "category": "network",
+      "short": "Accumulate mainnet",
+      "plain": "Accumulate's production network. Not used during pre-launch verification.",
+      "technical": "Accumulate mainnet L0; verification never targets mainnet pre-launch."
+    },
+    {
+      "id": "next.check_readiness",
+      "category": "next-action",
+      "short": "Check deployment posture",
+      "plain": "See which load-bearing services are ready and which are not.",
+      "technical": "infrix readiness --require public_production"
+    },
+    {
+      "id": "next.copy_verify_command",
+      "category": "next-action",
+      "short": "Copy the verifier command",
+      "plain": "Re-check this proof yourself without trusting the node.",
+      "technical": "infrix verify \u003cbundle\u003e --l0 kermit"
+    },
+    {
+      "id": "next.dry_run",
+      "category": "next-action",
+      "short": "Dry-run an action",
+      "plain": "Preview an action's effects before anything runs.",
+      "technical": "infrix agent dry-run \u003caction\u003e --input file.json --json"
+    },
+    {
+      "id": "next.inspect_trust_boundary",
+      "category": "next-action",
+      "short": "See the trust boundary",
+      "plain": "See exactly what was proved, what L0 proved, and what remains unverified.",
+      "technical": ""
+    },
+    {
+      "id": "next.list_actions",
+      "category": "next-action",
+      "short": "List agent actions",
+      "plain": "Discover every action Infrix exposes, as structured JSON.",
+      "technical": "infrix agent list-actions --json"
+    },
+    {
+      "id": "next.open_cinema",
+      "category": "next-action",
+      "short": "Watch the replay",
+      "plain": "Open the step-by-step view of what happened.",
+      "technical": ""
+    },
+    {
+      "id": "next.run_doctor",
+      "category": "next-action",
+      "short": "Diagnose the environment",
+      "plain": "Find what is misconfigured and the exact command to fix it.",
+      "technical": "infrix doctor"
+    },
+    {
+      "id": "next.share_story",
+      "category": "next-action",
+      "short": "Share a proof story",
+      "plain": "Send someone a self-contained story they can verify themselves.",
+      "technical": "infrix scenario story"
+    },
+    {
+      "id": "next.try_demo",
+      "category": "next-action",
+      "short": "Run the demo",
+      "plain": "See a full governed flow end-to-end on your machine.",
+      "technical": "infrix demo start --mode local"
+    },
+    {
+      "id": "next.verify_live_l0",
+      "category": "next-action",
+      "short": "Confirm against live L0",
+      "plain": "Confirm the anchor against Accumulate L0 to reach the strongest proof.",
+      "technical": "infrix verify \u003cbundle\u003e --l0 kermit --require L4/G2"
+    },
+    {
+      "id": "profile.full_public_production",
+      "category": "profile",
+      "short": "Full public production",
+      "plain": "Public production plus an independent witness quorum.",
+      "technical": "full_public_production profile: public_production + 2-of-3 distinct-operator witness quorum."
+    },
+    {
+      "id": "profile.kermit",
+      "category": "profile",
+      "short": "Kermit",
+      "plain": "Verified end-to-end against the public test network.",
+      "technical": "kermit profile: live L0 against Kermit testnet."
+    },
+    {
+      "id": "profile.local",
+      "category": "profile",
+      "short": "Local",
+      "plain": "For trying things out on your machine.",
+      "technical": "local profile: no live L0, no durability guarantees."
+    },
+    {
+      "id": "profile.public_production",
+      "category": "profile",
+      "short": "Public production",
+      "plain": "The strongest posture: durable, independently verifiable, no node trust.",
+      "technical": "public_production profile: live L0 + state mirror + TLS + replay required."
+    },
+    {
+      "id": "trust.l0",
+      "category": "trust",
+      "short": "Accumulate L0",
+      "plain": "Confirmed against the base chain Infrix anchors to — durable and neutral.",
+      "technical": "Anchor confirmed against Accumulate L0 (the neutral settlement substrate)."
+    },
+    {
+      "id": "trust.node",
+      "category": "trust",
+      "short": "Trusting this node",
+      "plain": "This answer comes from the Infrix node directly; an independent check has not been run.",
+      "technical": "Result asserted by the node; not independently re-verified.",
+      "neverUseWhen": [
+        "nodeTrusted=false"
+      ]
+    },
+    {
+      "id": "trust.none",
+      "category": "trust",
+      "short": "Trust no one",
+      "plain": "Anyone can re-run the maths and reach the same answer — you don't have to trust Infrix.",
+      "technical": "Verdict is reproducible from the portable bundle without trusting the producing node."
+    },
+    {
+      "id": "trust.operator",
+      "category": "trust",
+      "short": "Operator's word",
+      "plain": "An operator configured or attested this — it is not the same as a verified proof.",
+      "technical": "Operator attestation / configuration; not a cryptographic verification."
+    }
+  ],
+  "assuranceBadges": [
+    {
+      "id": "assurance.cryptographic",
+      "short": "Cryptographically verified",
+      "plain": "The maths binding every step together checks out.",
+      "technical": "All cryptographic bindings (hashes, signatures, anchor consistency) verified.",
+      "icon": "key",
+      "colorRole": "positive",
+      "screenReader": "Cryptographically verified: all cryptographic bindings checked.",
+      "allowedConditions": [
+        "cryptographicallyVerified=true"
+      ],
+      "disallowedConditions": []
+    },
+    {
+      "id": "assurance.disclosure",
+      "short": "Disclosure proof verified",
+      "plain": "A selective-disclosure proof checked out — the hidden facts are backed without revealing them.",
+      "technical": "Selective-disclosure proof verified against its commitment.",
+      "icon": "eye-off",
+      "colorRole": "positive",
+      "screenReader": "Disclosure proof verified: a selective-disclosure proof checked out.",
+      "allowedConditions": [
+        "disclosureProofVerified=true"
+      ],
+      "disallowedConditions": []
+    },
+    {
+      "id": "assurance.distinct_operators",
+      "short": "Distinct operators met",
+      "plain": "The confirmations came from genuinely separate operators, not one party.",
+      "technical": "Valid witnesses span the required number of DISTINCT independent operators.",
+      "icon": "network",
+      "colorRole": "positive",
+      "screenReader": "Distinct operators met: confirmations span separate independent operators.",
+      "allowedConditions": [
+        "distinctOperatorsMet=true",
+        "witnessQuorumMet=true"
+      ],
+      "disallowedConditions": []
+    },
+    {
+      "id": "assurance.live_l0",
+      "short": "Live L0 verified",
+      "plain": "Confirmed against Accumulate L0 right now — durable beyond Infrix.",
+      "technical": "Proof level L4: bundle anchor confirmed through a live L0 lookup.",
+      "icon": "anchor",
+      "colorRole": "positive",
+      "screenReader": "Live L0 verified: the anchor was confirmed against Accumulate L0.",
+      "allowedConditions": [
+        "l0Verified=true"
+      ],
+      "disallowedConditions": [
+        "l0Verified=false",
+        "verificationMode=local_only"
+      ]
+    },
+    {
+      "id": "assurance.local",
+      "short": "Local proof",
+      "plain": "Checked on this machine only — not yet confirmed against the chain.",
+      "technical": "Structurally consistent; no live L0 confirmation. Caps below L4.",
+      "icon": "circle",
+      "colorRole": "info",
+      "screenReader": "Local proof: checked on this machine only, not confirmed against Accumulate L0.",
+      "allowedConditions": [
+        "verified=true",
+        "l0Verified=false"
+      ],
+      "disallowedConditions": []
+    },
+    {
+      "id": "assurance.no_node_trust",
+      "short": "No node trust required",
+      "plain": "You don't have to trust the Infrix node — the proof stands on its own.",
+      "technical": "Verdict reproducible from the portable bundle without trusting the producing node.",
+      "icon": "unlock",
+      "colorRole": "info",
+      "screenReader": "No node trust required: the proof is verifiable without trusting the node.",
+      "allowedConditions": [
+        "nodeTrusted=false"
+      ],
+      "disallowedConditions": [
+        "nodeTrusted=true"
+      ]
+    },
+    {
+      "id": "assurance.offline",
+      "short": "Offline verified",
+      "plain": "Every cryptographic link checks out without any network — no node trust needed.",
+      "technical": "Cryptographic bindings recomputed offline; L0 anchor not independently confirmed (caps at L3).",
+      "icon": "shield",
+      "colorRole": "info",
+      "screenReader": "Offline verified: cryptographic bindings checked offline; L0 not confirmed.",
+      "allowedConditions": [
+        "cryptographicallyVerified=true",
+        "l0Verified=false"
+      ],
+      "disallowedConditions": []
+    },
+    {
+      "id": "assurance.operator_attested",
+      "short": "Operator attested",
+      "plain": "An operator vouches for this. It is their word, not a verified proof.",
+      "technical": "Operator attestation / configuration; NOT a cryptographic or L0 verification.",
+      "icon": "user-check",
+      "colorRole": "caution",
+      "screenReader": "Operator attested: vouched for by an operator, not independently verified.",
+      "allowedConditions": [
+        "operatorAttested=true"
+      ],
+      "disallowedConditions": []
+    },
+    {
+      "id": "assurance.release_evidence",
+      "short": "Release evidence verified",
+      "plain": "This release's evidence was checked and matches the exact code that shipped.",
+      "technical": "Release evidence bundle verified: signer custody + commit binding + manifest integrity.",
+      "icon": "package-check",
+      "colorRole": "positive",
+      "screenReader": "Release evidence verified: the release evidence bundle checked out.",
+      "allowedConditions": [
+        "releaseEvidenceVerified=true"
+      ],
+      "disallowedConditions": []
+    },
+    {
+      "id": "assurance.replay",
+      "short": "Replay matched",
+      "plain": "We re-ran exactly what happened and got the same result.",
+      "technical": "Deterministic replay from the capsule reproduced the recorded outcome.",
+      "icon": "repeat",
+      "colorRole": "positive",
+      "screenReader": "Replay matched: re-execution reproduced the recorded outcome.",
+      "allowedConditions": [
+        "replayVerified=true"
+      ],
+      "disallowedConditions": []
+    },
+    {
+      "id": "assurance.witness_quorum",
+      "short": "Witness quorum met",
+      "plain": "Independent parties confirmed the same event.",
+      "technical": "A threshold of independent witness receipts attests the bundle reproduces.",
+      "icon": "users",
+      "colorRole": "positive",
+      "screenReader": "Witness quorum met: independent witnesses confirmed the event.",
+      "allowedConditions": [
+        "witnessQuorumMet=true",
+        "l0Verified=true"
+      ],
+      "disallowedConditions": [
+        "l0Verified=false"
+      ]
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Accumulate L0",
+      "plain": "The base chain Infrix anchors to.",
+      "technical": "Accumulate's layer-0 identity + settlement substrate; the neutral chain Infrix anchors evidence digests to and confirms them against.",
+      "related": [
+        "anchor",
+        "key page"
+      ],
+      "firstUseReplacement": "the base chain Infrix anchors to",
+      "docs": "docs/learn/glossary.md"
+    },
+    {
+      "term": "anchor",
+      "plain": "The record on the base chain that pins your evidence in time.",
+      "technical": "An L0 transaction committing an evidence digest; confirming it raises the proof level to L4.",
+      "related": [
+        "Accumulate L0",
+        "assurance level"
+      ],
+      "firstUseReplacement": "the record on the base chain that pins your evidence",
+      "docs": "docs/learn/glossary.md"
+    },
+    {
+      "term": "assurance level",
+      "plain": "How strongly a result is backed.",
+      "technical": "The proof level (L0..L4) and governance level (ungoverned/G0..G2) an evidence bundle achieves; L4 requires a confirmed live L0 anchor.",
+      "related": [
+        "proof receipt",
+        "Accumulate L0"
+      ],
+      "firstUseReplacement": "how strongly this result is backed",
+      "docs": "docs/learn/glossary.md"
+    },
+    {
+      "term": "canonical spine",
+      "plain": "The internal record structure Infrix uses to make workflows replayable.",
+      "technical": "The Intent -\u003e Plan -\u003e Approval -\u003e Execution -\u003e Outcome -\u003e Evidence -\u003e Anchor chain every governed operation flows through.",
+      "related": [
+        "replay capsule",
+        "substrate"
+      ],
+      "firstUseReplacement": "the internal record of what happened",
+      "docs": "docs/learn/glossary.md"
+    },
+    {
+      "term": "disclosure proof",
+      "plain": "A way to prove a hidden fact without revealing it.",
+      "technical": "A selective-disclosure proof verified against a commitment, so a fact is backed without exposing the underlying data.",
+      "related": [
+        "assurance level"
+      ],
+      "firstUseReplacement": "a proof of a hidden fact that reveals nothing extra",
+      "docs": "docs/learn/glossary.md"
+    },
+    {
+      "term": "distinct operators",
+      "plain": "Genuinely separate parties, not one party wearing many hats.",
+      "technical": "Witnesses judged by the independent operator that runs them (via a witness registry), so a quorum reflects distinct operators, not distinct keys.",
+      "related": [
+        "witness quorum"
+      ],
+      "firstUseReplacement": "genuinely separate parties",
+      "docs": "docs/learn/glossary.md"
+    },
+    {
+      "term": "key page",
+      "plain": "The list of keys allowed to act for an identity.",
+      "technical": "An Accumulate ADI key page: the on-chain set of authorized signing keys (and their version) Infrix checks a signer against.",
+      "related": [
+        "Accumulate L0"
+      ],
+      "firstUseReplacement": "the list of keys allowed to act for an identity",
+      "docs": "docs/learn/glossary.md"
+    },
+    {
+      "term": "profile",
+      "plain": "How strong a posture a deployment promises to back.",
+      "technical": "A capability profile (local/kermit/public_production/full_public_production) whose claims are gated by substrate readiness.",
+      "related": [
+        "substrate"
+      ],
+      "firstUseReplacement": "how strong a posture this deployment backs",
+      "docs": "docs/learn/glossary.md"
+    },
+    {
+      "term": "proof receipt",
+      "plain": "A compact summary of what was verified.",
+      "technical": "The single canonical receipt (pkg/proofreceipt) every proof surface emits: outcome, assurance, trust answer, and the artifacts behind it.",
+      "related": [
+        "assurance level",
+        "replay capsule"
+      ],
+      "firstUseReplacement": "a compact summary of what was verified",
+      "docs": "docs/learn/glossary.md"
+    },
+    {
+      "term": "replay capsule",
+      "plain": "A portable package that lets anyone re-run what happened.",
+      "technical": "The self-contained capsule carried inside a bundle (contract bytecode, state, recorded steps) enabling deterministic re-execution.",
+      "related": [
+        "canonical spine",
+        "proof receipt"
+      ],
+      "firstUseReplacement": "a package that lets anyone re-run what happened",
+      "docs": "docs/learn/glossary.md"
+    },
+    {
+      "term": "substrate",
+      "plain": "A load-bearing service Infrix depends on (like the chain it anchors to).",
+      "technical": "A pluggable backing service (L0 anchoring, state mirror, witness network, disclosure) whose readiness gates a deployment profile.",
+      "related": [
+        "profile",
+        "Accumulate L0"
+      ],
+      "firstUseReplacement": "a service Infrix depends on",
+      "docs": "docs/learn/glossary.md"
+    },
+    {
+      "term": "witness quorum",
+      "plain": "Independent parties confirming the same event.",
+      "technical": "A threshold of distinct, independent witness receipts that each re-verify a bundle; full_public_production requires a 2-of-3 distinct-operator quorum.",
+      "related": [
+        "distinct operators",
+        "assurance level"
+      ],
+      "firstUseReplacement": "independent parties confirming the same event",
+      "docs": "docs/learn/glossary.md"
+    }
+  ],
+  "errors": [
+    {
+      "code": "AGENT_APPROVAL_EXPIRED",
+      "title": "The approval has expired",
+      "plainMeaning": "The approval token's validity window has passed.",
+      "fixes": [
+        {
+          "label": "Re-approve the action",
+          "command": "infrix agent approve \u003caction\u003e --input file.json",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_APPROVAL_EXPIRED"
+    },
+    {
+      "code": "AGENT_APPROVAL_INVALID",
+      "title": "The approval token is invalid",
+      "plainMeaning": "The approval token's signature does not verify against the session that minted it.",
+      "fixes": [
+        {
+          "label": "Re-approve through the session that will run the action",
+          "command": "infrix agent approve \u003caction\u003e --input file.json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_APPROVAL_INVALID"
+    },
+    {
+      "code": "AGENT_APPROVAL_MISMATCH",
+      "title": "The approval does not match this input",
+      "plainMeaning": "The approval token is bound to a different action or a different input hash than the one submitted.",
+      "fixes": [
+        {
+          "label": "Re-approve the exact input you intend to run",
+          "command": "infrix agent approve \u003caction\u003e --input file.json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_APPROVAL_MISMATCH"
+    },
+    {
+      "code": "AGENT_APPROVAL_REQUIRED",
+      "title": "This action needs explicit approval",
+      "plainMeaning": "The session's approval mode requires a human to approve this write before it runs.",
+      "fixes": [
+        {
+          "label": "Approve the dry-run's request, then run",
+          "command": "infrix agent approve \u003caction\u003e --input file.json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_APPROVAL_REQUIRED"
+    },
+    {
+      "code": "AGENT_CAPABILITY_DENIED",
+      "title": "This action is outside the session's capabilities",
+      "plainMeaning": "The session was not granted the capability to run this action.",
+      "fixes": [
+        {
+          "label": "Create a session that grants the capability",
+          "command": "infrix agent session create --cap \u003caction\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_CAPABILITY_DENIED"
+    },
+    {
+      "code": "AGENT_DRY_RUN_REQUIRED",
+      "title": "A dry-run is required before this action",
+      "plainMeaning": "This action mutates state and must be dry-run before it can be executed.",
+      "fixes": [
+        {
+          "label": "Dry-run the action first",
+          "command": "infrix agent dry-run \u003caction\u003e --input file.json --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_DRY_RUN_REQUIRED"
+    },
+    {
+      "code": "AGENT_INPUT_INVALID",
+      "title": "The action input is invalid",
+      "plainMeaning": "The input does not satisfy the action's input schema (a required field is missing or has the wrong type).",
+      "fixes": [
+        {
+          "label": "Inspect the action's schema",
+          "command": "infrix agent schema \u003caction\u003e --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_INPUT_INVALID"
+    },
+    {
+      "code": "AGENT_MAINNET_WRITE_BLOCKED",
+      "title": "Mainnet writes are blocked for agents",
+      "plainMeaning": "This action would write to mainnet, which the agent path blocks by default.",
+      "fixes": [
+        {
+          "label": "Use a testnet (Kermit) target instead",
+          "command": "infrix agent run \u003caction\u003e --input file.json --profile kermit",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_MAINNET_WRITE_BLOCKED"
+    },
+    {
+      "code": "AGENT_PROFILE_DENIED",
+      "title": "This action is disabled under the current profile",
+      "plainMeaning": "The action's supported profiles do not include the session's profile.",
+      "fixes": [
+        {
+          "label": "Run under a supported profile",
+          "command": "infrix agent describe-action \u003caction\u003e --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_PROFILE_DENIED"
+    },
+    {
+      "code": "AGENT_PUBLISH_UNVERIFIED",
+      "title": "Release evidence must verify before publish",
+      "plainMeaning": "The release evidence did not verify, so it cannot be published.",
+      "fixes": [
+        {
+          "label": "Verify the evidence first",
+          "command": "infrix agent run release.evidence.verify --input file.json --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_PUBLISH_UNVERIFIED"
+    },
+    {
+      "code": "AGENT_SESSION_EXPIRED",
+      "title": "The agent session has expired",
+      "plainMeaning": "The session's time-to-live has elapsed.",
+      "fixes": [
+        {
+          "label": "Create a fresh session",
+          "command": "infrix agent session create --profile local --ttl 30m",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_SESSION_EXPIRED"
+    },
+    {
+      "code": "AGENT_SESSION_NOT_FOUND",
+      "title": "The agent session was not found",
+      "plainMeaning": "No session with that id exists (it may have been revoked).",
+      "fixes": [
+        {
+          "label": "Create a new session",
+          "command": "infrix agent session create --profile local",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_SESSION_NOT_FOUND"
+    },
+    {
+      "code": "AGENT_SIGNING_DENIED",
+      "title": "This session may not sign",
+      "plainMeaning": "The action requires a signer, but the session does not permit signing.",
+      "fixes": [
+        {
+          "label": "Use a flow where the human wallet signs (e.g. MetaMask)",
+          "command": "infrix agent describe-action wallet.connect.metamask --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_SIGNING_DENIED"
+    },
+    {
+      "code": "AGENT_UNKNOWN_ACTION",
+      "title": "That agent action does not exist",
+      "plainMeaning": "No action with that id is registered in the Agent Action Protocol.",
+      "fixes": [
+        {
+          "label": "List the available actions",
+          "command": "infrix agent list-actions --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_UNKNOWN_ACTION"
+    },
+    {
+      "code": "AGENT_WRITE_BUDGET_EXCEEDED",
+      "title": "The session's write budget is exhausted",
+      "plainMeaning": "The session has already performed the maximum number of writes it was granted.",
+      "fixes": [
+        {
+          "label": "Create a session with a larger write budget",
+          "command": "infrix agent session create --write-budget 10",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent.md",
+      "technical": "error_code: AGENT_WRITE_BUDGET_EXCEEDED"
+    },
+    {
+      "code": "L0_ANCHOR_UNAVAILABLE",
+      "title": "The L0 anchor is unavailable",
+      "plainMeaning": "Infrix could not fetch the anchor transaction from Accumulate L0.",
+      "assuranceImpact": "The anchor cannot be independently confirmed, so the proof caps at L3 — it does not claim L4.",
+      "fixes": [
+        {
+          "label": "Retry against a reachable L0 endpoint",
+          "command": "infrix verify \u003cbundle\u003e --l0 kermit",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/l0.md",
+      "technical": "error_code: L0_ANCHOR_UNAVAILABLE"
+    },
+    {
+      "code": "L0_ENDPOINT_UNREACHABLE",
+      "title": "The Accumulate L0 endpoint is unreachable",
+      "plainMeaning": "Infrix could not reach the configured Accumulate L0 endpoint.",
+      "assuranceImpact": "Without a reachable L0 endpoint this proof cannot claim live L0 verification (it caps at L3).",
+      "fixes": [
+        {
+          "label": "Run local deterministic mode",
+          "command": "infrix demo start --mode local",
+          "safeToRun": true
+        },
+        {
+          "label": "Check connectivity to Kermit",
+          "command": "infrix doctor --persona auditor",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/l0.md",
+      "technical": "error_code: L0_ENDPOINT_UNREACHABLE"
+    },
+    {
+      "code": "L0_FINALITY_TIMEOUT",
+      "title": "Timed out waiting for L0 finality",
+      "plainMeaning": "The anchor did not confirm on Accumulate L0 within the timeout.",
+      "assuranceImpact": "The proof has not yet reached L4; it is not failed, just not final.",
+      "fixes": [
+        {
+          "label": "Retry verification with a longer timeout",
+          "command": "infrix verify \u003cbundle\u003e --l0 kermit --timeout 120s",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/l0.md",
+      "technical": "error_code: L0_FINALITY_TIMEOUT"
+    },
+    {
+      "code": "L0_KEY_NOT_ON_PAGE",
+      "title": "The signing key is not on the key page",
+      "plainMeaning": "The key that signed the request is not an authorized key on the declared L0 key page.",
+      "fixes": [
+        {
+          "label": "Bind the key to the ADI key page",
+          "safeToRun": false
+        },
+        {
+          "label": "Or submit without the L0 key-page check (offline)",
+          "command": "infrix demo start --mode local",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/l0.md",
+      "technical": "error_code: L0_KEY_NOT_ON_PAGE"
+    },
+    {
+      "code": "L0_KEY_PAGE_NOT_FOUND",
+      "title": "The signer's key page was not found on L0",
+      "plainMeaning": "Accumulate L0 has no key page at the signer's declared URL.",
+      "fixes": [
+        {
+          "label": "Check the signer key-page URL",
+          "command": "infrix doctor --persona operator",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/l0.md",
+      "technical": "error_code: L0_KEY_PAGE_NOT_FOUND"
+    },
+    {
+      "code": "L0_KEY_PAGE_RESOLVER_MISSING",
+      "title": "This node cannot verify the signer against Accumulate L0",
+      "plainMeaning": "This node cannot verify the signer against Accumulate L0.",
+      "fixes": [
+        {
+          "label": "Start the node with an L0 endpoint",
+          "command": "infrix node --config \u003cconfig-with-l0-endpoint\u003e",
+          "safeToRun": false
+        },
+        {
+          "label": "Or use local demo mode",
+          "command": "infrix demo start --mode local",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/l0-key-page-resolver-missing.md",
+      "technical": "error_code: L0_KEY_PAGE_RESOLVER_MISSING\ncause: the L0 key-page resolver is not configured on this node"
+    },
+    {
+      "code": "L0_SIGNER_VERSION_MISMATCH",
+      "title": "The signer key-page version is stale",
+      "plainMeaning": "The submitted signer version does not match the current key-page version on L0.",
+      "fixes": [
+        {
+          "label": "Re-read the current key-page version and re-sign",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/l0.md",
+      "technical": "error_code: L0_SIGNER_VERSION_MISMATCH"
+    },
+    {
+      "code": "L0_WRONG_NETWORK",
+      "title": "The endpoint is the wrong network",
+      "plainMeaning": "The configured endpoint does not match the expected Accumulate network.",
+      "fixes": [
+        {
+          "label": "Use the Kermit testnet for verification",
+          "command": "infrix verify \u003cbundle\u003e --l0 kermit",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/l0.md",
+      "technical": "error_code: L0_WRONG_NETWORK"
+    },
+    {
+      "code": "METAMASK_ADDRESS_MISMATCH",
+      "title": "The recovered address does not match MetaMask",
+      "plainMeaning": "The address recovered from the signature does not match the connected MetaMask account.",
+      "fixes": [
+        {
+          "label": "Make sure the same account that connected also signs",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/metamask-address-mismatch.md",
+      "technical": "error_code: METAMASK_ADDRESS_MISMATCH"
+    },
+    {
+      "code": "METAMASK_KEY_PAGE_BINDING_FAILED",
+      "title": "The key is not authorized on the L0 key page",
+      "plainMeaning": "MetaMask signed correctly, but the key is not a current authorized key on the declared Accumulate key page.",
+      "fixes": [
+        {
+          "label": "Bind the MetaMask key to the ADI key page",
+          "safeToRun": false
+        },
+        {
+          "label": "Or submit without the key-page check",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/metamask.md",
+      "technical": "error_code: METAMASK_KEY_PAGE_BINDING_FAILED"
+    },
+    {
+      "code": "METAMASK_PROVIDER_MISSING",
+      "title": "No MetaMask provider was found",
+      "plainMeaning": "No EIP-1193 wallet provider (window.ethereum) is available.",
+      "fixes": [
+        {
+          "label": "Install/unlock MetaMask in the browser",
+          "safeToRun": false
+        },
+        {
+          "label": "Or run the deterministic headless demo",
+          "command": "node examples/metamask-golden-escrow/golden.mjs",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/metamask.md",
+      "technical": "error_code: METAMASK_PROVIDER_MISSING"
+    },
+    {
+      "code": "METAMASK_PUBLIC_KEY_RECOVERY_FAILED",
+      "title": "Could not recover the public key from the signature",
+      "plainMeaning": "The secp256k1 public key could not be recovered from the MetaMask signature.",
+      "fixes": [
+        {
+          "label": "Re-run the signing flow with a fresh challenge",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/metamask.md",
+      "technical": "error_code: METAMASK_PUBLIC_KEY_RECOVERY_FAILED"
+    },
+    {
+      "code": "METAMASK_TYPED_DATA_UNSUPPORTED",
+      "title": "Typed-data signing is not supported",
+      "plainMeaning": "The wallet provider does not support eth_signTypedData_v4.",
+      "fixes": [
+        {
+          "label": "Use a wallet that supports EIP-712 (e.g. MetaMask)",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/metamask.md",
+      "technical": "error_code: METAMASK_TYPED_DATA_UNSUPPORTED"
+    },
+    {
+      "code": "METAMASK_USER_REJECTED",
+      "title": "The signature was rejected in MetaMask",
+      "plainMeaning": "The user declined the connection or the signing prompt in MetaMask.",
+      "fixes": [
+        {
+          "label": "Re-run and approve the MetaMask prompt",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/metamask.md",
+      "technical": "error_code: METAMASK_USER_REJECTED"
+    },
+    {
+      "code": "PROFILE_LIVE_L0_MISSING",
+      "title": "A live L0 endpoint is required for this profile",
+      "plainMeaning": "The selected profile requires a reachable, cryptographically-verified L0 anchor, but none is configured.",
+      "assuranceImpact": "The deployment cannot back a public-production assurance claim without live L0.",
+      "fixes": [
+        {
+          "label": "Configure a live L0 endpoint in the node config",
+          "safeToRun": false
+        },
+        {
+          "label": "Check readiness",
+          "command": "infrix readiness --require public_production",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/profiles.md",
+      "technical": "error_code: PROFILE_LIVE_L0_MISSING"
+    },
+    {
+      "code": "PROFILE_REQUIREMENT_FAILED",
+      "title": "A profile requirement is not met",
+      "plainMeaning": "One or more load-bearing substrates do not meet the selected deployment profile.",
+      "assuranceImpact": "The deployment cannot advertise an assurance profile it does not back.",
+      "fixes": [
+        {
+          "label": "See exactly which substrates are missing",
+          "command": "infrix readiness --require public_production",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/profiles.md",
+      "technical": "error_code: PROFILE_REQUIREMENT_FAILED"
+    },
+    {
+      "code": "PROFILE_STATE_MIRROR_MISSING",
+      "title": "State mirror is required for this profile",
+      "plainMeaning": "The selected profile requires the L0 state mirror, but it is not enabled.",
+      "fixes": [
+        {
+          "label": "Enable l0.stateMirrorEnabled in the node config",
+          "safeToRun": false
+        },
+        {
+          "label": "Re-validate the profile",
+          "command": "infrix node-validate --config \u003cconfig\u003e --profile public_production --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/profiles.md",
+      "technical": "error_code: PROFILE_STATE_MIRROR_MISSING"
+    },
+    {
+      "code": "PROFILE_TLS_MISSING",
+      "title": "TLS is required for this profile",
+      "plainMeaning": "The selected production profile requires the API to serve over TLS, but TLS is not enabled.",
+      "fixes": [
+        {
+          "label": "Enable api.tlsEnabled in the node config",
+          "safeToRun": false
+        },
+        {
+          "label": "Re-validate the profile",
+          "command": "infrix node-validate --config \u003cconfig\u003e --profile public_production --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/profile-tls-missing.md",
+      "technical": "error_code: PROFILE_TLS_MISSING"
+    },
+    {
+      "code": "PROOF_L0_UNAVAILABLE",
+      "title": "L0 confirmation is unavailable for this proof",
+      "plainMeaning": "The verifier could not confirm the anchor against Accumulate L0.",
+      "assuranceImpact": "The proof is cryptographically valid offline but caps at L3 — it does not claim L4.",
+      "fixes": [
+        {
+          "label": "Supply a reachable L0 endpoint",
+          "command": "infrix verify \u003cbundle\u003e --l0 kermit",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/proof-l0-unavailable.md",
+      "technical": "error_code: PROOF_L0_UNAVAILABLE"
+    },
+    {
+      "code": "PROOF_LEVEL_OVERCLAIMED",
+      "title": "The proof claims more than it backs",
+      "plainMeaning": "A receipt or claim asserts a higher assurance than the evidence supports (e.g. L4 without an L0 anchor).",
+      "assuranceImpact": "Infrix refuses to present a proof that claims more assurance than it backs.",
+      "fixes": [
+        {
+          "label": "Confirm the anchor against live L0 before claiming L4",
+          "command": "infrix verify \u003cbundle\u003e --l0 kermit --require L4/G2",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/proofs.md",
+      "technical": "error_code: PROOF_LEVEL_OVERCLAIMED"
+    },
+    {
+      "code": "PROOF_MALFORMED",
+      "title": "The proof bundle is malformed",
+      "plainMeaning": "The portable evidence package could not be parsed or is structurally invalid.",
+      "fixes": [
+        {
+          "label": "Re-export the proof from the producing flow",
+          "safeToRun": false
+        },
+        {
+          "label": "Inspect it",
+          "command": "infrix verify \u003cbundle\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/proofs.md",
+      "technical": "error_code: PROOF_MALFORMED"
+    },
+    {
+      "code": "PROOF_OPERATOR_DIVERSITY_FAILED",
+      "title": "Witness operator diversity not met",
+      "plainMeaning": "The valid witnesses do not span enough distinct independent operators.",
+      "assuranceImpact": "The proof does not meet the distinct-operator assurance.",
+      "fixes": [
+        {
+          "label": "Supply a witness registry mapping witnesses to operators",
+          "command": "infrix verify \u003cbundle\u003e --witness-registry \u003cfile\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/proofs.md",
+      "technical": "error_code: PROOF_OPERATOR_DIVERSITY_FAILED"
+    },
+    {
+      "code": "PROOF_REPLAY_UNAVAILABLE",
+      "title": "Deterministic replay is unavailable",
+      "plainMeaning": "The bundle carries no replay capsule, so deterministic re-execution cannot run.",
+      "assuranceImpact": "The cryptographic and L0 verdicts still hold; only the replay check is skipped.",
+      "fixes": [
+        {
+          "label": "Export with a replay capsule (public-production profile)",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/proofs.md",
+      "technical": "error_code: PROOF_REPLAY_UNAVAILABLE"
+    },
+    {
+      "code": "PROOF_WITNESS_QUORUM_MISSING",
+      "title": "The required witness quorum is missing",
+      "plainMeaning": "Not enough independent witness receipts attest this proof.",
+      "assuranceImpact": "The proof does not meet the required witness-quorum assurance.",
+      "fixes": [
+        {
+          "label": "Verify without requiring witnesses, or gather a quorum",
+          "command": "infrix verify \u003cbundle\u003e --l0 kermit",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/proofs.md",
+      "technical": "error_code: PROOF_WITNESS_QUORUM_MISSING"
+    },
+    {
+      "code": "SDK_BALANCE_UNAVAILABLE",
+      "title": "The balance is unavailable",
+      "plainMeaning": "The requested balance could not be read (gas/IU accounting not available).",
+      "fixes": [
+        {
+          "label": "Query the account directly",
+          "command": "infrix query \u003caccount\u003e",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/sdk.md",
+      "technical": "error_code: SDK_BALANCE_UNAVAILABLE"
+    },
+    {
+      "code": "SDK_INCOMPLETE_GOVERNED_RESULT",
+      "title": "The governed result is incomplete",
+      "plainMeaning": "A required field of the governed result (plan, outcome, or evidence) is missing.",
+      "fixes": [
+        {
+          "label": "Inspect the intent's spine artifacts",
+          "command": "infrix intent evidence \u003cid\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/sdk.md",
+      "technical": "error_code: SDK_INCOMPLETE_GOVERNED_RESULT"
+    },
+    {
+      "code": "SDK_MISSING_OUTCOME",
+      "title": "The governed result has no outcome",
+      "plainMeaning": "The intent was submitted but no outcome record was produced.",
+      "fixes": [
+        {
+          "label": "Wait for the outcome, or inspect the intent",
+          "command": "infrix intent status \u003cid\u003e",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/sdk.md",
+      "technical": "error_code: SDK_MISSING_OUTCOME"
+    },
+    {
+      "code": "SDK_PROOF_UNAVAILABLE",
+      "title": "A proof was requested but is unavailable",
+      "plainMeaning": "The flow could not export a portable proof for this result.",
+      "fixes": [
+        {
+          "label": "Re-run with proof export enabled",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/sdk.md",
+      "technical": "error_code: SDK_PROOF_UNAVAILABLE"
+    },
+    {
+      "code": "SETUP_GO_MISSING",
+      "title": "Go is not installed",
+      "plainMeaning": "Infrix needs the Go toolchain to build and run, but `go` was not found.",
+      "fixes": [
+        {
+          "label": "Install Go (1.25.7+)",
+          "command": "https://go.dev/dl",
+          "safeToRun": false
+        },
+        {
+          "label": "Verify your environment",
+          "command": "infrix doctor",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/setup.md",
+      "technical": "error_code: SETUP_GO_MISSING"
+    },
+    {
+      "code": "SETUP_GO_VERSION",
+      "title": "Go is older than go.mod requires",
+      "plainMeaning": "Your Go toolchain is older than the version go.mod declares.",
+      "fixes": [
+        {
+          "label": "Upgrade Go to match go.mod",
+          "command": "https://go.dev/dl",
+          "safeToRun": false
+        },
+        {
+          "label": "Check the exact required version",
+          "command": "infrix doctor",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/setup.md",
+      "technical": "error_code: SETUP_GO_VERSION"
+    },
+    {
+      "code": "SETUP_NODE_DEPS_MISSING",
+      "title": "Node dependencies are not installed",
+      "plainMeaning": "The TypeScript SDK or tooling needs its npm dependencies installed.",
+      "fixes": [
+        {
+          "label": "Install the SDK dependencies",
+          "command": "npm install --prefix sdk/typescript",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/setup.md",
+      "technical": "error_code: SETUP_NODE_DEPS_MISSING"
+    },
+    {
+      "code": "SETUP_PORT_IN_USE",
+      "title": "The port is already in use",
+      "plainMeaning": "Another process is already listening on the port Infrix wants to bind.",
+      "fixes": [
+        {
+          "label": "Stop a leftover demo",
+          "command": "infrix demo stop",
+          "safeToRun": true
+        },
+        {
+          "label": "Use another port",
+          "command": "infrix demo start --port 8090",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/setup.md",
+      "technical": "error_code: SETUP_PORT_IN_USE"
+    },
+    {
+      "code": "SETUP_RUST_WASM_TARGET_MISSING",
+      "title": "Rust wasm32 target is missing",
+      "plainMeaning": "Authoring WASM contracts needs the wasm32-unknown-unknown Rust target.",
+      "fixes": [
+        {
+          "label": "Add the wasm32 target",
+          "command": "rustup target add wasm32-unknown-unknown",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/setup.md",
+      "technical": "error_code: SETUP_RUST_WASM_TARGET_MISSING"
+    },
+    {
+      "code": "UNKNOWN",
+      "title": "Something went wrong",
+      "plainMeaning": "Infrix hit an error it could not translate into specific guidance.",
+      "fixes": [
+        {
+          "label": "Diagnose your environment",
+          "command": "infrix doctor --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/README.md",
+      "technical": "error_code: UNKNOWN"
+    }
+  ],
+  "nextActions": [
+    {
+      "id": "next.check_readiness",
+      "label": "Check deployment posture",
+      "plain": "See which load-bearing services are ready and which are not.",
+      "command": "infrix readiness --require public_production",
+      "personas": [
+        "operator",
+        "expert"
+      ]
+    },
+    {
+      "id": "next.copy_verify_command",
+      "label": "Copy the verifier command",
+      "plain": "Re-check this proof yourself without trusting the node.",
+      "command": "infrix verify \u003cbundle\u003e --l0 kermit",
+      "personas": [
+        "auditor",
+        "agent",
+        "expert"
+      ]
+    },
+    {
+      "id": "next.dry_run",
+      "label": "Dry-run an action",
+      "plain": "Preview an action's effects before anything runs.",
+      "command": "infrix agent dry-run \u003caction\u003e --input file.json --json",
+      "personas": [
+        "agent"
+      ]
+    },
+    {
+      "id": "next.inspect_trust_boundary",
+      "label": "See the trust boundary",
+      "plain": "See exactly what was proved, what L0 proved, and what remains unverified.",
+      "personas": [
+        "auditor",
+        "expert",
+        "operator"
+      ]
+    },
+    {
+      "id": "next.list_actions",
+      "label": "List agent actions",
+      "plain": "Discover every action Infrix exposes, as structured JSON.",
+      "command": "infrix agent list-actions --json",
+      "personas": [
+        "agent"
+      ]
+    },
+    {
+      "id": "next.open_cinema",
+      "label": "Watch the replay",
+      "plain": "Open the step-by-step view of what happened.",
+      "personas": [
+        "builder",
+        "operator",
+        "auditor"
+      ]
+    },
+    {
+      "id": "next.run_doctor",
+      "label": "Diagnose the environment",
+      "plain": "Find what is misconfigured and the exact command to fix it.",
+      "command": "infrix doctor",
+      "personas": [
+        "builder",
+        "operator"
+      ]
+    },
+    {
+      "id": "next.share_story",
+      "label": "Share a proof story",
+      "plain": "Send someone a self-contained story they can verify themselves.",
+      "command": "infrix scenario story",
+      "personas": [
+        "builder",
+        "auditor"
+      ]
+    },
+    {
+      "id": "next.try_demo",
+      "label": "Run the demo",
+      "plain": "See a full governed flow end-to-end on your machine.",
+      "command": "infrix demo start --mode local",
+      "personas": [
+        "builder"
+      ]
+    },
+    {
+      "id": "next.verify_live_l0",
+      "label": "Confirm against live L0",
+      "plain": "Confirm the anchor against Accumulate L0 to reach the strongest proof.",
+      "command": "infrix verify \u003cbundle\u003e --l0 kermit --require L4/G2",
+      "personas": [
+        "operator",
+        "auditor",
+        "expert"
+      ]
+    }
+  ],
+  "personas": [
+    {
+      "persona": "builder",
+      "title": "Builder",
+      "tagline": "Ship something that works, see the outcome first.",
+      "showTechnicalByDefault": false,
+      "glossaryDensity": "high",
+      "leadActions": [
+        "next.try_demo",
+        "next.share_story",
+        "next.open_cinema"
+      ],
+      "panels": [
+        "outcome",
+        "assurance",
+        "next"
+      ]
+    },
+    {
+      "persona": "operator",
+      "title": "Operator",
+      "tagline": "Know the posture, find the failed substrate, get the fix.",
+      "showTechnicalByDefault": false,
+      "glossaryDensity": "low",
+      "leadActions": [
+        "next.check_readiness",
+        "next.run_doctor",
+        "next.verify_live_l0"
+      ],
+      "panels": [
+        "outcome",
+        "assurance",
+        "readiness",
+        "next"
+      ]
+    },
+    {
+      "persona": "auditor",
+      "title": "Auditor",
+      "tagline": "Copy the verifier command, check the proof yourself.",
+      "showTechnicalByDefault": true,
+      "glossaryDensity": "normal",
+      "leadActions": [
+        "next.copy_verify_command",
+        "next.verify_live_l0",
+        "next.inspect_trust_boundary"
+      ],
+      "panels": [
+        "outcome",
+        "assurance",
+        "trust-boundary",
+        "technical",
+        "next"
+      ]
+    },
+    {
+      "persona": "agent",
+      "title": "Agent",
+      "tagline": "Consume the same status as structured JSON.",
+      "showTechnicalByDefault": true,
+      "glossaryDensity": "none",
+      "leadActions": [
+        "next.list_actions",
+        "next.dry_run",
+        "next.copy_verify_command"
+      ],
+      "panels": [
+        "outcome",
+        "assurance",
+        "technical",
+        "next"
+      ]
+    },
+    {
+      "persona": "expert",
+      "title": "Expert",
+      "tagline": "Everything, all layers, no hand-holding.",
+      "showTechnicalByDefault": true,
+      "glossaryDensity": "none",
+      "leadActions": [
+        "next.copy_verify_command",
+        "next.verify_live_l0",
+        "next.inspect_trust_boundary"
+      ],
+      "panels": [
+        "outcome",
+        "assurance",
+        "trust-boundary",
+        "technical",
+        "next"
+      ]
+    }
+  ],
+  "categories": [
+    "assurance",
+    "trust",
+    "network",
+    "profile",
+    "action",
+    "error",
+    "next-action",
+    "glossary"
+  ]
+}
