@@ -1,0 +1,104 @@
+{
+  "items": [
+    {
+      "version": 1,
+      "id": "inbox_escrow_release_01",
+      "title": "Regulated escrow release",
+      "kind": "proof_story",
+      "artifactHash": "sha256:fcd824fd2f9f97a82a785ec45c3c76b4fb07a4e6b71abd9599f6640c0e0d2de4",
+      "artifactFile": "artifact.json",
+      "sender": "alice@example.com",
+      "recipient": "auditor@example.com",
+      "createdAt": "2026-06-09T00:00:00Z",
+      "summary": "Verified L3/G2",
+      "askedToApprove": "release the regulated escrow",
+      "verification": {
+        "status": "verified",
+        "proofLevel": "L3",
+        "governanceLevel": "G2",
+        "trustsNode": false,
+        "l0Verified": false,
+        "replayVerified": false,
+        "verifiedAt": "2026-06-09T00:00:00Z",
+        "verifier": "scenario.VerifyStory",
+        "detail": "proof story independently verified"
+      },
+      "decisions": [
+        {
+          "type": "approve",
+          "itemId": "inbox_escrow_release_01",
+          "artifactHash": "sha256:fcd824fd2f9f97a82a785ec45c3c76b4fb07a4e6b71abd9599f6640c0e0d2de4",
+          "reason": "meets policy",
+          "signedBy": "auditor",
+          "signerKeyId": "5441ea69d66dd90a101f9956372e406a93823c83e4cd7d83bd3a349facfa843f",
+          "publicKey": "gNKpcg8xZrFphb/glPeZqkQxp8fddRtmN+Uc/feLNsI=",
+          "createdAt": "2026-06-09T00:06:00Z",
+          "bodyHash": "sha256:e7b5127a395c3c4ebff4bd1a7120aea201150e70a048bb391768001a351022a0",
+          "signature": "0hWF+EnNXs2QmgYP5LMwkFJLd9f9S3NE3kyUuZ7ZWrH/OF8lEj+GRyw7LHx1YzWWHtHLzC0Rf3DaFamKdV0AAg=="
+        }
+      ],
+      "comments": [
+        {
+          "id": "c1",
+          "author": "auditor",
+          "body": "Disclosure scope checks out.",
+          "bodyHash": "sha256:66f0a080c00067e7e457c532fe68491323d97f3e88a2816db32f6d7e586da4e4",
+          "createdAt": "2026-06-09T00:05:00Z"
+        }
+      ],
+      "archived": false
+    },
+    {
+      "version": 1,
+      "id": "inbox_release_evidence_02",
+      "title": "Release evidence v1.4",
+      "kind": "proof_receipt",
+      "artifactHash": "sha256:ab05c57797a0d41527b4c7ec5b552d2b27089e91409eeac3d5c23f03fd2bcbdf",
+      "artifactFile": "artifact.json",
+      "sender": "alice@example.com",
+      "recipient": "auditor@example.com",
+      "createdAt": "2026-06-09T00:00:00Z",
+      "summary": "Verified L3/G1",
+      "askedToApprove": "release the regulated escrow",
+      "verification": {
+        "status": "verified",
+        "proofLevel": "L3",
+        "governanceLevel": "G1",
+        "trustsNode": false,
+        "l0Verified": false,
+        "replayVerified": false,
+        "verifiedAt": "2026-06-09T00:00:00Z",
+        "verifier": "proofreceipt.Validate",
+        "detail": "proof receipt validated and reports verified"
+      },
+      "decisions": [],
+      "comments": [],
+      "archived": false
+    },
+    {
+      "version": 1,
+      "id": "inbox_tampered_story_03",
+      "title": "Cross-org settlement proof",
+      "kind": "proof_story",
+      "artifactHash": "sha256:5ca29e08b7b70dda27c7bd26114be63eab317379a3ec56670f6fb5d2e0f55ff3",
+      "artifactFile": "artifact.json",
+      "sender": "alice@example.com",
+      "recipient": "auditor@example.com",
+      "createdAt": "2026-06-09T00:00:00Z",
+      "summary": "Failed verification — tampered",
+      "askedToApprove": "release the regulated escrow",
+      "verification": {
+        "status": "failed",
+        "trustsNode": false,
+        "l0Verified": false,
+        "replayVerified": false,
+        "verifier": "scenario.VerifyStory",
+        "detail": "artifact hash mismatch — stored bytes do not match the bound hash (tampered)"
+      },
+      "decisions": [],
+      "comments": [],
+      "archived": false
+    }
+  ],
+  "version": 1
+}

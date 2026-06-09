@@ -16,6 +16,7 @@ import { designView } from '/views/design.js';
 import { tasksView } from '/views/tasks.js';
 import { autopilotView } from '/views/autopilot.js';
 import { workbenchView } from '/views/workbench.js';
+import { proofInboxView } from '/views/inbox_collab.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -155,6 +156,12 @@ const routes = {
   // #/inbox          — full inbox, default tab = approvals
   // #/inbox/<tab>    — focus a lane (approvals|assigned|mentions|handoffs|drafts)
   inbox: inboxView,
+
+  // nextux-07 — Proof Inbox + Collaboration. Distinct from the node-level
+  // collaborative inbox above: this is the proof-review workspace where humans
+  // and agents verify, comment on, approve, reject, and archive proof artifacts.
+  // #/proof-inbox    — the review queue + item detail
+  'proof-inbox': proofInboxView,
 
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
   // #/verifyBatch              — empty launcher
