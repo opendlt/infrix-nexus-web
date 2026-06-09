@@ -8083,4 +8083,59 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 
 .start-learn-link { display: inline-block; margin-top: 8px; font-size: 0.86rem; font-weight: 600; color: var(--accent, #58a6ff); text-decoration: none; }
 .start-learn-link:hover { text-decoration: underline; }
+
+/* nextux-01 — Agent Mode panel */
+.agent-view { padding: 18px 22px; max-width: 1100px; }
+.agent-view-title { font-size: 1.4rem; margin: 0 0 4px; }
+.agent-view-intro { color: var(--text-dim, #8b949e); font-size: 0.9rem; margin: 0 0 14px; max-width: 70ch; }
+.agent-conn { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.agent-conn-input { flex: 1 1 280px; min-width: 220px; font-family: var(--mono, monospace); font-size: 0.82rem; padding: 6px 10px; border: 1px solid var(--border, #30363d); border-radius: 6px; background: var(--surface, #0d1117); color: var(--text, #e6edf3); }
+.agent-conn-btn, .agent-btn { font-size: 0.82rem; font-weight: 700; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--accent, #238636); background: var(--accent, #238636); color: var(--bg, #010409); cursor: pointer; }
+.agent-conn-status { font-size: 0.8rem; color: var(--text-dim, #8b949e); }
+.agent-conn-ok { color: var(--ok, #3fb950); }
+.agent-conn-err { color: var(--alert, #f85149); }
+.agent-layout { display: grid; grid-template-columns: 300px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 720px) { .agent-layout { grid-template-columns: 1fr; } }
+.agent-pane-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim, #8b949e); margin-bottom: 8px; }
+.agent-actions-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; max-height: 60vh; overflow: auto; }
+.agent-action-btn { width: 100%; display: flex; align-items: center; gap: 8px; text-align: left; padding: 7px 10px; border-radius: 6px; border: 1px solid var(--border, #30363d); background: var(--surface, #161b22); color: var(--text, #e6edf3); cursor: pointer; }
+.agent-action-btn:hover { border-color: var(--accent, #58a6ff); }
+.agent-action-id { font-family: var(--mono, monospace); font-size: 0.8rem; flex: 1; }
+.agent-action-flag { font-size: 0.66rem; color: var(--warn, #d29922); border: 1px solid currentColor; border-radius: 4px; padding: 0 4px; }
+.agent-risk { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.04em; border-radius: 4px; padding: 1px 5px; border: 1px solid currentColor; }
+.agent-risk-read-only { color: var(--ok, #3fb950); }
+.agent-risk-local-write { color: var(--accent, #58a6ff); }
+.agent-risk-testnet-write { color: var(--warn, #d29922); }
+.agent-risk-mainnet-write, .agent-risk-release-publish, .agent-risk-authority-change { color: var(--alert, #f85149); }
+.agent-detail { border: 1px solid var(--border, #30363d); border-radius: 8px; padding: 16px; background: var(--surface, #0d1117); min-height: 220px; }
+.agent-detail-empty { color: var(--text-dim, #8b949e); font-size: 0.9rem; }
+.agent-detail-title { font-size: 1.1rem; margin: 0 0 4px; }
+.agent-detail-desc { color: var(--text-dim, #8b949e); font-size: 0.85rem; margin: 0 0 8px; }
+.agent-detail-meta { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.agent-detail-tag { font-size: 0.68rem; color: var(--text-dim, #8b949e); border: 1px solid var(--border, #30363d); border-radius: 4px; padding: 1px 6px; }
+.agent-input-label { display: block; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim, #8b949e); margin-bottom: 4px; }
+.agent-input { width: 100%; box-sizing: border-box; font-family: var(--mono, monospace); font-size: 0.8rem; padding: 8px; border: 1px solid var(--border, #30363d); border-radius: 6px; background: var(--bg, #010409); color: var(--text, #e6edf3); resize: vertical; }
+.agent-detail-actions { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
+.agent-btn-dry { background: var(--surface, #161b22); color: var(--text, #e6edf3); }
+.agent-btn-copy { background: var(--surface, #161b22); color: var(--text-dim, #8b949e); }
+.agent-result-card { border-radius: 8px; padding: 12px; border: 1px solid var(--border, #30363d); }
+.agent-result-ok { border-left: 3px solid var(--ok, #3fb950); }
+.agent-result-fail { border-left: 3px solid var(--alert, #f85149); }
+.agent-result-summary { font-weight: 600; margin-bottom: 8px; }
+.agent-assurance { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.agent-assurance-level { font-family: var(--mono, monospace); font-weight: 700; }
+.agent-assurance-trust { font-size: 0.78rem; color: var(--ok, #3fb950); }
+.agent-dryrun, .agent-approval { background: var(--bg, #010409); border-radius: 6px; padding: 8px 10px; margin: 8px 0; font-size: 0.82rem; }
+.agent-dryrun-warn, .agent-approval-title { color: var(--warn, #d29922); font-weight: 600; }
+.agent-approval-hash { font-family: var(--mono, monospace); font-size: 0.74rem; color: var(--text-dim, #8b949e); word-break: break-all; }
+.agent-artifact { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 0.8rem; margin: 4px 0; }
+.agent-artifact-type { font-size: 0.66rem; text-transform: uppercase; color: var(--text-dim, #8b949e); border: 1px solid var(--border, #30363d); border-radius: 4px; padding: 1px 5px; }
+.agent-artifact-cmd, .agent-error-fix { font-family: var(--mono, monospace); font-size: 0.76rem; background: var(--bg, #010409); padding: 2px 6px; border-radius: 4px; word-break: break-all; }
+.agent-warning { color: var(--warn, #d29922); font-size: 0.8rem; margin: 4px 0; }
+.agent-error { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; margin: 6px 0; font-size: 0.82rem; }
+.agent-error-code { font-family: var(--mono, monospace); font-weight: 700; color: var(--alert, #f85149); }
+.agent-raw { margin-top: 10px; }
+.agent-raw-summary { cursor: pointer; font-size: 0.76rem; color: var(--text-dim, #8b949e); }
+.agent-raw-pre { font-family: var(--mono, monospace); font-size: 0.72rem; background: var(--bg, #010409); padding: 10px; border-radius: 6px; overflow: auto; max-height: 320px; }
+.agent-loading { color: var(--text-dim, #8b949e); font-size: 0.85rem; }
 </content>
