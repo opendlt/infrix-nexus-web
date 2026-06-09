@@ -17,6 +17,7 @@ import { tasksView } from '/views/tasks.js';
 import { autopilotView } from '/views/autopilot.js';
 import { workbenchView } from '/views/workbench.js';
 import { proofInboxView } from '/views/inbox_collab.js';
+import { identityView } from '/views/identity.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -162,6 +163,11 @@ const routes = {
   // and agents verify, comment on, approve, reject, and archive proof artifacts.
   // #/proof-inbox    — the review queue + item detail
   'proof-inbox': proofInboxView,
+
+  // nextux-08 — Wallet & Identity Control Center.
+  // #/identity       — wallet, Accumulate identity, signature queue, sessions,
+  //                    permissions, signing history, safety center
+  identity: identityView,
 
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
   // #/verifyBatch              — empty launcher

@@ -1,0 +1,105 @@
+{
+  "wallet": {
+    "provider": "metamask",
+    "connected": true,
+    "address": "0x27000f84214f79b0600aa86841958b13ac98242a",
+    "publicKeyRecovered": true,
+    "publicKeyCompressed": "02b4f3e1c9a7d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8",
+    "liveProvider": false,
+    "verifiedAt": "2026-06-09T00:00:00Z",
+    "challengeNonce": "0123456789abcdef0123456789abcdef"
+  },
+  "accumulate": {
+    "adi": "acc://alice.acme",
+    "keyPage": "acc://alice.acme/book/1",
+    "keyPageVersion": 1,
+    "ethAddress": "0x27000f84214f79b0600aa86841958b13ac98242a",
+    "l0Verified": false,
+    "bindingChecked": false,
+    "detail": "mapping shown without live L0 confirmation (l0Verified=false)"
+  },
+  "sessions": [
+    {
+      "id": "ses-local-1",
+      "createdAt": "2026-06-09T00:00:00Z",
+      "expiresAt": "2026-06-09T00:30:00Z",
+      "allowedActions": [
+        "proof.verify",
+        "inbox.list"
+      ],
+      "network": "local",
+      "profile": "local",
+      "approvalMode": "ask_before_write",
+      "allowSigning": false,
+      "writeBudget": -1,
+      "writesUsed": 0,
+      "expired": false
+    },
+    {
+      "id": "ses-signing-2",
+      "createdAt": "2026-06-09T00:00:00Z",
+      "expiresAt": "2026-06-09T00:30:00Z",
+      "allowedActions": [
+        "inbox.signDecision"
+      ],
+      "network": "kermit",
+      "profile": "kermit",
+      "approvalMode": "ask_before_write",
+      "allowSigning": true,
+      "writeBudget": -1,
+      "writesUsed": 0,
+      "expired": false
+    }
+  ],
+  "permissions": [
+    {
+      "kind": "session_capability",
+      "capability": "proof.verify, inbox.list",
+      "scope": "local",
+      "expiresAt": "2026-06-09T00:30:00Z",
+      "source": "ses-local-1",
+      "plain": "agent session ses-local-1 may run proof.verify, inbox.list on local"
+    },
+    {
+      "kind": "session_capability",
+      "capability": "inbox.signDecision",
+      "scope": "kermit",
+      "expiresAt": "2026-06-09T00:30:00Z",
+      "source": "ses-signing-2",
+      "plain": "agent session ses-signing-2 may run inbox.signDecision on kermit (and may sign)"
+    }
+  ],
+  "signatureQueue": [
+    {
+      "action": "Release 100 ACME from escrow to acc://bob.acme",
+      "goalType": "SEND_TOKENS",
+      "sourceAssets": [
+        {
+          "asset": "ACME",
+          "amount": 100
+        }
+      ],
+      "signer": "acc://alice.acme/book/1",
+      "signerVersion": 1,
+      "network": "Kermit",
+      "memo": "regulated escrow release",
+      "agentInitiated": true
+    }
+  ],
+  "history": [
+    {
+      "txHash": "a1b2c3",
+      "action": "Add credits",
+      "network": "Kermit",
+      "signer": "acc://alice.acme/book/1",
+      "ethAddress": "0x27000f84214f79b0600aa86841958b13ac98242a",
+      "agentInitiated": false,
+      "signedAt": "2026-06-08T12:00:00Z",
+      "proofReceiptRef": "receipt-001"
+    }
+  ],
+  "warnings": [
+    "session ses-signing-2 may sign on your behalf",
+    "the claimed Accumulate key-page binding has not been verified on L0"
+  ]
+}

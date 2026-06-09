@@ -8590,3 +8590,57 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 @media (max-width: 768px) {
   .inbox-collab-layout { grid-template-columns: 1fr; }
 }
+
+/* ── nextux-08 Wallet & Identity Control Center (#/identity) ────────────── */
+.identity-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.identity-wallet-card,
+.identity-accumulate-card,
+.identity-signature-queue,
+.identity-sessions,
+.identity-permissions,
+.identity-history,
+.identity-safety-center {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 14px 16px;
+  min-width: 0;
+}
+.identity-signature-queue,
+.identity-sessions,
+.identity-permissions,
+.identity-history,
+.identity-safety-center { margin-bottom: 16px; }
+.identity-subtitle { margin: 0 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); }
+.identity-wallet-status { margin: 0 0 8px; font-weight: 600; color: var(--text); overflow-wrap: anywhere; }
+.identity-wallet-card[data-connected="true"] .identity-wallet-status { color: var(--ok); }
+.identity-wallet-card[data-connected="false"] .identity-wallet-status { color: var(--text-secondary); }
+.identity-accumulate-line { margin: 0 0 8px; font-weight: 600; overflow-wrap: anywhere; }
+.identity-grid { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; }
+.identity-grid dt { color: var(--text-secondary); font-size: 0.8rem; }
+.identity-grid dd { margin: 0; font-size: 0.8rem; word-break: break-all; }
+.identity-hint { margin: 8px 0 0; font-size: 0.8rem; color: var(--text-dim); overflow-wrap: anywhere; }
+.identity-sig-request { border: 1px solid var(--border-bold); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+.identity-sig-title { margin: 0 0 6px; font-weight: 600; overflow-wrap: anywhere; }
+.identity-sig-headline { margin: 0 0 8px; color: var(--text); font-weight: 600; overflow-wrap: anywhere; }
+.identity-sig-error { margin: 0; color: var(--warn); overflow-wrap: anywhere; }
+.identity-warning { margin: 6px 0 0; color: var(--warn); font-size: 0.82rem; overflow-wrap: anywhere; }
+.identity-warning-list { margin: 0; padding-left: 18px; }
+.identity-warning-list .identity-warning { color: var(--warn); }
+.identity-safe { margin: 0; color: var(--ok); }
+.identity-session { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+.identity-session-id { font-size: 0.78rem; color: var(--text-secondary); }
+.identity-session-plain { font-size: 0.84rem; color: var(--text); overflow-wrap: anywhere; flex: 1 1 200px; }
+.identity-session-flag { font-size: 0.7rem; text-transform: uppercase; border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; padding: 1px 8px; }
+.identity-session-flag.identity-flag-danger { border-color: var(--red); color: var(--red); }
+.identity-perm-list, .identity-history-list { margin: 0; padding-left: 18px; }
+.identity-perm, .identity-history-item { font-size: 0.84rem; color: var(--text); overflow-wrap: anywhere; margin: 2px 0; }
+.identity-error { color: var(--red); }
+@media (max-width: 768px) {
+  .identity-grid-layout { grid-template-columns: 1fr; }
+}
