@@ -1,0 +1,448 @@
+{
+  "exports": {
+    "agent-plan": {
+      "format": "agent-plan",
+      "filename": "regulated-escrow.agentplan.json",
+      "artifact": "{\n  \"version\": 1,\n  \"title\": \"Regulated escrow\",\n  \"network\": \"local\",\n  \"nodeTrusted\": false,\n  \"mainnetAllowed\": false,\n  \"steps\": [\n    {\n      \"id\": \"run-escrow\",\n      \"action\": \"workflow.execute\",\n      \"label\": \"Run the governed escrow\",\n      \"input\": {\n        \"goal\": \"run a governed escrow and prove it\",\n        \"mode\": \"local\"\n      },\n      \"dryRunFirst\": true,\n      \"requiresApproval\": true\n    }\n  ],\n  \"note\": \"Draft plan. An agent can inspect and simulate it, but every step runs only through the normal dry-run + approval path. Nothing here bypasses the gated surfaces, and assurance comes from the verifier.\"\n}",
+      "validation": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      },
+      "safety": {
+        "mainnetDisabled": true,
+        "requiresDryRun": true,
+        "requiresApproval": true,
+        "nodeTrusted": false,
+        "proofLevelCap": "L3",
+        "governanceCap": "G2",
+        "notes": [
+          "The producing node is never trusted; proof is verified by re-checking the evidence bytes.",
+          "Mainnet is disabled; this flow targets local.",
+          "Proof caps at L3: L4 requires a live L0 verify step on Kermit."
+        ]
+      },
+      "verifierCommand": "infrix verify \u003cbundle.json\u003e",
+      "docsLinks": [
+        "docs/agent/examples.md",
+        "docs/studio.md",
+        "docs/agent/action-protocol.md"
+      ]
+    },
+    "markdown": {
+      "format": "markdown",
+      "filename": "regulated-escrow.md",
+      "artifact": "# Regulated escrow\n\nA buyer and seller transact through governed escrow; a regulator can view the invoice, two operators witness, and anyone can verify the release without trusting the node.\n\n- **Network:** local (never mainnet)\n- **Proof level cap:** L3 (G2)\n- **Node trusted:** no — independently verifiable\n- **Simulated:** this document describes the flow; it is not a live proof\n\n## Participants\n\n- **Buyer** — user\n- **Seller** — user\n- **Regulator** — disclosureAuthority\n- **Compliance agent** — agent\n\n## Steps\n\n1. **Buyer joins** — actor\n2. **Run the governed escrow** — workflow_action (`workflow.execute`)\n3. **Buyer approves the release** — approval\n4. **Regulator can view the invoice** — disclosure\n5. **Two operators witness** — witness\n6. **Export the proof receipt** — proof_export\n7. **Verify the proof without trusting the node** — proof_verify\n8. **Replay the run in Cinema** — cinema_replay\n9. **Compliance agent reviews the proof** — inbox_review\n\n## Required approvals\n\n- Buyer — approval (Buyer approves the release)\n- Compliance agent — review (Compliance agent reviews the proof)\n\n## Trust boundary\n\nIndependently verifiable — the producing node is never trusted. The proof is checked by re-verifying the evidence bytes, not by trusting a server. Local deterministic execution caps at L3: L4 is not reachable without a live L0 anchor.\n",
+      "validation": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      },
+      "safety": {
+        "mainnetDisabled": true,
+        "requiresDryRun": true,
+        "requiresApproval": true,
+        "nodeTrusted": false,
+        "proofLevelCap": "L3",
+        "governanceCap": "G2",
+        "notes": [
+          "The producing node is never trusted; proof is verified by re-checking the evidence bytes.",
+          "Mainnet is disabled; this flow targets local.",
+          "Proof caps at L3: L4 requires a live L0 verify step on Kermit."
+        ]
+      },
+      "verifierCommand": "infrix verify \u003cbundle.json\u003e",
+      "docsLinks": [
+        "docs/studio.md",
+        "docs/agent/action-protocol.md"
+      ]
+    },
+    "scenario": {
+      "format": "scenario",
+      "filename": "regulated-escrow.scenario.yaml",
+      "artifact": "version: 1\nid: regulated-escrow\ntitle: Regulated escrow\nnetwork: local\nactors:\n    buyer:\n        kind: user\n    complianceAgent:\n        kind: agent\n    regulator:\n        kind: disclosureAuthority\n    seller:\n        kind: user\npolicy:\n    releaseRequires:\n        - buyerApproval\n    disclosure:\n        encryptedAtRest: true\n        regulatorCanView:\n            - invoice\nsteps:\n    - id: run-escrow\n      action: workflow.execute\nproof:\n    requireReplay: true\n    requireWitnessThreshold: 2\n    minimumLevel: L3\nnarrative:\n    promise: A buyer and seller transact through governed escrow; a regulator can view the invoice, two operators witness, and anyone can verify the release without trusting the node.\n    description: Composed in the Visual Workflow Studio (nextux-12).\n    whyItMatters: Every step compiles to an existing verified primitive; nothing here bypasses the gated execution paths.\n    cinemaLabels:\n        run-escrow: Run the governed escrow\n",
+      "validation": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      },
+      "safety": {
+        "mainnetDisabled": true,
+        "requiresDryRun": true,
+        "requiresApproval": true,
+        "nodeTrusted": false,
+        "proofLevelCap": "L3",
+        "governanceCap": "G2",
+        "notes": [
+          "The producing node is never trusted; proof is verified by re-checking the evidence bytes.",
+          "Mainnet is disabled; this flow targets local.",
+          "Proof caps at L3: L4 requires a live L0 verify step on Kermit."
+        ]
+      },
+      "verifierCommand": "infrix scenario verify-story regulated-escrow-out/story.infrixstory.json",
+      "docsLinks": [
+        "docs/scenario-builder.md",
+        "docs/studio.md",
+        "docs/agent/action-protocol.md"
+      ]
+    },
+    "sdk-ts": {
+      "format": "sdk-ts",
+      "filename": "run-regulated-escrow.ts",
+      "artifact": "// Generated by the Infrix Visual Workflow Studio (nextux-12).\n// Flow: Regulated escrow  (network: local)\n//\n// SAFE BY CONSTRUCTION: every action is dry-run first, and every\n// state-mutating action is run only after an explicit, input-bound\n// approval. This code never skips a dry-run or an approval, and it\n// never targets mainnet.\nimport { agent } from '@infrix/client';\n\nexport async function runRegulatedEscrow(endpoint: string) {\n  const client = new agent.InfrixAgentClient({ endpoint });\n  const network = \"local\"; // never 'mainnet'\n\n  // Run the governed escrow\n  {\n    const action = \"workflow.execute\";\n    const input = {\"goal\":\"run a governed escrow and prove it\",\"mode\":\"local\"};\n    // 1) Always dry-run to preview exactly what would happen.\n    const preview = await client.dryRun(action, input);\n    if (!preview.ok) throw new Error('dry-run failed: ' + action);\n    // 2) If the action needs approval, obtain an input-bound approval\n    //    through the normal approval path BEFORE running it.\n    const needsApproval = !!preview.approvalRequest;\n    const approval = needsApproval\n      ? await client.approve(action, input) // human/operator confirms\n      : undefined;\n    // 3) Run only after the dry-run (and approval, when required).\n    const result = await client.run(action, input, { approval });\n    if (!result.ok) throw new Error('action failed: ' + action);\n  }\n\n  // Assurance comes from the verifier, never asserted by this code.\n  return { ok: true };\n}\n",
+      "validation": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      },
+      "safety": {
+        "mainnetDisabled": true,
+        "requiresDryRun": true,
+        "requiresApproval": true,
+        "nodeTrusted": false,
+        "proofLevelCap": "L3",
+        "governanceCap": "G2",
+        "notes": [
+          "The producing node is never trusted; proof is verified by re-checking the evidence bytes.",
+          "Mainnet is disabled; this flow targets local.",
+          "Proof caps at L3: L4 requires a live L0 verify step on Kermit."
+        ]
+      },
+      "verifierCommand": "infrix verify \u003cbundle.json\u003e",
+      "docsLinks": [
+        "docs/agent/examples.md",
+        "docs/studio.md",
+        "docs/agent/action-protocol.md"
+      ]
+    },
+    "task": {
+      "format": "task",
+      "filename": "regulated-escrow.infrixtask.json",
+      "artifact": "{\n  \"version\": 1,\n  \"id\": \"studio/regulated-escrow\",\n  \"title\": \"Regulated escrow\",\n  \"summary\": \"A buyer and seller transact through governed escrow; a regulator can view the invoice, two operators witness, and anyone can verify the release without trusting the node.\",\n  \"publisher\": \"studio\",\n  \"category\": \"studio\",\n  \"defaultNetwork\": \"local\",\n  \"supportedNetworks\": [\n    \"local\"\n  ],\n  \"actions\": [\n    {\n      \"id\": \"run-escrow\",\n      \"uses\": \"workflow.execute\",\n      \"with\": {\n        \"goal\": \"run a governed escrow and prove it\",\n        \"mode\": \"${network}\"\n      }\n    }\n  ],\n  \"outputs\": [\n    \"proofReceipt\",\n    \"cinemaReplay\",\n    \"verifierCommand\"\n  ],\n  \"safety\": {\n    \"requiresDryRun\": true,\n    \"requiresApprovalForWrites\": true,\n    \"mainnetDisabledByDefault\": true\n  }\n}",
+      "validation": {
+        "valid": true,
+        "errors": [],
+        "warnings": []
+      },
+      "safety": {
+        "mainnetDisabled": true,
+        "requiresDryRun": true,
+        "requiresApproval": true,
+        "nodeTrusted": false,
+        "proofLevelCap": "L3",
+        "governanceCap": "G2",
+        "notes": [
+          "The producing node is never trusted; proof is verified by re-checking the evidence bytes.",
+          "Mainnet is disabled; this flow targets local.",
+          "Proof caps at L3: L4 requires a live L0 verify step on Kermit."
+        ]
+      },
+      "verifierCommand": "infrix tasks verify regulated-escrow.infrixtask.json",
+      "docsLinks": [
+        "docs/task-marketplace.md",
+        "docs/studio.md",
+        "docs/agent/action-protocol.md"
+      ]
+    }
+  },
+  "flow": {
+    "version": 1,
+    "title": "Regulated escrow",
+    "description": "A buyer and seller transact through governed escrow; a regulator can view the invoice, two operators witness, and anyone can verify the release without trusting the node.",
+    "network": "local",
+    "actors": [
+      {
+        "id": "buyer",
+        "kind": "user",
+        "label": "Buyer"
+      },
+      {
+        "id": "seller",
+        "kind": "user",
+        "label": "Seller"
+      },
+      {
+        "id": "regulator",
+        "kind": "disclosureAuthority",
+        "label": "Regulator"
+      },
+      {
+        "id": "complianceAgent",
+        "kind": "agent",
+        "label": "Compliance agent"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "buyer-joins",
+        "kind": "actor",
+        "label": "Buyer joins",
+        "actor": "buyer"
+      },
+      {
+        "id": "run-escrow",
+        "kind": "workflow_action",
+        "label": "Run the governed escrow",
+        "action": "workflow.execute",
+        "config": {
+          "goal": "run a governed escrow and prove it"
+        }
+      },
+      {
+        "id": "buyer-approves",
+        "kind": "approval",
+        "label": "Buyer approves the release",
+        "actor": "buyer"
+      },
+      {
+        "id": "regulator-view",
+        "kind": "disclosure",
+        "label": "Regulator can view the invoice",
+        "actor": "regulator",
+        "config": {
+          "encryptedAtRest": true,
+          "regulatorCanView": [
+            "invoice"
+          ]
+        }
+      },
+      {
+        "id": "operators-witness",
+        "kind": "witness",
+        "label": "Two operators witness",
+        "config": {
+          "threshold": 2
+        }
+      },
+      {
+        "id": "export-proof",
+        "kind": "proof_export",
+        "label": "Export the proof receipt"
+      },
+      {
+        "id": "verify-proof",
+        "kind": "proof_verify",
+        "label": "Verify the proof without trusting the node"
+      },
+      {
+        "id": "replay-cinema",
+        "kind": "cinema_replay",
+        "label": "Replay the run in Cinema"
+      },
+      {
+        "id": "agent-reviews",
+        "kind": "inbox_review",
+        "label": "Compliance agent reviews the proof",
+        "actor": "complianceAgent"
+      }
+    ],
+    "edges": [
+      {
+        "from": "buyer-joins",
+        "to": "run-escrow"
+      },
+      {
+        "from": "run-escrow",
+        "to": "buyer-approves"
+      },
+      {
+        "from": "buyer-approves",
+        "to": "regulator-view"
+      },
+      {
+        "from": "regulator-view",
+        "to": "operators-witness"
+      },
+      {
+        "from": "operators-witness",
+        "to": "export-proof"
+      },
+      {
+        "from": "export-proof",
+        "to": "verify-proof"
+      },
+      {
+        "from": "verify-proof",
+        "to": "replay-cinema"
+      },
+      {
+        "from": "replay-cinema",
+        "to": "agent-reviews"
+      }
+    ],
+    "policies": {
+      "releaseRequires": [
+        "buyerApproval"
+      ],
+      "disclosure": {
+        "encryptedAtRest": true,
+        "regulatorCanView": [
+          "invoice"
+        ]
+      },
+      "witnessThreshold": 2
+    },
+    "expectedOutputs": [
+      "proofReceipt",
+      "cinemaReplay",
+      "verifierCommand"
+    ],
+    "safety": {
+      "requireDryRun": true,
+      "requireApprovalForWrites": true,
+      "mainnetDisabled": true,
+      "requireReplay": true
+    }
+  },
+  "palette": [
+    {
+      "group": "People and agents",
+      "items": [
+        {
+          "kind": "actor",
+          "defaultLabel": "Add a participant",
+          "expert": "actor id + role (user, agent, regulator, witness, operator)",
+          "needsActor": true,
+          "needsAction": false
+        }
+      ]
+    },
+    {
+      "group": "Actions",
+      "items": [
+        {
+          "kind": "workflow_action",
+          "defaultLabel": "Run a governed action",
+          "expert": "agent action id (e.g. workflow.execute), goal type, inputs",
+          "needsActor": false,
+          "needsAction": true
+        }
+      ]
+    },
+    {
+      "group": "Trust and proof",
+      "items": [
+        {
+          "kind": "disclosure",
+          "defaultLabel": "Regulator can view invoice",
+          "expert": "disclosure authority key page + disclosed fields",
+          "needsActor": true,
+          "needsAction": false
+        },
+        {
+          "kind": "witness",
+          "defaultLabel": "Two operators witness",
+          "expert": "witness threshold (M-of-N) + witness key pages",
+          "needsActor": false,
+          "needsAction": false
+        },
+        {
+          "kind": "proof_export",
+          "defaultLabel": "Export proof receipt",
+          "expert": "portable evidence package + receipt artifact",
+          "needsActor": false,
+          "needsAction": false
+        },
+        {
+          "kind": "proof_verify",
+          "defaultLabel": "Verify the proof",
+          "expert": "verifier command, live L0 confirmation (L4) vs local (L3)",
+          "needsActor": false,
+          "needsAction": false
+        },
+        {
+          "kind": "cinema_replay",
+          "defaultLabel": "Replay in Cinema",
+          "expert": "replay capsule reproduction",
+          "needsActor": false,
+          "needsAction": false
+        }
+      ]
+    },
+    {
+      "group": "Review",
+      "items": [
+        {
+          "kind": "approval",
+          "defaultLabel": "Buyer approves",
+          "expert": "approver key page + plan-hash-bound approval",
+          "needsActor": true,
+          "needsAction": false
+        },
+        {
+          "kind": "agent_approval",
+          "defaultLabel": "Agent approves under policy",
+          "expert": "agent session + input-bound approval token",
+          "needsActor": true,
+          "needsAction": false
+        },
+        {
+          "kind": "inbox_review",
+          "defaultLabel": "Reviewer checks the proof",
+          "expert": "proof-inbox decision, Ed25519-signed, artifact-bound",
+          "needsActor": true,
+          "needsAction": false
+        }
+      ]
+    },
+    {
+      "group": "Outputs",
+      "items": [
+        {
+          "kind": "proof_export",
+          "defaultLabel": "Export proof receipt",
+          "expert": "proof receipt + verifier command + docs links",
+          "needsActor": false,
+          "needsAction": false
+        }
+      ]
+    }
+  ],
+  "simulation": {
+    "flow": "Regulated escrow",
+    "network": "local",
+    "pathTaken": [
+      "buyer-joins",
+      "run-escrow",
+      "buyer-approves",
+      "regulator-view",
+      "operators-witness",
+      "export-proof",
+      "verify-proof",
+      "replay-cinema",
+      "agent-reviews"
+    ],
+    "requiredApprovals": [
+      "Buyer — approval (Buyer approves the release)",
+      "Compliance agent — review (Compliance agent reviews the proof)"
+    ],
+    "possibleFailures": [
+      "fewer than the required witnesses attest: Two operators witness",
+      "the action does not complete or its policy denies it: workflow.execute",
+      "the approver declines or never signs: Buyer approves the release",
+      "the proof does not verify (tampered or incomplete evidence): Verify the proof without trusting the node",
+      "the replay is not independently reproducible: Replay the run in Cinema",
+      "the reviewer rejects or requests changes: Compliance agent reviews the proof"
+    ],
+    "expectedArtifacts": [
+      "Cinema replay capsule",
+      "portable evidence package",
+      "proof receipt",
+      "selective-disclosure grant",
+      "verifier transcript"
+    ],
+    "proofLevelCap": "L3",
+    "governanceCap": "G2",
+    "trustBoundary": "Independently verifiable — the producing node is never trusted. The proof is checked by re-verifying the evidence bytes, not by trusting a server. Local deterministic execution caps at L3: L4 is not reachable without a live L0 anchor.",
+    "missingInputs": [],
+    "nodeTrusted": false,
+    "simulated": true,
+    "note": "This is a simulation, not a live proof. Run the exported scenario or task through the gated surfaces to produce real, verifiable proof."
+  },
+  "validation": {
+    "valid": true,
+    "errors": [],
+    "warnings": []
+  },
+  "version": 1
+}

@@ -20,6 +20,7 @@ import { proofInboxView } from '/views/inbox_collab.js';
 import { identityView } from '/views/identity.js';
 import { companionView } from '/views/companion.js';
 import { questsView } from '/views/quests.js';
+import { studioView } from '/views/studio.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -178,6 +179,10 @@ const routes = {
   // nextux-11 — Proof Quest Mode.
   // #/quests         — learning trail: missions, progress, proof receipt, Cinema, next step
   quests: questsView,
+
+  // nextux-12 — Visual Workflow Studio.
+  // #/studio         — compose a flow, simulate it, preview assurance, export to a verified primitive
+  studio: studioView,
 
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
   // #/verifyBatch              — empty launcher
