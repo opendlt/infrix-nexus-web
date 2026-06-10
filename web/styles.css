@@ -8907,3 +8907,50 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 @media (max-width: 980px) {
   .room-grid-layout { grid-template-columns: 1fr; }
 }
+
+/* nextux-15 — Migration & Comparison Lab (#/compare) */
+.compare-banner { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--surface); padding: 10px 14px; margin-bottom: 14px; min-width: 0; }
+.compare-banner-tag { color: var(--accent); }
+.compare-banner-text { color: var(--text-secondary); font-size: 0.88rem; }
+.compare-source { margin: 6px 0 0; font-size: 0.78rem; color: var(--text-dim); }
+.compare-report-header { margin-bottom: 12px; }
+.compare-report-title { margin: 0 0 4px; font-size: 1.1rem; }
+.compare-report-impl { margin: 0; font-size: 0.86rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.compare-grid-layout { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.compare-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.compare-subtitle { margin: 0 0 8px; font-size: 0.95rem; }
+.compare-picker, .compare-trust, .compare-ux, .compare-proof, .compare-cost, .compare-migration, .compare-claims { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 12px 14px; min-width: 0; }
+.compare-pattern-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.compare-pattern { font-size: 0.8rem; border: 1px solid var(--border-bold); border-radius: 8px; padding: 6px 8px; overflow-wrap: anywhere; }
+.compare-pattern-id { font-weight: 600; }
+.compare-pattern-arrow { color: var(--text-dim); }
+.compare-pattern-equiv { color: var(--accent); }
+.compare-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.compare-table th, .compare-table td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; overflow-wrap: anywhere; }
+.compare-table th { color: var(--text-dim); font-weight: 600; }
+.compare-aspect { font-weight: 600; color: var(--text); width: 22%; }
+.compare-inf { color: var(--text); }
+.compare-cost-card { border: 1px solid var(--border-bold); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; }
+.compare-cost-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
+.compare-cost-label { font-weight: 600; font-size: 0.84rem; }
+.compare-cost-basis { font-size: 0.72rem; border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; color: var(--text-dim); }
+.compare-cost-basis[data-basis="measured"], .compare-cost-basis[data-basis="published"] { border-color: var(--ok); color: var(--ok); }
+.compare-cost-line { margin: 4px 0 0; font-size: 0.8rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.compare-cost-disclaimer { margin: 4px 0 0; font-size: 0.74rem; color: var(--text-dim); overflow-wrap: anywhere; }
+.compare-migration-list { margin: 0; padding-left: 18px; font-size: 0.82rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px; }
+.compare-migration-title { font-weight: 600; color: var(--text); }
+.compare-migration-action { margin-left: 6px; font-size: 0.72rem; border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; color: var(--accent); }
+.compare-claim-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.compare-claim { font-size: 0.82rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.compare-claim-tag { font-size: 0.72rem; border: 1px solid var(--border-bold); border-radius: 6px; padding: 1px 6px; color: var(--text-dim); }
+.compare-claim[data-external="false"] .compare-claim-tag { border-color: var(--ok); color: var(--ok); }
+.compare-why, .compare-expert { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 10px 16px; margin-top: 12px; }
+.compare-why-summary, .compare-expert-summary { cursor: pointer; font-weight: 600; font-size: 0.86rem; }
+.compare-why-body { margin: 8px 0 0; font-size: 0.86rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.compare-expert-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 10px 0; font-size: 0.82rem; }
+.compare-expert-grid dt { color: var(--text-dim); }
+.compare-trust-model { margin: 6px 0 0; padding-left: 18px; font-size: 0.82rem; color: var(--text-secondary); }
+.compare-error { color: var(--red); }
+@media (max-width: 980px) {
+  .compare-grid-layout { grid-template-columns: 1fr; }
+}

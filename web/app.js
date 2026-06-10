@@ -23,6 +23,7 @@ import { questsView } from '/views/quests.js';
 import { studioView } from '/views/studio.js';
 import { tutorView } from '/views/tutor.js';
 import { roomsView } from '/views/room.js';
+import { compareView } from '/views/compare.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -194,6 +195,10 @@ const routes = {
   // #/rooms                — launcher / list of rooms
   // #/rooms/<room-id>      — a room: participants, approvals, roles, replay, proof, chat
   rooms: roomsView,
+
+  // nextux-15 — Migration & Comparison Lab.
+  // #/compare              — pattern catalog + honest sourced comparison report
+  compare: compareView,
 
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
   // #/verifyBatch              — empty launcher

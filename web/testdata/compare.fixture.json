@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "patterns": [
+    {
+      "id": "audit-log",
+      "title": "Tamper-evident audit log",
+      "sourceEcosystem": "ethereum",
+      "infrixEquivalent": "witness-quorum"
+    },
+    {
+      "id": "cross-chain-bridge",
+      "title": "Cross-chain bridge transfer",
+      "sourceEcosystem": "cosmos",
+      "infrixEquivalent": "bridge-handoff"
+    },
+    {
+      "id": "dao-approval",
+      "title": "DAO governance approval",
+      "sourceEcosystem": "ethereum",
+      "infrixEquivalent": "ai-agent-approved-workflow"
+    },
+    {
+      "id": "ethereum-multisig",
+      "title": "Ethereum multisig wallet",
+      "sourceEcosystem": "ethereum",
+      "infrixEquivalent": "regulated-escrow"
+    },
+    {
+      "id": "private-disclosure",
+      "title": "Private selective disclosure",
+      "sourceEcosystem": "ethereum",
+      "infrixEquivalent": "selective-disclosure"
+    },
+    {
+      "id": "release-attestation",
+      "title": "Software release attestation",
+      "sourceEcosystem": "ethereum",
+      "infrixEquivalent": "release-evidence"
+    },
+    {
+      "id": "token-escrow",
+      "title": "Token escrow contract",
+      "sourceEcosystem": "ethereum",
+      "infrixEquivalent": "regulated-escrow"
+    },
+    {
+      "id": "web2-approval-workflow",
+      "title": "Web2 approval workflow",
+      "sourceEcosystem": "web2",
+      "infrixEquivalent": "ai-agent-approved-workflow"
+    }
+  ],
+  "report": {
+    "pattern": "ethereum-multisig",
+    "title": "Ethereum multisig wallet",
+    "source": "ethereum",
+    "infrixEquivalent": "regulated-escrow",
+    "commonImplementation": "An N-of-M multisig smart contract (e.g. a Safe) where owners submit and confirm transactions on-chain.",
+    "trustComparison": [
+      {
+        "aspect": "Who you trust",
+        "source": "the contract bytecode and an RPC node to report state",
+        "infrix": "no node — the proof is re-checked from its own bytes"
+      },
+      {
+        "aspect": "Authority model",
+        "source": "N-of-M owner keys on a single contract",
+        "infrix": "governed key pages with policy-gated approval and signed decisions"
+      }
+    ],
+    "uxComparison": [
+      {
+        "aspect": "Setup",
+        "source": "deploy and fund a contract",
+        "infrix": "run a scenario; local runs need no deploy and no funds"
+      },
+      {
+        "aspect": "Approval",
+        "source": "each owner sends an on-chain confirmation tx",
+        "infrix": "each approver records a signed, artifact-bound decision"
+      }
+    ],
+    "proofComparison": [
+      {
+        "aspect": "What you can verify",
+        "source": "the transaction's on-chain receipt (you trust the chain/RPC)",
+        "infrix": "A portable proof story re-verified from its own bytes — the node is never trusted."
+      },
+      {
+        "aspect": "Independent re-verification",
+        "source": "requires trusting an RPC/explorer or re-deriving from chain state",
+        "infrix": "anyone can run `infrix verify` offline and reproduce the verdict"
+      },
+      {
+        "aspect": "Assurance ceiling",
+        "source": "depends on the chain's finality",
+        "infrix": "L3 locally; L4 with a live Accumulate L0 anchor confirmation (never claimed without it)"
+      }
+    ],
+    "costComparison": [
+      {
+        "label": "Cost \u0026 latency",
+        "source": "per-operation execution cost on the source chain (varies with network conditions)",
+        "infrix": "metered in internal units (IU) derived from the governed verdict; local runs need no network",
+        "basis": "assumption",
+        "sourceRef": {
+          "type": "assumption",
+          "citation": "Qualitative only; no measured numbers. Supply your own benchmark to quantify.",
+          "assumption": true
+        },
+        "disclaimer": "Qualitative only — no measured numbers are asserted; supply a benchmark to quantify either side."
+      }
+    ],
+    "migrationPlan": [
+      {
+        "order": 1,
+        "title": "Map owners to key pages",
+        "detail": "Each multisig owner becomes a governed identity / key page.",
+        "infrixAction": "identity connect"
+      },
+      {
+        "order": 2,
+        "title": "Express the N-of-M rule as policy",
+        "detail": "The release policy requires the approvals (e.g. buyer + seller).",
+        "infrixAction": "scenario run"
+      },
+      {
+        "order": 3,
+        "title": "Run and prove",
+        "detail": "Run the governed escrow; collect signed approvals; export a portable proof.",
+        "infrixAction": "room export-proof"
+      }
+    ],
+    "claims": [
+      {
+        "text": "An Infrix proof can be re-verified offline from its own bytes, without trusting the producing node.",
+        "backedBy": "verifykit",
+        "about": "infrix"
+      },
+      {
+        "text": "A governed run produces a portable proof story; locally it reaches L3, and a live Accumulate L0 anchor on Kermit raises it to L4.",
+        "backedBy": "anchor",
+        "about": "infrix"
+      },
+      {
+        "text": "Approvals are recorded as signed decisions bound to the exact artifact hash.",
+        "backedBy": "inbox",
+        "about": "infrix"
+      },
+      {
+        "text": "A Safe-style multisig confirms a transaction once N of M owners submit on-chain confirmations.",
+        "about": "ethereum",
+        "source": {
+          "type": "published_docs",
+          "date": "2026-06-01",
+          "citation": "Ethereum smart-contract multisig pattern (e.g. Gnosis Safe) — public contract docs",
+          "url": "https://docs.safe.global/",
+          "assumption": false
+        }
+      }
+    ],
+    "proofOutput": "A portable proof story showing the approvals and release happened under policy, re-verifiable offline.",
+    "whatRemainsHard": [
+      "key custody is still the user's responsibility",
+      "the people behind the approving identities must be trustworthy"
+    ],
+    "infrixTrustModel": [
+      "The producing node is never trusted: a proof is re-verified from its own bytes.",
+      "Authority is governed key pages with policy-gated, signed approvals.",
+      "A live Accumulate L0 anchor confirmation raises a local L3 proof to L4 (never claimed without it).",
+      "Selective disclosure reveals only the fields a policy authorizes; the rest stays encrypted.",
+      "Independent witnesses can attest an outcome, so no single node is an authority on it."
+    ],
+    "competitorClaimsDisabled": false,
+    "sources": {
+      "Ethereum smart-contract multisig pattern (e.g. Gnosis Safe) — public contract docs": {
+        "type": "published_docs",
+        "date": "2026-06-01",
+        "citation": "Ethereum smart-contract multisig pattern (e.g. Gnosis Safe) — public contract docs",
+        "url": "https://docs.safe.global/",
+        "assumption": false
+      }
+    }
+  },
+  "capabilities": [
+    "agentapi",
+    "anchor",
+    "economics",
+    "governance",
+    "identityux",
+    "inbox",
+    "proofreceipt",
+    "scenario",
+    "selective_disclosure",
+    "tasks",
+    "verifykit",
+    "witness"
+  ]
+}
