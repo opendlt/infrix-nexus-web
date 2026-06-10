@@ -21,6 +21,7 @@ import { identityView } from '/views/identity.js';
 import { companionView } from '/views/companion.js';
 import { questsView } from '/views/quests.js';
 import { studioView } from '/views/studio.js';
+import { tutorView } from '/views/tutor.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -183,6 +184,10 @@ const routes = {
   // nextux-12 — Visual Workflow Studio.
   // #/studio         — compose a flow, simulate it, preview assurance, export to a verified primitive
   studio: studioView,
+
+  // nextux-13 — Conversational Proof Tutor.
+  // #/tutor          — explain a parsed artifact (can/cannot claim), audiences, lessons, quiz
+  tutor: tutorView,
 
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
   // #/verifyBatch              — empty launcher

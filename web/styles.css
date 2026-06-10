@@ -8805,3 +8805,48 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 @media (max-width: 980px) {
   .studio-grid-layout { grid-template-columns: 1fr; }
 }
+
+/* nextux-13 — Conversational Proof Tutor (#/tutor) */
+.tutor-banner { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--surface); padding: 10px 14px; margin-bottom: 14px; min-width: 0; }
+.tutor-banner-tag { color: var(--accent); }
+.tutor-banner-text { color: var(--text-secondary); font-size: 0.88rem; }
+.tutor-source { margin: 6px 0 0; font-size: 0.78rem; color: var(--text-dim); }
+.tutor-grid-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.tutor-subtitle { margin: 0 0 10px; font-size: 0.95rem; }
+.tutor-explanation, .tutor-lessons { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 12px 14px; min-width: 0; }
+.tutor-audience-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.tutor-audience-chip { font: inherit; font-size: 0.78rem; cursor: pointer; border: 1px solid var(--border-bold); background: var(--bg-alt); color: var(--text); border-radius: 999px; padding: 4px 12px; }
+.tutor-audience-chip[aria-selected="true"] { border-color: var(--accent); background: var(--accent); color: var(--bg); }
+.tutor-summary { font-size: 0.92rem; color: var(--text); margin: 0 0 10px; overflow-wrap: anywhere; }
+.tutor-status-badge { display: inline-block; border-radius: 999px; padding: 3px 12px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border-bold); background: var(--bg-alt); color: var(--text); margin-bottom: 10px; }
+.tutor-status-badge[data-tone="positive"] { border-color: var(--ok); }
+.tutor-status-badge[data-tone="caution"] { border-color: var(--warn); }
+.tutor-status-badge[data-tone="negative"] { border-color: var(--red); color: var(--red); }
+.tutor-claim-title { margin: 12px 0 4px; font-size: 0.82rem; }
+.tutor-claim-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.tutor-claim { display: flex; gap: 8px; font-size: 0.84rem; color: var(--text-secondary); }
+.tutor-claim-mark { color: var(--text-dim); }
+.tutor-can .tutor-claim-mark { color: var(--ok); }
+.tutor-cannot .tutor-claim-mark { color: var(--warn); }
+.tutor-claim-text { overflow-wrap: anywhere; }
+.tutor-lesson { border: 1px solid var(--border-bold); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; min-width: 0; }
+.tutor-lesson-title { margin: 0 0 6px; font-size: 0.88rem; }
+.tutor-lesson-body { margin: 0 0 6px; font-size: 0.82rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.tutor-lesson-example { margin: 0 0 6px; font-size: 0.78rem; color: var(--text-dim); overflow-wrap: anywhere; }
+.tutor-lesson-tryit { margin: 0 0 6px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 0.74rem; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.tutor-quiz-summary { cursor: pointer; font-size: 0.8rem; color: var(--text-secondary); }
+.tutor-quiz-choices { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.tutor-quiz-choice { list-style: decimal; }
+.tutor-quiz-btn { font: inherit; font-size: 0.8rem; cursor: pointer; border: 1px solid var(--border-bold); background: var(--bg-alt); color: var(--text); border-radius: 8px; padding: 4px 10px; text-align: left; }
+.tutor-quiz-feedback { margin: 8px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
+.tutor-quiz-feedback[data-correct="true"] { color: var(--ok); }
+.tutor-quiz-feedback[data-correct="false"] { color: var(--warn); }
+.tutor-why, .tutor-expert { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 10px 16px; margin-top: 12px; }
+.tutor-why-summary, .tutor-expert-summary { cursor: pointer; font-weight: 600; font-size: 0.86rem; }
+.tutor-why-body { margin: 8px 0 0; font-size: 0.86rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.tutor-expert-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 10px 0; font-size: 0.82rem; }
+.tutor-expert-grid dt { color: var(--text-dim); }
+.tutor-error { color: var(--red); }
+@media (max-width: 980px) {
+  .tutor-grid-layout { grid-template-columns: 1fr; }
+}

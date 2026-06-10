@@ -1,0 +1,262 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "proof-receipt",
+      "topic": "proof-receipt",
+      "title": "What is a proof receipt?",
+      "explanation": "A proof receipt is a small, fail-closed summary of a verification verdict. It records exactly what was checked (internal consistency, replay, live L0, witness quorum) and never asserts more than those checks support. If a receipt says \"verified\" it had to pass at least one concrete check; if it claims L4 it must carry a live L0 confirmation, or it is rejected.",
+      "example": "A receipt with status=partial, proofLevel=L3, l0Verified=false means: checked locally, the node was not trusted, but live Accumulate L0 was not confirmed — so it is not L4.",
+      "tryIt": "infrix tutor explain testdata/offline-proof.infrix.json",
+      "quiz": {
+        "topic": "proof-receipt",
+        "question": "A proof receipt says status=verified, proofLevel=L3, l0Verified=false. What can you safely claim?",
+        "choices": [
+          "It was verified locally; live Accumulate L0 was not confirmed.",
+          "It is an L4 proof anchored live on Accumulate.",
+          "The Infrix node vouches for it, so it must be true."
+        ],
+        "answer": 0,
+        "explain": "L3 with l0Verified=false is a local verification only. L4 requires a live L0 confirmation, and the node is never trusted as a source of truth."
+      },
+      "related": [
+        "node-not-trusted",
+        "L3-vs-L4"
+      ],
+      "aliases": [
+        "receipt",
+        "what-is-a-proof-receipt"
+      ],
+      "glossaryRef": "proof receipt"
+    },
+    {
+      "id": "node-not-trusted",
+      "topic": "node-not-trusted",
+      "title": "What does \"node not trusted\" mean?",
+      "explanation": "It means the verification did not take the Infrix node's word for anything. Instead of trusting a server's \"yes, it's valid\" response, the verifier re-checks the evidence bytes itself: the bindings, the hashes, and (when available) the live anchor. A trustless verdict is the default — the node producing a proof is never an authority on whether that proof is real.",
+      "example": "Two people can hand the same bundle to `infrix verify` on different machines with no shared server and get the same verdict. That only works because neither trusts a node.",
+      "tryIt": "infrix verify \u003cbundle\u003e   # re-checks the bytes; trustsInfrixNode is always false",
+      "quiz": {
+        "topic": "node-not-trusted",
+        "question": "Why does \"the node is not trusted\" make a proof stronger, not weaker?",
+        "choices": [
+          "Because anyone can independently re-check the evidence without relying on the producer.",
+          "Because the node encrypts the proof so no one can read it.",
+          "Because the node is faster when it is not trusted."
+        ],
+        "answer": 0,
+        "explain": "A trustless verdict can be reproduced by anyone from the evidence itself, so it does not depend on the honesty or uptime of the producing node."
+      },
+      "related": [
+        "proof-receipt",
+        "accumulate-l0"
+      ],
+      "aliases": [
+        "node-trust",
+        "trustless",
+        "trusts-infrix-node"
+      ]
+    },
+    {
+      "id": "L3-vs-L4",
+      "topic": "L3-vs-L4",
+      "title": "What is L3 vs L4?",
+      "explanation": "The assurance ladder describes how strongly a result is backed. L3 means the bundle is internally consistent and (typically) replay-checked, verified locally without trusting the node — but the live Accumulate L0 anchor was not confirmed. L4 is L3 PLUS a confirmed live L0 anchor: the outcome is provably recorded on Accumulate's root chain. The tutor never reports L4 unless the verifier actually confirmed L0.",
+      "example": "Local run: caps at L3 (no live network). Same run on Kermit with `--l0`: the verifier confirms the anchor and the proof reaches L4.",
+      "tryIt": "infrix verify \u003cbundle\u003e --l0 --network kermit   # adds the live L0 confirmation that L4 requires",
+      "quiz": {
+        "topic": "L3-vs-L4",
+        "question": "What does L4 add over L3?",
+        "choices": [
+          "A confirmed live Accumulate L0 anchor.",
+          "Trusting the Infrix node instead of verifying.",
+          "A faster but unverified result."
+        ],
+        "answer": 0,
+        "explain": "L4 = L3 plus a live L0 confirmation. Without the confirmed anchor, the honest level is at most L3."
+      },
+      "related": [
+        "accumulate-l0",
+        "proof-receipt",
+        "witness-quorum"
+      ],
+      "aliases": [
+        "L4",
+        "L3",
+        "l4",
+        "l3",
+        "assurance-ladder",
+        "levels"
+      ],
+      "glossaryRef": "assurance level"
+    },
+    {
+      "id": "accumulate-l0",
+      "topic": "accumulate-l0",
+      "title": "What is Accumulate L0 doing?",
+      "explanation": "Accumulate L0 is the root anchoring layer. Infrix writes a compact commitment (an anchor) of an outcome to Accumulate so that the result is recorded on an independent, append-only chain. Confirming that anchor live — that the entry exists, matches the bundle, and landed in a block — is what turns a local proof into an L4 proof. L0 is the external root of trust; Infrix nodes are not.",
+      "example": "An L4 receipt carries verification.network and verification.command — the where and how of the live L0 check. Without them, L0 was not confirmed.",
+      "tryIt": "infrix tutor teach L3-vs-L4   # how the L0 anchor lifts a proof to L4",
+      "quiz": {
+        "topic": "accumulate-l0",
+        "question": "What role does Accumulate L0 play in an Infrix proof?",
+        "choices": [
+          "It is the independent root chain where the outcome's anchor is recorded and can be confirmed.",
+          "It is the Infrix node's internal database.",
+          "It is a marketing label with no verification meaning."
+        ],
+        "answer": 0,
+        "explain": "L0 is the external anchoring layer; confirming the anchor live on L0 is exactly what an L4 proof requires."
+      },
+      "related": [
+        "L3-vs-L4",
+        "anchor",
+        "node-not-trusted"
+      ],
+      "aliases": [
+        "l0",
+        "accumulate",
+        "anchoring",
+        "anchor"
+      ],
+      "glossaryRef": "Accumulate L0"
+    },
+    {
+      "id": "replay",
+      "topic": "replay",
+      "title": "Why does replay matter?",
+      "explanation": "Replay re-executes the recorded inputs of a run and checks that they reproduce the exact same outcome. It proves the result was not fabricated or hand-edited: given the same inputs, the same deterministic outcome appears. A proof with replay verified is far stronger than one that merely looks internally consistent, because consistency alone can be forged while a matching deterministic re-execution cannot.",
+      "example": "A replay capsule bundles the inputs needed to re-run. `infrix verify` re-executes them; replayVerified=true means the outcome matched byte-for-byte.",
+      "tryIt": "infrix verify \u003cbundle\u003e   # reports replayVerified when a replay capsule is present and matches",
+      "quiz": {
+        "topic": "replay",
+        "question": "What does a verified replay demonstrate?",
+        "choices": [
+          "Re-running the recorded inputs reproduces the same outcome, so it was not fabricated.",
+          "The proof is encrypted.",
+          "The Infrix node approved the result."
+        ],
+        "answer": 0,
+        "explain": "Replay re-executes the inputs deterministically; a matching outcome shows the result is genuine rather than hand-edited."
+      },
+      "related": [
+        "proof-receipt",
+        "L3-vs-L4"
+      ],
+      "aliases": [
+        "replay-capsule",
+        "re-execution",
+        "deterministic"
+      ],
+      "glossaryRef": "replay capsule"
+    },
+    {
+      "id": "witness-quorum",
+      "topic": "witness-quorum",
+      "title": "What is a witness quorum?",
+      "explanation": "A witness quorum is a set of independent witnesses who each re-verify a result and sign an attestation. Reaching the quorum threshold means enough distinct, independent parties — not the producer — agree the outcome is valid. It sits above a live L0 confirmation on the ladder: it adds independent corroboration on top of the anchored proof. It can never be claimed without the L0 confirmation beneath it.",
+      "example": "A receipt with witnessQuorumVerified=true and l0Verified=true had independent witnesses corroborate an already-anchored result.",
+      "tryIt": "infrix tutor teach accumulate-l0   # the L0 confirmation a witness quorum sits on top of",
+      "quiz": {
+        "topic": "witness-quorum",
+        "question": "What must already be true before a witness quorum can be claimed?",
+        "choices": [
+          "The live Accumulate L0 anchor must be confirmed.",
+          "Nothing — a quorum stands on its own.",
+          "The Infrix node must vouch for the witnesses."
+        ],
+        "answer": 0,
+        "explain": "A witness quorum sits above L0 on the ladder; it corroborates an already-anchored result and cannot be claimed without the L0 confirmation."
+      },
+      "related": [
+        "accumulate-l0",
+        "L3-vs-L4"
+      ],
+      "aliases": [
+        "witness",
+        "quorum",
+        "witnesses"
+      ],
+      "glossaryRef": "witness quorum"
+    },
+    {
+      "id": "metamask-signing",
+      "topic": "metamask-signing",
+      "title": "What am I signing with MetaMask?",
+      "explanation": "With MetaMask you sign a typed (EIP-712) intent: a structured statement of what you authorize — the action, the identity (key page) you sign as, the network, and any funds or irreversible effects. Signing authorizes an action; it is not the same as proving one. The proof only appears after the signed intent runs and the verifier accepts it. Always confirm the identity and network in the explanation match what you intend.",
+      "example": "`infrix tutor explain signature-request.json` lists the identity you would sign as, the key page, the network, and any irreversible effects — before you sign.",
+      "tryIt": "infrix tutor explain testdata/signature-request.json --audience operator",
+      "quiz": {
+        "topic": "metamask-signing",
+        "question": "Does signing an intent with MetaMask prove the action happened?",
+        "choices": [
+          "No — signing authorizes the action; the proof comes only after it runs and verifies.",
+          "Yes — a signature is the same as a verified proof.",
+          "Yes — MetaMask verifies the result for you."
+        ],
+        "answer": 0,
+        "explain": "A signature authorizes; it does not verify. The proof is produced when the signed intent executes and the verifier accepts the result."
+      },
+      "related": [
+        "node-not-trusted",
+        "proof-receipt"
+      ],
+      "aliases": [
+        "metamask",
+        "signing",
+        "signature",
+        "eip712",
+        "wallet"
+      ],
+      "glossaryRef": "key page"
+    }
+  ],
+  "audiences": [
+    "builder",
+    "operator",
+    "auditor",
+    "business",
+    "agent",
+    "expert"
+  ],
+  "sample": {
+    "kind": "proof_receipt",
+    "audience": "auditor",
+    "summary": "For the record: This proof was verified locally (L3) and does not trust the Infrix node. Live Accumulate L0 was not checked.",
+    "status": "partial",
+    "canClaim": [
+      "The bundle is internally consistent and its bindings check out.",
+      "Replay matched: re-executing the recorded inputs reproduced the same outcome.",
+      "The producing Infrix node was not trusted; the proof was checked from the evidence itself."
+    ],
+    "cannotClaim": [
+      "Live Accumulate L0 verification was not performed.",
+      "This is not an L4 proof.",
+      "No independent witness quorum was confirmed."
+    ],
+    "nextActions": [
+      "To raise this to L4, request a live-L0 verification on Kermit and re-run `infrix verify --l0`.",
+      "Independently re-run `infrix verify` against the bundle; do not trust this summary alone."
+    ],
+    "technicalDetails": [
+      "subject: intent intent-demo-escrow",
+      "proofLevel=L3 governanceLevel=G2",
+      "status=partial nodeTrusted=false",
+      "l0Verified=false replayVerified=true witnessQuorumVerified=false",
+      "verify: infrix verify proof.json"
+    ],
+    "grounded": true,
+    "modelImproved": false
+  },
+  "sampleQuiz": {
+    "topic": "L3-vs-L4",
+    "question": "What does L4 add over L3?",
+    "choices": [
+      "A confirmed live Accumulate L0 anchor.",
+      "Trusting the Infrix node instead of verifying.",
+      "A faster but unverified result."
+    ],
+    "answer": 0,
+    "explain": "L4 = L3 plus a live L0 confirmation. Without the confirmed anchor, the honest level is at most L3."
+  }
+}
