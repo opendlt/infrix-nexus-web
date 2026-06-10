@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "rooms": [
+    {
+      "roomId": "regulated-escrow-demo01",
+      "scenarioId": "regulated-escrow",
+      "title": "Regulated escrow with selective disclosure",
+      "mode": "local",
+      "network": "local",
+      "state": "proven",
+      "stateLabel": "Waiting for Buyer approval"
+    }
+  ],
+  "room": {
+    "roomId": "regulated-escrow-demo01",
+    "scenarioId": "regulated-escrow",
+    "title": "Regulated escrow with selective disclosure",
+    "promise": "A regulated party released funds correctly, and a regulator can verify it without seeing the buyer's private payload.",
+    "mode": "local",
+    "network": "local",
+    "state": "proven",
+    "stateLabel": "Waiting for Buyer approval",
+    "privateScopes": ["invoice"],
+    "participants": [
+      { "id": "p1", "name": "Bea", "role": "buyer", "roleLabel": "Buyer", "isAgent": false, "delegated": false, "canApprove": true },
+      { "id": "p2", "name": "Sam", "role": "seller", "roleLabel": "Seller", "isAgent": false, "delegated": false, "canApprove": true },
+      { "id": "p3", "name": "Rita", "role": "regulator", "roleLabel": "Regulator", "isAgent": false, "delegated": false, "canApprove": true },
+      { "id": "p4", "name": "Wendy", "role": "witness", "roleLabel": "Witness", "isAgent": false, "delegated": false, "canApprove": false },
+      { "id": "p5", "name": "Otto", "role": "auditor", "roleLabel": "Auditor", "isAgent": false, "delegated": false, "canApprove": false },
+      { "id": "p6", "name": "Aria", "role": "ai_assistant", "roleLabel": "AI assistant", "isAgent": true, "delegated": false, "canApprove": false },
+      { "id": "p7", "name": "Val", "role": "viewer", "roleLabel": "Viewer", "isAgent": false, "delegated": false, "canApprove": false }
+    ],
+    "requiredApprovals": [
+      { "role": "buyer", "roleLabel": "Buyer", "subject": "buyerApproval", "label": "Buyer — approval", "satisfied": false },
+      { "role": "seller", "roleLabel": "Seller", "subject": "sellerDelivery", "label": "Seller — delivery", "satisfied": false }
+    ],
+    "pendingApprovals": ["Buyer", "Seller"],
+    "eventCount": 11,
+    "commentCount": 1,
+    "approvalCount": 0,
+    "proof": {
+      "storyRef": "run/story.infrixstory.json",
+      "storyId": "story-regulated-escrow-demo01",
+      "artifactHash": "sha256:9b1c0e7a4f2d8c6b5a3e1f0d9c8b7a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a",
+      "cinemaBinding": "sha256:c1nemab1nd1ng0000111122223333444455556666777788889999aaaabbbbcc",
+      "assurance": {
+        "proofLevel": "L3",
+        "governanceLevel": "G2",
+        "trustsInfrixNode": false,
+        "l0Verified": false,
+        "replayVerified": true,
+        "verified": true
+      }
+    }
+  },
+  "roles": [
+    { "role": "buyer", "label": "Buyer", "allowedActions": ["room.comment", "room.approve", "room.act"], "visibleData": ["public", "deal_terms", "private_payload", "event_log", "proof"], "requiresSignature": true, "canApprove": true, "canComment": true },
+    { "role": "seller", "label": "Seller", "allowedActions": ["room.comment", "room.approve", "room.act"], "visibleData": ["public", "deal_terms", "event_log", "proof"], "requiresSignature": true, "canApprove": true, "canComment": true },
+    { "role": "regulator", "label": "Regulator", "allowedActions": ["room.comment", "room.approve", "room.disclose"], "visibleData": ["public", "deal_terms", "private_payload", "event_log", "proof"], "requiresSignature": true, "canApprove": true, "canComment": true },
+    { "role": "witness", "label": "Witness", "allowedActions": ["room.comment", "room.witness"], "visibleData": ["public", "event_log", "proof"], "requiresSignature": true, "canApprove": false, "canComment": true },
+    { "role": "auditor", "label": "Auditor", "allowedActions": ["room.comment", "room.review"], "visibleData": ["public", "deal_terms", "private_payload", "event_log", "proof"], "requiresSignature": false, "canApprove": false, "canComment": true },
+    { "role": "ai_assistant", "label": "AI assistant", "allowedActions": ["room.comment", "room.summarize"], "visibleData": ["public", "event_log", "proof"], "requiresSignature": true, "canApprove": false, "canComment": true },
+    { "role": "viewer", "label": "Viewer", "allowedActions": [], "visibleData": ["public", "event_log", "proof"], "requiresSignature": false, "canApprove": false, "canComment": false }
+  ],
+  "replay": {
+    "roomId": "regulated-escrow-demo01",
+    "scenarioId": "regulated-escrow",
+    "network": "local",
+    "storyRef": "run/story.infrixstory.json",
+    "cinemaBinding": "sha256:c1nemab1nd1ng0000111122223333444455556666777788889999aaaabbbbcc",
+    "eventLogHash": "sha256:e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1",
+    "eventCount": 11,
+    "events": [
+      { "seq": 0, "actor": "p1", "role": "buyer", "action": "room.join", "timestamp": "2026-06-10T12:00:00Z", "prevHash": "", "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000001" },
+      { "seq": 1, "actor": "p2", "role": "seller", "action": "room.join", "timestamp": "2026-06-10T12:00:01Z", "prevHash": "sha256:0000000000000000000000000000000000000000000000000000000000000001", "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000002" },
+      { "seq": 2, "actor": "p3", "role": "regulator", "action": "room.join", "timestamp": "2026-06-10T12:00:02Z", "prevHash": "sha256:0000000000000000000000000000000000000000000000000000000000000002", "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000003" },
+      { "seq": 3, "actor": "system", "role": "buyer", "action": "escrow.create", "timestamp": "2026-06-10T12:00:03Z", "artifactHash": "sha256:9b1c0e7a4f2d8c6b5a3e1f0d9c8b7a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a", "detail": "create (buyer)", "prevHash": "sha256:0000000000000000000000000000000000000000000000000000000000000003", "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000004" },
+      { "seq": 4, "actor": "system", "role": "seller", "action": "escrow.markDelivered", "timestamp": "2026-06-10T12:00:04Z", "artifactHash": "sha256:9b1c0e7a4f2d8c6b5a3e1f0d9c8b7a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a", "detail": "deliver (seller)", "prevHash": "sha256:0000000000000000000000000000000000000000000000000000000000000004", "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000005" },
+      { "seq": 5, "actor": "system", "role": "regulator", "action": "disclosure.grant", "timestamp": "2026-06-10T12:00:05Z", "artifactHash": "sha256:9b1c0e7a4f2d8c6b5a3e1f0d9c8b7a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a", "detail": "disclose (regulator)", "prevHash": "sha256:0000000000000000000000000000000000000000000000000000000000000005", "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000006" },
+      { "seq": 6, "actor": "system", "role": "buyer", "action": "escrow.release", "timestamp": "2026-06-10T12:00:06Z", "artifactHash": "sha256:9b1c0e7a4f2d8c6b5a3e1f0d9c8b7a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a", "detail": "release (buyer)", "prevHash": "sha256:0000000000000000000000000000000000000000000000000000000000000006", "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000007" },
+      { "seq": 7, "actor": "p4", "role": "witness", "action": "room.join", "timestamp": "2026-06-10T12:00:07Z", "prevHash": "sha256:0000000000000000000000000000000000000000000000000000000000000007", "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000008" },
+      { "seq": 8, "actor": "p5", "role": "auditor", "action": "room.join", "timestamp": "2026-06-10T12:00:08Z", "prevHash": "sha256:0000000000000000000000000000000000000000000000000000000000000008", "hash": "sha256:0000000000000000000000000000000000000000000000000000000000000009" },
+      { "seq": 9, "actor": "p6", "role": "ai_assistant", "action": "room.join", "timestamp": "2026-06-10T12:00:09Z", "prevHash": "sha256:0000000000000000000000000000000000000000000000000000000000000009", "hash": "sha256:000000000000000000000000000000000000000000000000000000000000000a" },
+      { "seq": 10, "actor": "p1", "role": "buyer", "action": "room.comment", "timestamp": "2026-06-10T12:00:10Z", "detail": "Ready when the seller delivers.", "prevHash": "sha256:000000000000000000000000000000000000000000000000000000000000000a", "hash": "sha256:e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1e1" }
+    ]
+  }
+}

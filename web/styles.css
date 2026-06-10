@@ -8850,3 +8850,60 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 @media (max-width: 980px) {
   .tutor-grid-layout { grid-template-columns: 1fr; }
 }
+
+/* nextux-14 — Multiplayer Demo Rooms (#/rooms) */
+.room-launcher { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 14px 16px; }
+.room-launcher-hint { color: var(--text-secondary); font-size: 0.88rem; margin: 4px 0 10px; }
+.room-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.room-list-item { border: 1px solid var(--border-bold); border-radius: 10px; padding: 8px 12px; }
+.room-list-link { color: var(--accent); font-weight: 600; text-decoration: none; }
+.room-list-meta { color: var(--text-dim); font-size: 0.78rem; }
+.room-state { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 12px; background: var(--surface); padding: 12px 16px; margin-bottom: 14px; min-width: 0; }
+.room-state-label { margin: 0 0 4px; font-size: 1.25rem; color: var(--text); }
+.room-state-meta { margin: 0; font-size: 0.8rem; color: var(--text-dim); }
+.room-promise { margin: 8px 0 0; font-size: 0.88rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.room-grid-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.room-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.room-subtitle { margin: 0 0 10px; font-size: 0.95rem; }
+.room-participants, .room-approvals, .room-roles, .room-replay, .room-proof, .room-chat, .room-trust { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 12px 14px; min-width: 0; }
+.room-participant-list, .room-approval-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.room-participant { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border: 1px solid var(--border-bold); border-radius: 8px; padding: 6px 10px; }
+.room-participant-name { font-weight: 600; font-size: 0.86rem; }
+.room-participant-role { font-size: 0.78rem; color: var(--text-secondary); }
+.room-participant-agent { font-size: 0.7rem; color: var(--text-dim); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
+.room-participant-approve { font-size: 0.72rem; color: var(--text-dim); margin-left: auto; }
+.room-participant-approve[data-can-approve="true"] { color: var(--ok); }
+.room-approval { display: flex; gap: 8px; align-items: center; font-size: 0.84rem; color: var(--text-secondary); }
+.room-approval[data-satisfied="true"] .room-approval-mark { color: var(--ok); }
+.room-approval-mark { color: var(--text-dim); }
+.room-role-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.room-role-table th, .room-role-table td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+.room-role-table th { color: var(--text-dim); font-weight: 600; }
+.room-role-cap[data-yes="true"] { color: var(--ok); }
+.room-role-cap[data-yes="false"] { color: var(--text-dim); }
+.room-replay-bound { display: inline-block; font-size: 0.74rem; border: 1px solid var(--border-bold); border-radius: 999px; padding: 2px 10px; color: var(--text-secondary); margin-bottom: 8px; }
+.room-replay-bound[data-bound="true"] { border-color: var(--ok); color: var(--ok); }
+.room-replay-binding, .room-replay-cinema { margin: 2px 0; font-size: 0.74rem; color: var(--text-dim); overflow-wrap: anywhere; }
+.room-event-log { margin: 8px 0 0; padding-left: 18px; font-size: 0.78rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 2px; }
+.room-event { list-style: decimal; }
+.room-event-actor { font-weight: 600; }
+.room-event-role { color: var(--text-dim); margin: 0 6px; }
+.room-proof-badge { display: inline-block; border-radius: 999px; padding: 3px 12px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border-bold); background: var(--bg-alt); color: var(--text); margin-bottom: 8px; }
+.room-proof-badge[data-verified="true"] { border-color: var(--ok); }
+.room-proof-grid, .room-expert-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0; font-size: 0.82rem; }
+.room-proof-grid dt, .room-expert-grid dt { color: var(--text-dim); }
+.room-proof-note { font-size: 0.8rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.room-chat-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.room-chat-msg { font-size: 0.82rem; }
+.room-chat-author { font-weight: 600; margin-right: 6px; }
+.room-chat-body { color: var(--text-secondary); overflow-wrap: anywhere; }
+.room-chat-empty { color: var(--text-dim); font-size: 0.82rem; }
+.room-trust { border-left: 3px solid var(--accent); }
+.room-trust-body { margin: 0; font-size: 0.84rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.room-why, .room-expert { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 10px 16px; margin-top: 12px; }
+.room-why-summary, .room-expert-summary { cursor: pointer; font-weight: 600; font-size: 0.86rem; }
+.room-why-body { margin: 8px 0 0; font-size: 0.86rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.room-error { color: var(--red); }
+@media (max-width: 980px) {
+  .room-grid-layout { grid-template-columns: 1fr; }
+}

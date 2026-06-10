@@ -22,6 +22,7 @@ import { companionView } from '/views/companion.js';
 import { questsView } from '/views/quests.js';
 import { studioView } from '/views/studio.js';
 import { tutorView } from '/views/tutor.js';
+import { roomsView } from '/views/room.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -188,6 +189,11 @@ const routes = {
   // nextux-13 — Conversational Proof Tutor.
   // #/tutor          — explain a parsed artifact (can/cannot claim), audiences, lessons, quiz
   tutor: tutorView,
+
+  // nextux-14 — Multiplayer Demo Rooms.
+  // #/rooms                — launcher / list of rooms
+  // #/rooms/<room-id>      — a room: participants, approvals, roles, replay, proof, chat
+  rooms: roomsView,
 
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
   // #/verifyBatch              — empty launcher
