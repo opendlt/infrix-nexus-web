@@ -18,6 +18,7 @@ import { autopilotView } from '/views/autopilot.js';
 import { workbenchView } from '/views/workbench.js';
 import { proofInboxView } from '/views/inbox_collab.js';
 import { identityView } from '/views/identity.js';
+import { companionView } from '/views/companion.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -168,6 +169,10 @@ const routes = {
   // #/identity       — wallet, Accumulate identity, signature queue, sessions,
   //                    permissions, signing history, safety center
   identity: identityView,
+
+  // nextux-10 — Zero-Context Local Companion.
+  // #/companion      — workspace dashboard (artifacts, next actions, agent context)
+  companion: companionView,
 
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
   // #/verifyBatch              — empty launcher

@@ -11,7 +11,7 @@
           "kind": "task",
           "id": "infrix/regulated-escrow",
           "title": "Regulated escrow",
-          "confidence": 0.9843,
+          "confidence": 0.9857,
           "why": "Matches task on: escrow, prove, regulated, release, verify.",
           "missingInputs": null,
           "requiredAuthority": "a local session; writes need an approval. Never mainnet by default.",
@@ -27,7 +27,7 @@
           "kind": "scenario",
           "id": "regulated-escrow",
           "title": "Regulated escrow with selective disclosure",
-          "confidence": 0.9173,
+          "confidence": 0.9219,
           "why": "Matches scenario on: escrow, regulated, release, verify.",
           "missingInputs": null,
           "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
@@ -43,7 +43,7 @@
           "kind": "task",
           "id": "infrix/release-evidence-verify",
           "title": "Verify release evidence",
-          "confidence": 0.6976,
+          "confidence": 0.7075,
           "why": "Matches task on: release, verify.",
           "missingInputs": [
             "path"
@@ -61,7 +61,7 @@
           "kind": "task",
           "id": "infrix/selective-disclosure",
           "title": "Selective disclosure",
-          "confidence": 0.6467,
+          "confidence": 0.6533,
           "why": "Matches task on: prove.",
           "missingInputs": null,
           "requiredAuthority": "a local session; writes need an approval. Never mainnet by default.",
@@ -77,7 +77,7 @@
           "kind": "action",
           "id": "demo.start",
           "title": "Start the one-command demo",
-          "confidence": 0.6362,
+          "confidence": 0.6451,
           "why": "Matches action on: escrow, verify.",
           "missingInputs": null,
           "requiredAuthority": "Runs locally with no keys (local mode) or bootstraps a funded Kermit identity (kermit mode). Never touches mainnet.",
@@ -119,7 +119,7 @@
           "kind": "scenario",
           "id": "release-evidence",
           "title": "Release evidence matches a commit and L0 anchor",
-          "confidence": 0.8356,
+          "confidence": 0.8422,
           "why": "Matches scenario on: l0, l4, proof.",
           "missingInputs": null,
           "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
@@ -135,7 +135,7 @@
           "kind": "action",
           "id": "release.evidence.verify",
           "title": "Verify release evidence",
-          "confidence": 0.6553,
+          "confidence": 0.664,
           "why": "Matches action on: l0, without.",
           "missingInputs": [
             "path"
@@ -152,7 +152,7 @@
           "kind": "scenario",
           "id": "ai-agent-approved-workflow",
           "title": "An AI agent ran a governed workflow under approval",
-          "confidence": 0.605,
+          "confidence": 0.6149,
           "why": "Matches scenario on: proof, without.",
           "missingInputs": null,
           "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
@@ -168,7 +168,7 @@
           "kind": "scenario",
           "id": "regulated-escrow",
           "title": "Regulated escrow with selective disclosure",
-          "confidence": 0.605,
+          "confidence": 0.6149,
           "why": "Matches scenario on: proof, without.",
           "missingInputs": null,
           "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
@@ -184,7 +184,7 @@
           "kind": "scenario",
           "id": "selective-disclosure",
           "title": "A user disclosed only approved encrypted data",
-          "confidence": 0.605,
+          "confidence": 0.6149,
           "why": "Matches scenario on: proof, without.",
           "missingInputs": null,
           "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
@@ -218,7 +218,7 @@
           "kind": "scenario",
           "id": "release-evidence",
           "title": "Release evidence matches a commit and L0 anchor",
-          "confidence": 0.8356,
+          "confidence": 0.8422,
           "why": "Matches scenario on: l0, l4, proof.",
           "missingInputs": null,
           "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
@@ -234,7 +234,7 @@
           "kind": "action",
           "id": "release.evidence.verify",
           "title": "Verify release evidence",
-          "confidence": 0.6553,
+          "confidence": 0.664,
           "why": "Matches action on: l0, without.",
           "missingInputs": [
             "path"
@@ -251,7 +251,7 @@
           "kind": "scenario",
           "id": "ai-agent-approved-workflow",
           "title": "An AI agent ran a governed workflow under approval",
-          "confidence": 0.605,
+          "confidence": 0.6149,
           "why": "Matches scenario on: proof, without.",
           "missingInputs": null,
           "requiredAuthority": "a local session (no keys) or a bootstrapped Kermit identity. Never mainnet.",
@@ -268,5 +268,5 @@
       "planHash": "sha256:6c2e510557ba150321bdef002cc28b1b37f03a1068e6e876246f29bf8707fdd6"
     }
   },
-  "catalogSize": 64
+  "catalogSize": 68
 }

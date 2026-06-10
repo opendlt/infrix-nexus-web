@@ -1,0 +1,119 @@
+{
+  "allowedActions": [
+    "companion.context",
+    "companion.recentArtifacts",
+    "companion.suggestNext",
+    "companion.open",
+    "proof.verify",
+    "scenario.verifyStory",
+    "doctor.run",
+    "readiness.check"
+  ],
+  "branch": "feature/escrow",
+  "dirty": true,
+  "generatedAt": "2026-06-09T12:05:00Z",
+  "recentArtifacts": [
+    {
+      "path": "out/story.infrixstory.json",
+      "kind": "proof_story",
+      "hash": "sha256:abcdef",
+      "sizeBytes": 5120,
+      "modifiedAt": "2026-06-09T12:00:00Z",
+      "command": "infrix scenario verify-story out/story.infrixstory.json",
+      "declaredProofLevel": "L3/G2",
+      "verificationStatus": "verified",
+      "redactionStatus": "redacted",
+      "verifiedAt": "2026-06-09T12:01:00Z",
+      "verifyDetail": "independently verified offline"
+    },
+    {
+      "path": "out/proof.infrix.json",
+      "kind": "proof_bundle",
+      "hash": "sha256:112233",
+      "sizeBytes": 8192,
+      "modifiedAt": "2026-06-09T11:30:00Z",
+      "command": "infrix verify out/proof.infrix.json",
+      "declaredProofLevel": "L3",
+      "verificationStatus": "unverified",
+      "redactionStatus": "n/a"
+    },
+    {
+      "path": "release/evidence.json",
+      "kind": "release_evidence",
+      "hash": "sha256:445566",
+      "sizeBytes": 4096,
+      "modifiedAt": "2026-06-08T09:00:00Z",
+      "declaredProofLevel": "L4/G2",
+      "verificationStatus": "unverified",
+      "redactionStatus": "n/a",
+      "commit": "bbbbbbbbbbbb"
+    },
+    {
+      "path": "plan.infrixplan.json",
+      "kind": "proof_plan",
+      "hash": "sha256:778899",
+      "sizeBytes": 2048,
+      "modifiedAt": "2026-06-09T10:00:00Z",
+      "command": "infrix workbench dry-run plan.infrixplan.json",
+      "verificationStatus": "n/a",
+      "redactionStatus": "n/a"
+    }
+  ],
+  "suggestions": [
+    {
+      "id": "open-cinema:out/story.infrixstory.json",
+      "title": "Open this run in Cinema",
+      "reason": "out/story.infrixstory.json is verified — replay it step-by-step in Cinema.",
+      "command": "infrix companion open --route '#/execute'",
+      "riskLevel": "read_only",
+      "needsApproval": false,
+      "docs": "docs/scenario-builder.md"
+    },
+    {
+      "id": "verify-bundle:out/proof.infrix.json",
+      "title": "Verify this proof bundle",
+      "reason": "out/proof.infrix.json is an unverified portable proof — verify it offline (add --l0 to confirm the anchor).",
+      "command": "infrix verify out/proof.infrix.json",
+      "riskLevel": "read_only",
+      "needsApproval": false,
+      "docs": "docs/proof-receipts.md"
+    },
+    {
+      "id": "stale-evidence:release/evidence.json",
+      "title": "This release evidence is for an older commit",
+      "reason": "release/evidence.json was built for commit bbbbbbbbbbbb, not the current aaaaaaaaaaaa — regenerate it before publishing.",
+      "command": "infrix release make-evidence",
+      "riskLevel": "local_write",
+      "needsApproval": true,
+      "docs": "docs/release/README.md"
+    },
+    {
+      "id": "plan-dryrun:plan.infrixplan.json",
+      "title": "Dry-run this plan",
+      "reason": "plan.infrixplan.json is a workbench plan — dry-run it to preview the effects before approving.",
+      "command": "infrix workbench dry-run plan.infrixplan.json",
+      "riskLevel": "read_only",
+      "needsApproval": false,
+      "docs": "docs/intent-workbench.md"
+    },
+    {
+      "id": "ux-matrix",
+      "title": "Run the UX matrix before claiming UI closure",
+      "reason": "You have uncommitted UI changes — run the matrix gate so a UI closure claim is backed.",
+      "command": "npm run test:matrix --prefix tools/ux-gate",
+      "riskLevel": "read_only",
+      "needsApproval": false,
+      "docs": "docs/direction-doc/ux-gate-matrix-closure-guidance.md"
+    },
+    {
+      "id": "agent-server",
+      "title": "Start the agent server for workbench assistance",
+      "reason": "Run the agent action server so AI agents can dry-run and (with approval) run governed actions.",
+      "command": "infrix agent serve",
+      "riskLevel": "read_only",
+      "needsApproval": false,
+      "docs": "docs/agent/action-protocol.md"
+    }
+  ],
+  "workspace": "/home/dev/my-infrix-app"
+}
