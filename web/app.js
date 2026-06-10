@@ -19,6 +19,7 @@ import { workbenchView } from '/views/workbench.js';
 import { proofInboxView } from '/views/inbox_collab.js';
 import { identityView } from '/views/identity.js';
 import { companionView } from '/views/companion.js';
+import { questsView } from '/views/quests.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -173,6 +174,10 @@ const routes = {
   // nextux-10 — Zero-Context Local Companion.
   // #/companion      — workspace dashboard (artifacts, next actions, agent context)
   companion: companionView,
+
+  // nextux-11 — Proof Quest Mode.
+  // #/quests         — learning trail: missions, progress, proof receipt, Cinema, next step
+  quests: questsView,
 
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
   // #/verifyBatch              — empty launcher

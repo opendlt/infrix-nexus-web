@@ -1,0 +1,538 @@
+{
+  "version": 1,
+  "status": {
+    "quests": [
+      {
+        "id": "first-proof",
+        "title": "Run your first proof",
+        "promise": "Produce a real, governed Infrix proof in one step — no setup, no node trust.",
+        "persona": "first-time developer",
+        "estimatedTime": "2 min",
+        "prerequisites": null,
+        "nextQuest": "verify-without-node",
+        "locked": false,
+        "started": true,
+        "completed": true,
+        "missions": [
+          {
+            "id": "run-first-proof",
+            "title": "Run a governed escrow proof",
+            "promise": "Run the golden escrow flow locally and export a portable proof.",
+            "completed": true,
+            "learning": false,
+            "proofLevel": "L3",
+            "detail": "independently verified without trusting the node"
+          }
+        ]
+      },
+      {
+        "id": "verify-without-node",
+        "title": "Verify it without trusting the node",
+        "promise": "Re-check your proof offline and see it hold without trusting the node that made it.",
+        "persona": "first-time developer",
+        "estimatedTime": "1 min",
+        "prerequisites": [
+          "first-proof"
+        ],
+        "nextQuest": "cinema-replay",
+        "locked": false,
+        "started": false,
+        "completed": false,
+        "missions": [
+          {
+            "id": "verify-offline",
+            "title": "Independently verify offline",
+            "promise": "Verify the proof with the canonical verifier, no node, no network.",
+            "completed": false,
+            "learning": false
+          }
+        ]
+      },
+      {
+        "id": "cinema-replay",
+        "title": "Watch it in Cinema",
+        "promise": "Replay the exact execution that produced your proof — and see the replay independently match.",
+        "persona": "product evaluator",
+        "estimatedTime": "1 min",
+        "prerequisites": [
+          "first-proof"
+        ],
+        "nextQuest": "workbench-plan",
+        "locked": false,
+        "started": false,
+        "completed": false,
+        "missions": [
+          {
+            "id": "replay",
+            "title": "Reproduce the run via replay capsule",
+            "promise": "Replay the bundle's deterministic capsule and confirm it matches the outcome.",
+            "completed": false,
+            "learning": false
+          }
+        ]
+      },
+      {
+        "id": "workbench-plan",
+        "title": "Ask the workbench to build a plan",
+        "promise": "Describe an outcome in plain language and get a grounded, inspectable plan.",
+        "persona": "first-time developer",
+        "estimatedTime": "2 min",
+        "prerequisites": null,
+        "nextQuest": "safe-agent-approval",
+        "locked": false,
+        "started": true,
+        "completed": true,
+        "missions": [
+          {
+            "id": "ask-plan",
+            "title": "Turn intent into a grounded plan",
+            "promise": "Ask the Intent Copilot for a plan and inspect what it grounded to.",
+            "completed": true,
+            "learning": true,
+            "detail": "the workbench grounded your intent to a real capability (infrix/regulated-escrow) and produced a hash-bound plan"
+          }
+        ]
+      },
+      {
+        "id": "safe-agent-approval",
+        "title": "Approve a safe local action",
+        "promise": "See the approval gate: a plan, a plan-hash-bound approval, then a real, verified run.",
+        "persona": "AI agent onboarding itself",
+        "estimatedTime": "3 min",
+        "prerequisites": [
+          "workbench-plan"
+        ],
+        "nextQuest": "proof-inbox-review",
+        "locked": false,
+        "started": false,
+        "completed": false,
+        "missions": [
+          {
+            "id": "approve-and-run",
+            "title": "Approve, then run a safe local plan",
+            "promise": "Plan a safe local action, mint a plan-hash-bound approval, and run it.",
+            "completed": false,
+            "learning": false
+          }
+        ]
+      },
+      {
+        "id": "proof-inbox-review",
+        "title": "Review a proof in the inbox",
+        "promise": "Receive a proof, re-verify it independently, and sign an artifact-bound approval.",
+        "persona": "product evaluator",
+        "estimatedTime": "2 min",
+        "prerequisites": [
+          "first-proof"
+        ],
+        "nextQuest": "identity-signature-explain",
+        "locked": false,
+        "started": false,
+        "completed": false,
+        "missions": [
+          {
+            "id": "inbox-review",
+            "title": "Receive, verify, and approve",
+            "promise": "Send your proof to the inbox, verify it, and approve it with a signed decision.",
+            "completed": false,
+            "learning": false
+          }
+        ]
+      },
+      {
+        "id": "identity-signature-explain",
+        "title": "Explain a signature to an auditor",
+        "promise": "See exactly what a signature would do, in plain language, before anyone signs.",
+        "persona": "community educator",
+        "estimatedTime": "2 min",
+        "prerequisites": null,
+        "nextQuest": "embedded-widget",
+        "locked": false,
+        "started": true,
+        "completed": true,
+        "missions": [
+          {
+            "id": "explain-signature",
+            "title": "Get a plain-language signature explanation",
+            "promise": "Ask the identity center to explain a sample signing request in plain language.",
+            "completed": true,
+            "learning": true,
+            "detail": "you saw, in plain language, exactly what the signature would do before signing"
+          }
+        ]
+      },
+      {
+        "id": "embedded-widget",
+        "title": "Verify like an embedded widget",
+        "promise": "Verify a proof the way an in-browser widget would — offline, with no node trust.",
+        "persona": "first-time developer",
+        "estimatedTime": "1 min",
+        "prerequisites": [
+          "first-proof"
+        ],
+        "nextQuest": "release-evidence-lite",
+        "locked": false,
+        "started": false,
+        "completed": false,
+        "missions": [
+          {
+            "id": "widget-verify",
+            "title": "Run the embeddable offline verification",
+            "promise": "Verify the proof offline as the widget kit does, and read its honest verdict.",
+            "completed": false,
+            "learning": false
+          }
+        ]
+      },
+      {
+        "id": "release-evidence-lite",
+        "title": "Seal a local evidence manifest",
+        "promise": "Build a tamper-evident manifest over your proof — the local seed of a release evidence package.",
+        "persona": "internal demo",
+        "estimatedTime": "2 min",
+        "prerequisites": [
+          "first-proof"
+        ],
+        "nextQuest": "kermit-l0-upgrade",
+        "locked": false,
+        "started": false,
+        "completed": false,
+        "missions": [
+          {
+            "id": "evidence-manifest",
+            "title": "Compute and verify a SHA-256 evidence manifest",
+            "promise": "Seal your proof artifacts under a SHA-256 manifest and re-verify it.",
+            "completed": false,
+            "learning": false
+          }
+        ]
+      },
+      {
+        "id": "kermit-l0-upgrade",
+        "title": "Upgrade to a live L0-anchored proof",
+        "promise": "Take your proof from L3 (local) to L4 by anchoring it on the Kermit testnet — earned only when live L0 confirms.",
+        "persona": "product evaluator",
+        "estimatedTime": "5 min",
+        "prerequisites": [
+          "first-proof"
+        ],
+        "locked": false,
+        "started": false,
+        "completed": false,
+        "missions": [
+          {
+            "id": "kermit-upgrade",
+            "title": "Anchor on Kermit and confirm L4",
+            "promise": "Run the flow against Kermit so a real L0 anchor is confirmed, reaching L4.",
+            "completed": false,
+            "learning": false
+          }
+        ]
+      }
+    ],
+    "completed": 3,
+    "total": 10,
+    "nextQuest": "verify-without-node"
+  },
+  "catalog": [
+    {
+      "id": "first-proof",
+      "title": "Run your first proof",
+      "promise": "Produce a real, governed Infrix proof in one step — no setup, no node trust.",
+      "estimatedTime": "2 min",
+      "persona": "first-time developer",
+      "prerequisites": null,
+      "missions": [
+        {
+          "id": "run-first-proof",
+          "title": "Run a governed escrow proof",
+          "promise": "Run the golden escrow flow locally and export a portable proof.",
+          "kind": "run_proof",
+          "actions": [
+            "demo.start",
+            "proof.verify"
+          ],
+          "requires": "the exported proof verifies cryptographically (L3 locally; never L4 without live L0)"
+        }
+      ],
+      "artifacts": [
+        "proof bundle",
+        "proof receipt"
+      ],
+      "nextQuest": "verify-without-node"
+    },
+    {
+      "id": "verify-without-node",
+      "title": "Verify it without trusting the node",
+      "promise": "Re-check your proof offline and see it hold without trusting the node that made it.",
+      "estimatedTime": "1 min",
+      "persona": "first-time developer",
+      "prerequisites": [
+        "first-proof"
+      ],
+      "missions": [
+        {
+          "id": "verify-offline",
+          "title": "Independently verify offline",
+          "promise": "Verify the proof with the canonical verifier, no node, no network.",
+          "kind": "verify_offline",
+          "actions": [
+            "proof.verify"
+          ],
+          "requires": "the verifier accepts the proof AND reports the node was not trusted"
+        }
+      ],
+      "artifacts": [
+        "verification report"
+      ],
+      "nextQuest": "cinema-replay"
+    },
+    {
+      "id": "cinema-replay",
+      "title": "Watch it in Cinema",
+      "promise": "Replay the exact execution that produced your proof — and see the replay independently match.",
+      "estimatedTime": "1 min",
+      "persona": "product evaluator",
+      "prerequisites": [
+        "first-proof"
+      ],
+      "missions": [
+        {
+          "id": "replay",
+          "title": "Reproduce the run via replay capsule",
+          "promise": "Replay the bundle's deterministic capsule and confirm it matches the outcome.",
+          "kind": "cinema_replay",
+          "actions": [
+            "proof.verify"
+          ],
+          "requires": "the deterministic replay reproduces the recorded outcome"
+        }
+      ],
+      "artifacts": [
+        "replay verification report"
+      ],
+      "nextQuest": "workbench-plan"
+    },
+    {
+      "id": "workbench-plan",
+      "title": "Ask the workbench to build a plan",
+      "promise": "Describe an outcome in plain language and get a grounded, inspectable plan.",
+      "estimatedTime": "2 min",
+      "persona": "first-time developer",
+      "prerequisites": null,
+      "missions": [
+        {
+          "id": "ask-plan",
+          "title": "Turn intent into a grounded plan",
+          "promise": "Ask the Intent Copilot for a plan and inspect what it grounded to.",
+          "kind": "workbench_plan",
+          "actions": [
+            "workbench.plan"
+          ],
+          "requires": "the plan is grounded in a real capability and hash-bound (a local learning artifact, not a proof)"
+        }
+      ],
+      "artifacts": [
+        "grounded plan"
+      ],
+      "nextQuest": "safe-agent-approval"
+    },
+    {
+      "id": "safe-agent-approval",
+      "title": "Approve a safe local action",
+      "promise": "See the approval gate: a plan, a plan-hash-bound approval, then a real, verified run.",
+      "estimatedTime": "3 min",
+      "persona": "AI agent onboarding itself",
+      "prerequisites": [
+        "workbench-plan"
+      ],
+      "missions": [
+        {
+          "id": "approve-and-run",
+          "title": "Approve, then run a safe local plan",
+          "promise": "Plan a safe local action, mint a plan-hash-bound approval, and run it.",
+          "kind": "safe_approval",
+          "actions": [
+            "workbench.plan",
+            "workbench.dryRun",
+            "workbench.run"
+          ],
+          "requires": "a valid plan-hash-bound approval AND the gated run verifies"
+        }
+      ],
+      "artifacts": [
+        "approval token",
+        "run proof receipt"
+      ],
+      "nextQuest": "proof-inbox-review"
+    },
+    {
+      "id": "proof-inbox-review",
+      "title": "Review a proof in the inbox",
+      "promise": "Receive a proof, re-verify it independently, and sign an artifact-bound approval.",
+      "estimatedTime": "2 min",
+      "persona": "product evaluator",
+      "prerequisites": [
+        "first-proof"
+      ],
+      "missions": [
+        {
+          "id": "inbox-review",
+          "title": "Receive, verify, and approve",
+          "promise": "Send your proof to the inbox, verify it, and approve it with a signed decision.",
+          "kind": "inbox_review",
+          "actions": [
+            "inbox.receive",
+            "inbox.verify",
+            "inbox.approve"
+          ],
+          "requires": "the inbox re-verifies the proof AND records a valid signed, artifact-bound approval"
+        }
+      ],
+      "artifacts": [
+        "inbox item",
+        "signed decision"
+      ],
+      "nextQuest": "identity-signature-explain"
+    },
+    {
+      "id": "identity-signature-explain",
+      "title": "Explain a signature to an auditor",
+      "promise": "See exactly what a signature would do, in plain language, before anyone signs.",
+      "estimatedTime": "2 min",
+      "persona": "community educator",
+      "prerequisites": null,
+      "missions": [
+        {
+          "id": "explain-signature",
+          "title": "Get a plain-language signature explanation",
+          "promise": "Ask the identity center to explain a sample signing request in plain language.",
+          "kind": "identity_explain",
+          "actions": [
+            "identity.explain"
+          ],
+          "requires": "a fail-closed, plain-language explanation is produced (a local learning artifact)"
+        }
+      ],
+      "artifacts": [
+        "signature explanation"
+      ],
+      "nextQuest": "embedded-widget"
+    },
+    {
+      "id": "embedded-widget",
+      "title": "Verify like an embedded widget",
+      "promise": "Verify a proof the way an in-browser widget would — offline, with no node trust.",
+      "estimatedTime": "1 min",
+      "persona": "first-time developer",
+      "prerequisites": [
+        "first-proof"
+      ],
+      "missions": [
+        {
+          "id": "widget-verify",
+          "title": "Run the embeddable offline verification",
+          "promise": "Verify the proof offline as the widget kit does, and read its honest verdict.",
+          "kind": "widget_verify",
+          "actions": [
+            "widgets.generateEmbed",
+            "proof.verify"
+          ],
+          "requires": "the offline verification accepts the proof and never claims live L0 it did not check"
+        }
+      ],
+      "artifacts": [
+        "widget verdict"
+      ],
+      "nextQuest": "release-evidence-lite"
+    },
+    {
+      "id": "release-evidence-lite",
+      "title": "Seal a local evidence manifest",
+      "promise": "Build a tamper-evident manifest over your proof — the local seed of a release evidence package.",
+      "estimatedTime": "2 min",
+      "persona": "internal demo",
+      "prerequisites": [
+        "first-proof"
+      ],
+      "missions": [
+        {
+          "id": "evidence-manifest",
+          "title": "Compute and verify a SHA-256 evidence manifest",
+          "promise": "Seal your proof artifacts under a SHA-256 manifest and re-verify it.",
+          "kind": "release_evidence",
+          "actions": [
+            "demo.start"
+          ],
+          "requires": "the manifest recomputes exactly (local integrity; full release evidence adds signing + live L0 on Kermit)"
+        }
+      ],
+      "artifacts": [
+        "evidence manifest"
+      ],
+      "nextQuest": "kermit-l0-upgrade"
+    },
+    {
+      "id": "kermit-l0-upgrade",
+      "title": "Upgrade to a live L0-anchored proof",
+      "promise": "Take your proof from L3 (local) to L4 by anchoring it on the Kermit testnet — earned only when live L0 confirms.",
+      "estimatedTime": "5 min",
+      "persona": "product evaluator",
+      "prerequisites": [
+        "first-proof"
+      ],
+      "missions": [
+        {
+          "id": "kermit-upgrade",
+          "title": "Anchor on Kermit and confirm L4",
+          "promise": "Run the flow against Kermit so a real L0 anchor is confirmed, reaching L4.",
+          "kind": "kermit_upgrade",
+          "actions": [
+            "demo.start",
+            "proof.verify"
+          ],
+          "requires": "L4 is recorded ONLY when the verifier confirms a live L0 anchor (Kermit); local mode stays an honest L3 learning step"
+        }
+      ],
+      "artifacts": [
+        "L4 proof bundle (Kermit)"
+      ]
+    }
+  ],
+  "receipt": {
+    "version": 1,
+    "questId": "first-proof",
+    "missionId": "run-first-proof",
+    "title": "Run a governed escrow proof",
+    "completedAt": "2026-06-10T08:45:30Z",
+    "mode": "local",
+    "learning": false,
+    "detail": "independently verified without trusting the node",
+    "proof": {
+      "verified": true,
+      "proofLevel": "L3",
+      "governanceLevel": "G2",
+      "trustsNode": false,
+      "l0Verified": false,
+      "replayVerified": false
+    },
+    "artifacts": [
+      {
+        "name": "proof bundle",
+        "path": ".infrix/quest/shared/local/bundle.infrix.json",
+        "kind": "proof_bundle",
+        "hash": "sha256:9e525d53eabebcc7ae6aa22c37b2389835157ad5cc6418d9cb6dec0c20fd89c3",
+        "sizeBytes": 36993
+      },
+      {
+        "name": "proof receipt",
+        "path": ".infrix/quest/shared/local/receipt.json",
+        "kind": "proof_receipt",
+        "hash": "sha256:c0bdf83579875766455e5bb26135a97b4c5827779f84cc7143a7de4031c694a3",
+        "sizeBytes": 832
+      }
+    ],
+    "receiptHash": "sha256:f09e479affec034994ce9005ab4bf498dfcda80616c14d555ce13147a6fb65f5"
+  },
+  "_live": false
+}
