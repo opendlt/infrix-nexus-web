@@ -1,0 +1,75 @@
+{
+  "prompt": "a regulated escrow with buyer approval, selective disclosure, witness quorum, MetaMask signing, and a shareable proof",
+  "name": "regulated-escrow",
+  "flowTitle": "Regulated escrow",
+  "network": "local",
+  "planHash": "sha256:9b1c0f7e4a2d6b58e3c1a09f7d4e2b6c8a0f1e3d5c7b9a1f2e4d6c8b0a2f4e6d",
+  "pattern": "token-escrow",
+  "patternTitle": "Token escrow with conditional release",
+  "proofLevelCap": "L3",
+  "nodes": [
+    { "id": "buyer-joins", "kind": "actor", "label": "Buyer joins" },
+    { "id": "run-escrow", "kind": "workflow_action", "label": "Run the governed escrow" },
+    { "id": "buyer-approves", "kind": "approval", "label": "Buyer approves the release" },
+    { "id": "regulator-view", "kind": "disclosure", "label": "Regulator can view the invoice" },
+    { "id": "operators-witness", "kind": "witness", "label": "Two operators witness" },
+    { "id": "export-proof", "kind": "proof_export", "label": "Export the proof receipt" },
+    { "id": "verify-proof", "kind": "proof_verify", "label": "Verify the proof without trusting the node" },
+    { "id": "replay-cinema", "kind": "cinema_replay", "label": "Replay the run in Cinema" },
+    { "id": "agent-reviews", "kind": "inbox_review", "label": "Compliance agent reviews the proof" }
+  ],
+  "expectedOutputs": ["proofReceipt", "cinemaReplay", "verifierCommand"],
+  "artifacts": [
+    { "format": "scenario", "filename": "regulated-escrow.scenario.yaml", "proofLevelCap": "L3", "mainnetDisabled": true },
+    { "format": "task", "filename": "regulated-escrow.infrixtask.json", "proofLevelCap": "L3", "mainnetDisabled": true },
+    { "format": "sdk-ts", "filename": "run-regulated-escrow.ts", "proofLevelCap": "L3", "mainnetDisabled": true },
+    { "format": "agent-plan", "filename": "regulated-escrow.agent-plan.json", "proofLevelCap": "L3", "mainnetDisabled": true },
+    { "format": "markdown", "filename": "regulated-escrow.md", "proofLevelCap": "L3", "mainnetDisabled": true }
+  ],
+  "run": {
+    "id": "run-1",
+    "network": "local",
+    "storyPath": "runs/run-1/story.infrixstory.json",
+    "proofLevel": "L3",
+    "governanceLevel": "G2",
+    "verified": true,
+    "l0Verified": false,
+    "deferred": [
+      "witness quorum (2 independent witnesses) — verified on Kermit with registered witnesses, not on a local run"
+    ],
+    "ranAtUnix": 1781179200
+  },
+  "assurance": {
+    "proofLevel": "L3",
+    "governanceLevel": "G2",
+    "verified": true,
+    "l0Verified": false,
+    "replayVerified": true,
+    "fullyVerified": false,
+    "nodeTrusted": false,
+    "source": "verifykit"
+  },
+  "shareLink": "share/share.infrixstory.bundle.json",
+  "nextActions": [
+    {
+      "step": "anchor",
+      "command": "infrix app anchor --name regulated-escrow",
+      "why": "Anchor the proof to live Accumulate L0 on Kermit for L4/G2. Needs a funded testnet ADI; local stays L3. A Kermit run also verifies what local defers: the witness quorum."
+    },
+    {
+      "step": "verify",
+      "command": "infrix app verify --name regulated-escrow",
+      "why": "Re-verify the latest run offline (the node is never trusted)."
+    },
+    {
+      "step": "share",
+      "command": "infrix app share --name regulated-escrow",
+      "why": "Pack a self-contained, offline-verifiable proof bundle to share."
+    },
+    {
+      "step": "export",
+      "command": "infrix app export --name regulated-escrow --sdk ts --widget react",
+      "why": "Emit the TypeScript SDK driver and an embeddable verification widget."
+    }
+  ]
+}

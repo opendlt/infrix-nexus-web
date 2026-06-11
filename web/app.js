@@ -24,6 +24,7 @@ import { studioView } from '/views/studio.js';
 import { tutorView } from '/views/tutor.js';
 import { roomsView } from '/views/room.js';
 import { compareView } from '/views/compare.js';
+import { appView } from '/views/app.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -200,6 +201,12 @@ const routes = {
   // #/compare              — pattern catalog + honest sourced comparison report
   compare: compareView,
 
+  // nextux-16 — Prompt-to-Proof App Studio. The single golden front door:
+  // #/app                  — describe a verifiable app; Infrix builds, runs,
+  //                          proves, replays, verifies, and ships it. This is
+  //                          the default landing for non-expert users.
+  app: appView,
+
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
   // #/verifyBatch              — empty launcher
   // #/verifyBatch/<jobId>      — poll an in-flight or completed job
@@ -224,13 +231,15 @@ window.addEventListener('DOMContentLoaded', () => {
   initTimeContext();
   initHeader();
 
-  // adoption-04 — first-time / guided landing. With no explicit hash, guided
-  // users land on the #/start task chooser; experts (who toggled the header to
-  // Expert) keep landing on the spine. Any direct expert URL still works.
+  // nextux-16 — the front door is the Prompt-to-Proof App Studio. With no
+  // explicit hash, non-expert users land on #/app (describe a verifiable app and
+  // Infrix builds, runs, and proves it); experts (who toggled the header to
+  // Expert) keep landing on the spine. #/start stays reachable. Any direct URL
+  // still works.
   const noHash = !window.location.hash || window.location.hash === '#' || window.location.hash === '#/';
   if (noHash) {
     const mode = (() => { try { return localStorage.getItem('nexus.mode'); } catch (_) { return null; } })();
-    if (mode !== 'expert') window.location.hash = '#/start';
+    if (mode !== 'expert') window.location.hash = '#/app';
   }
 
   const container = document.getElementById('view-container');

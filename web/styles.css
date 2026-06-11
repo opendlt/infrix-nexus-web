@@ -8954,3 +8954,44 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 @media (max-width: 980px) {
   .compare-grid-layout { grid-template-columns: 1fr; }
 }
+
+/* nextux-16 — Prompt-to-Proof App Studio (#/app). All colors come from theme
+   vars so contrast holds in both themes; overflow-wrap keeps long prompts,
+   commands, and share links from overflowing on narrow viewports. */
+.app-body { min-width: 0; }
+.app-banner { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--surface); padding: 10px 14px; margin-bottom: 14px; min-width: 0; }
+.app-banner-tag { color: var(--accent); font-weight: 600; }
+.app-banner-text { color: var(--text-secondary); font-size: 0.88rem; }
+.app-source { margin: 6px 0 0; font-size: 0.8rem; color: var(--text-dim); }
+.app-grid-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.app-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.app-prompt, .app-workflow, .app-assurance, .app-artifacts, .app-next, .app-why { border: 1px solid var(--border-bold); border-radius: 12px; background: var(--surface); padding: 12px 14px; min-width: 0; }
+.app-subtitle { margin: 0 0 8px; font-size: 0.95rem; color: var(--text); }
+.app-prompt-text { margin: 0; padding: 8px 12px; border-left: 3px solid var(--accent); color: var(--text); font-style: italic; overflow-wrap: anywhere; }
+.app-pattern { margin: 8px 0 0; font-size: 0.82rem; color: var(--text-secondary); }
+.app-pattern-id { color: var(--accent); }
+.app-step-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.app-step { font-size: 0.84rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.app-step-kind { font-size: 0.7rem; border: 1px solid var(--border-bold); border-radius: 6px; padding: 1px 6px; margin-right: 6px; color: var(--text-dim); }
+.app-step-label { color: var(--text); }
+.app-assurance-label { margin: 0 0 8px; font-size: 0.86rem; color: var(--text); overflow-wrap: anywhere; }
+.app-badges { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.app-badge { font-size: 0.74rem; border: 1px solid var(--border-bold); border-radius: 6px; padding: 1px 8px; color: var(--text-dim); }
+.app-badge[data-ok="true"] { border-color: var(--ok); color: var(--ok); }
+.app-deferred { margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.app-deferred-tag { color: var(--text-secondary); font-size: 0.8rem; }
+.app-deferred-list { margin: 6px 0 0; padding-left: 18px; font-size: 0.8rem; color: var(--text-dim); overflow-wrap: anywhere; }
+.app-artifact-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.app-artifact { font-size: 0.82rem; display: flex; gap: 8px; overflow-wrap: anywhere; }
+.app-artifact-format { color: var(--accent); min-width: 84px; }
+.app-artifact-file { color: var(--text-secondary); overflow-wrap: anywhere; }
+.app-share { margin: 10px 0 0; font-size: 0.8rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.app-share-link { color: var(--accent); }
+.app-next-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.app-next-item { font-size: 0.82rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.app-next-command { color: var(--accent); }
+.app-why-text { margin: 0; font-size: 0.86rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.app-error { color: var(--red); }
+@media (max-width: 980px) {
+  .app-grid-layout { grid-template-columns: 1fr; }
+}
