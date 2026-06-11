@@ -85,7 +85,7 @@
       "command": "infrix release make-evidence",
       "riskLevel": "local_write",
       "needsApproval": true,
-      "docs": "docs/release/README.md"
+      "docs": "docs/release/RELEASE-RUNBOOK.md"
     },
     {
       "id": "plan-dryrun:plan.infrixplan.json",
@@ -103,7 +103,7 @@
       "command": "npm run test:matrix --prefix tools/ux-gate",
       "riskLevel": "read_only",
       "needsApproval": false,
-      "docs": "docs/direction-doc/ux-gate-matrix-closure-guidance.md"
+      "docs": "docs/direction-doc/archive/ux-gate-matrix-closure-guidance.md"
     },
     {
       "id": "agent-server",

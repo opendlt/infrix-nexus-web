@@ -186,8 +186,8 @@
     "dryRun": true,
     "configPath": "..\\..\\testdata\\bad-profile.yaml",
     "profile": "public_production",
-    "beforeStateHash": "sha256:7663bc9c88d67bccd30320d3bbb08033ec5abac9486d8cd4af64fdf349185fbb",
-    "afterStateHash": "sha256:06e4803513c0267a92dabd93c75a14c13ac5b8e03ca8941dce56855865a5df3e",
+    "beforeStateHash": "sha256:e4d54011168943f8e45d9bde22b4ca21f8fc2322a37f494ffec844e0191b8cc1",
+    "afterStateHash": "sha256:feead08c89d2570cd1b4b6df9a8af9c5f6caacdd9b270a4cf43195b7b8e0da18",
     "appliedFixes": [
       {
         "findingId": "finding_billing_throttle_enabled",
@@ -313,7 +313,7 @@
     "remainingManual": [
       "[external_required] The L0 signer uses a local key file; production should use managed custody. — Move the signer to HSM/KMS/MPC custody. (set l0.signerBackend to aws-kms or azure-keyvault and reference the managed key)"
     ],
-    "hash": "sha256:5755e6138bbd76d4b22b275fd839d30d1f9ff5d365a99ba0bd721ca04836d1bf"
+    "hash": "sha256:7d2e485896ffaedad86c289387005b4c24cc9837d6f54bfb49c1c64be723170d"
   },
   "version": 1
 }
