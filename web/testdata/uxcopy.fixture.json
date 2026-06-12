@@ -229,6 +229,13 @@
       "technical": "error_code: AGENT_WRITE_BUDGET_EXCEEDED"
     },
     {
+      "id": "error.CLI_USAGE",
+      "category": "error",
+      "short": "That flag or command isn't recognized",
+      "plain": "Infrix did not recognize a flag, argument, or subcommand in the command line.",
+      "technical": "error_code: CLI_USAGE"
+    },
+    {
       "id": "error.L0_ANCHOR_UNAVAILABLE",
       "category": "error",
       "short": "The L0 anchor is unavailable",
@@ -1206,6 +1213,20 @@
       ],
       "docs": "docs/errors/agent.md",
       "technical": "error_code: AGENT_WRITE_BUDGET_EXCEEDED"
+    },
+    {
+      "code": "CLI_USAGE",
+      "title": "That flag or command isn't recognized",
+      "plainMeaning": "Infrix did not recognize a flag, argument, or subcommand in the command line.",
+      "fixes": [
+        {
+          "label": "See the valid flags and subcommands",
+          "command": "infrix \u003ccommand\u003e --help",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/README.md",
+      "technical": "error_code: CLI_USAGE"
     },
     {
       "code": "L0_ANCHOR_UNAVAILABLE",
