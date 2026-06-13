@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "receipt": {
+    "title": "Regulated escrow — proof receipt",
+    "network": "local",
+    "plainSummary": "An escrow released funds only after the buyer approved, a regulator could view the invoice, and two operators witnessed it. This receipt lets anyone re-check that outcome without trusting the Infrix node.",
+    "assuranceLevel": "L3 / G2",
+    "assuranceLabel": "Locally verified (L3 / G2). Live L0 not checked; the node is never trusted.",
+    "verified": true,
+    "l0Verified": false,
+    "nodeTrusted": false,
+    "whatVerified": [
+      "The governed workflow ran exactly as written (every step bound into the sealed story).",
+      "The buyer's approval was a real Ed25519 decision bound to the artifact hash.",
+      "The outcome replays deterministically from the sealed evidence.",
+      "The proof's integrity is recomputed offline — the node asserts nothing the verifier did not confirm."
+    ],
+    "whatNotVerified": [
+      "The Accumulate L0 anchor (L4) — a local run never confirms it; run on Kermit for L0 confirmation.",
+      "The witness quorum (two independent operators) — verified on Kermit with registered witnesses, deferred on a local run."
+    ],
+    "independentCommand": "infrix verify ./regulated-escrow.share.json",
+    "l0AnchorStatus": "Not checked on this local run. On Kermit the anchor is confirmed against Accumulate L0 for L4.",
+    "witnessStatus": "Deferred: a Kermit run with registered witnesses proves the two-operator quorum.",
+    "cinemaReplay": "cinema/regulated-escrow.replay.json",
+    "downloadBundle": "regulated-escrow.share.infrixstory.bundle.json",
+    "embedWidget": "infrix app export --name regulated-escrow --widget web-component",
+    "source": "verifykit"
+  }
+}

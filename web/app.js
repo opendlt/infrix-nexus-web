@@ -25,6 +25,9 @@ import { tutorView } from '/views/tutor.js';
 import { roomsView } from '/views/room.js';
 import { compareView } from '/views/compare.js';
 import { appView } from '/views/app.js';
+import { launchView } from '/views/launch.js';
+import { trustCenterView } from '/views/trust_center.js';
+import { receiptView } from '/views/receipt.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
 import { approveView } from '/views/approve.js';
@@ -206,6 +209,18 @@ const routes = {
   //                          proves, replays, verifies, and ships it. This is
   //                          the default landing for non-expert users.
   app: appView,
+
+  // plan-12 — Public Launch Trust Narrative.
+  // #/launch        — the public launch page: hero path, why-it's-different,
+  //                   the Kermit-vs-mainnet claim boundary, and the "what we do
+  //                   not claim" panel.
+  // #/trust-center  — the trust center: release evidence (bound to HEAD),
+  //                   launch-check, UX matrix, study, provider matrix, threat
+  //                   model, boundaries, and the mainnet status.
+  // #/receipt       — the shareable proof receipt (better than a block explorer).
+  launch: launchView,
+  'trust-center': trustCenterView,
+  receipt: receiptView,
 
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
   // #/verifyBatch              — empty launcher

@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "center": {
+    "commit": "0000000000000000000000000000000000000000",
+    "network": "kermit",
+    "generatedNote": "Every item below is reproducible from this repository at commit 000000000000. Assurance always comes from the verifier; the node is never trusted.",
+    "sections": [
+      {
+        "id": "release-evidence",
+        "title": "Latest release evidence",
+        "status": "Not yet generated for HEAD",
+        "detail": "No release evidence package was found for commit 000000000000. Generate one to anchor a verifiable release for this commit.",
+        "command": "infrix release make-evidence --commit 0000000000000000000000000000000000000000",
+        "link": "release-evidence-out/"
+      },
+      {
+        "id": "launch-check",
+        "title": "Launch-check receipt",
+        "status": "Reproducible",
+        "detail": "The launch-check runs the preflight gates (profile, network posture, hero path, evidence freshness, study + provider acceptance) and emits a signed receipt for the current commit.",
+        "command": "infrix launch-check --profile public_production --claim-network kermit --strict --json",
+        "link": ""
+      },
+      {
+        "id": "ux-matrix",
+        "title": "UX matrix transcript",
+        "status": "Reproducible",
+        "detail": "The Playwright UX matrix (screenshots + axe accessibility + console-clean) runs every Nexus route across the desktop/tablet/mobile viewports the matrix policy requires.",
+        "command": "npm run test:matrix --prefix tools/ux-gate",
+        "link": "tools/ux-gate/matrix-policy.json"
+      },
+      {
+        "id": "human-study",
+        "title": "User \u0026 agent proof study",
+        "status": "AI-agent program complete; human cohort gated on real participants",
+        "detail": "Each study bundle is independently re-verified and the cohort composition is enforced. The AI-agent program is sealed; the human program harness is ready and gated until the required participants run it.",
+        "command": "infrix study aggregate docs/audit/user-proof-study --require human",
+        "link": "docs/audit/user-proof-study/REPORT.md"
+      },
+      {
+        "id": "provider-matrix",
+        "title": "Wallet provider matrix",
+        "status": "MetaMask via SDK; real-browser PASS pending sealed evidence",
+        "detail": "MetaMask is supported through the SDK and API and covered by deterministic provider-simulation tests. A provider PASS row requires a sealed real-browser acceptance bundle, which is pending until captured.",
+        "command": "infrix metamask-acceptance verify --dir \u003cbundle\u003e --expected-commit 0000000000000000000000000000000000000000",
+        "link": "examples/metamask-golden-escrow/PROVIDER_MATRIX.md"
+      },
+      {
+        "id": "threat-model",
+        "title": "Security \u0026 threat model",
+        "status": "Published",
+        "detail": "The threat model states the trust boundaries (the node is trusted for nothing in verification; Accumulate L0 for inclusion only), the adversaries, and the defenses — and its non-goals.",
+        "command": "",
+        "link": "docs/audit/archive/threat-model.md"
+      }
+    ],
+    "boundaries": [
+      {
+        "id": "kermit-not-mainnet",
+        "title": "Kermit proof ≠ mainnet production claim",
+        "weDoNotClaim": "A Kermit proof is a mainnet production claim.",
+        "honest": "Kermit is the official pre-mainnet proving network. A Kermit proof is real and independently verifiable, but it is not a mainnet production claim — that requires referenced mainnet evidence we have not produced. Mainnet remains gated until that evidence exists.",
+        "why": "Verification on a testnet proves the mechanism, not production operation. We never let a Kermit result stand in for a mainnet guarantee."
+      },
+      {
+        "id": "l3-not-l4",
+        "title": "Local L3 proof ≠ L4",
+        "weDoNotClaim": "A local run produces an L4 proof.",
+        "honest": "A local run proves cryptographic structure and governance (L3 / G2). It is not L4: L4 requires confirming the anchor on Accumulate L0, which a local run never does. The verifier caps a local run below L4 and discloses what was deferred.",
+        "why": "L4 is an on-chain fact, not a local computation. Only a live Accumulate L0 anchor confirmation earns it, and the verifier — never the node — decides."
+      },
+      {
+        "id": "metamask-sdk-not-pass",
+        "title": "MetaMask SDK support ≠ provider PASS",
+        "weDoNotClaim": "MetaMask is a finished, certified provider experience.",
+        "honest": "MetaMask is supported through the SDK and API (the @infrix/client withMetaMask path) and covered by deterministic provider-simulation tests. That is not a provider PASS: a PASS requires a sealed real-browser acceptance bundle (tools/metamask-acceptance and the provider matrix), which stays pending until a real Chrome + MetaMask run is captured.",
+        "why": "Provider-simulation tests prove the logic; only a captured real-browser pass proves the user-facing flow. We keep the provider matrix honest about which is which."
+      },
+      {
+        "id": "token-staking-gated",
+        "title": "On-chain token \u0026 staking are gated",
+        "weDoNotClaim": "The on-chain INFRIX token and staking are operating today.",
+        "honest": "The off-chain IU billing meter is live and metered from real verifier verdicts. The on-chain INFRIX token and staking remain gated on pilot demand and stay planned until they ship on-chain.",
+        "why": "Shipping a token before there is pilot demand would be theater. The economics layer is real; the on-chain instrument waits for a reason to exist."
+      },
+      {
+        "id": "pilot-invoices-non-payable",
+        "title": "Commercial pilot invoices are non-payable",
+        "weDoNotClaim": "Pilot invoices can be settled today.",
+        "honest": "Commercial pilot invoices are generated from the IU meter, but they are non-payable: settlement requires a mainnet commercial mode that does not yet exist. Until then, invoices are informational and frame the eventual commercial relationship.",
+        "why": "We will not present a payable invoice for a settlement path that is not built. The meter is real; payment is gated on the commercial mode landing."
+      }
+    ],
+    "mainnetStatus": "Mainnet is gated. A mainnet production claim requires referenced mainnet evidence that has not been produced; verification runs on Kermit (the official pre-mainnet network). Commercial pilot invoices stay non-payable until a mainnet commercial mode exists."
+  }
+}

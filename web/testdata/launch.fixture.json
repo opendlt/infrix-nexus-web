@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "page": {
+    "hero": {
+      "headline": "Describe an app. Get a proof anyone can check.",
+      "subhead": "Infrix turns a plain-language prompt into a governed workflow, runs it, and produces a proof you can verify yourself — without trusting our node. Accumulate is the L0 that anchors it.",
+      "promptPlaceholder": "Describe the verifiable app you want…",
+      "examplePrompts": [
+        "A regulated escrow with buyer approval, a regulator-only invoice view, and a shareable proof.",
+        "A release attestation signed by two maintainers that anyone can verify offline.",
+        "A grant payout that only releases after a milestone is approved, with a full audit trail."
+      ],
+      "primaryAction": {
+        "label": "Build verifiable app",
+        "command": "infrix new verifiable-app my-escrow \"a regulated escrow with buyer approval and a shareable proof\"",
+        "why": "Grounds the prompt, builds the workflow and SDK, runs it for a real proof, and verifies it — in one command."
+      },
+      "receiptPreview": {
+        "title": "Regulated escrow — proof receipt",
+        "network": "local",
+        "plainSummary": "An escrow released funds only after the buyer approved, a regulator could view the invoice, and two operators witnessed it. This receipt lets anyone re-check that outcome without trusting the Infrix node.",
+        "assuranceLevel": "L3 / G2",
+        "assuranceLabel": "Locally verified (L3 / G2). Live L0 not checked; the node is never trusted.",
+        "verified": true,
+        "l0Verified": false,
+        "nodeTrusted": false,
+        "whatVerified": [
+          "The governed workflow ran exactly as written (every step bound into the sealed story).",
+          "The buyer's approval was a real Ed25519 decision bound to the artifact hash.",
+          "The outcome replays deterministically from the sealed evidence.",
+          "The proof's integrity is recomputed offline — the node asserts nothing the verifier did not confirm."
+        ],
+        "whatNotVerified": [
+          "The Accumulate L0 anchor (L4) — a local run never confirms it; run on Kermit for L0 confirmation.",
+          "The witness quorum (two independent operators) — verified on Kermit with registered witnesses, deferred on a local run."
+        ],
+        "independentCommand": "infrix verify ./regulated-escrow.share.json",
+        "l0AnchorStatus": "Not checked on this local run. On Kermit the anchor is confirmed against Accumulate L0 for L4.",
+        "witnessStatus": "Deferred: a Kermit run with registered witnesses proves the two-operator quorum.",
+        "cinemaReplay": "cinema/regulated-escrow.replay.json",
+        "downloadBundle": "regulated-escrow.share.infrixstory.bundle.json",
+        "embedWidget": "infrix app export --name regulated-escrow --widget web-component",
+        "source": "verifykit"
+      },
+      "cinemaPreview": {
+        "title": "Replay the run, step by step",
+        "note": "Cinema is a non-committing view of the canonical artifacts — the L0-anchored spine is the record, never the movie.",
+        "frames": [
+          "Buyer joins the escrow",
+          "Buyer approves the release",
+          "Regulator views the invoice",
+          "Two operators witness",
+          "Proof exported \u0026 verified"
+        ]
+      }
+    },
+    "sections": [
+      {
+        "id": "verify-without-trust",
+        "title": "Verify without trusting the node",
+        "body": "The proof is yours to check. The verifier recomputes every binding offline and the Infrix node is never trusted for the outcome — if our node lied, your verification would fail.",
+        "points": [
+          "Run the verifier on the bundle; it re-derives the result from sealed evidence.",
+          "Assurance always comes from the verifier (Source = verifykit), never from the node.",
+          "A local run proves L3 / G2; it is honest that the L0 anchor (L4) was not checked."
+        ],
+        "command": "infrix verify ./my-escrow.share.json"
+      },
+      {
+        "id": "l0-anchor",
+        "title": "Why Accumulate L0 matters",
+        "body": "Accumulate is the L0 that anchors a proof. When you run on Kermit, the proof's root is written to Accumulate L0, so the anchor is an on-chain fact (L4) — not something our node asserts.",
+        "points": [
+          "The verifier confirms the anchor directly against Accumulate L0, bypassing the node.",
+          "L4 is reached only with a live Accumulate L0 anchor confirmation; local runs stay below it.",
+          "Tampering with the bundle breaks the anchor binding the verifier checks."
+        ],
+        "command": ""
+      },
+      {
+        "id": "vs-conventional",
+        "title": "Compared to a conventional smart-contract flow",
+        "body": "A conventional contract makes you trust a chain explorer and read bytecode. Infrix gives a plain-language outcome plus a portable proof. The comparison is measured in the demo, never asserted.",
+        "points": [
+          "Conventional figures are sourced or labeled an assumption; Infrix figures are measured in the demo.",
+          "No claim that Infrix is \"better\" without a measured basis — the demo shows the numbers."
+        ],
+        "command": "infrix compare-demo escrow"
+      },
+      {
+        "id": "developer-one-liner",
+        "title": "For developers",
+        "body": "One command scaffolds, runs, and proves a verifiable app, and emits a typed SDK driver and an embeddable verification widget.",
+        "points": [
+          "The generated SDK driver dry-runs and approves before it runs, and never targets mainnet.",
+          "The widget verifies the proof structure offline in the browser — locally, with no node trust."
+        ],
+        "command": "infrix new verifiable-app my-escrow \"a regulated escrow with a shareable proof\""
+      },
+      {
+        "id": "agent-one-liner",
+        "title": "For AI agents",
+        "body": "Agents drive the same governed actions through the Agent Action Protocol — every mutating action is dry-run and approval-gated, and assurance still comes from the verifier.",
+        "points": [
+          "Point any MCP-capable agent at tools/mcp-infrix to expose the governed actions over stdio.",
+          "An agent can resume from the exact workspace state it left in .infrixapp/."
+        ],
+        "command": "infrix agent serve --addr 127.0.0.1:7700"
+      },
+      {
+        "id": "wallet-status",
+        "title": "Wallet \u0026 provider status",
+        "body": "MetaMask is supported through the SDK and API (the @infrix/client withMetaMask path) and covered by deterministic provider-simulation tests. A real-browser provider PASS is pending sealed acceptance evidence.",
+        "points": [
+          "Connect, signature explanation, and key-page mapping are real and covered by tests.",
+          "The provider matrix stays honest: a PASS row requires a sealed real-browser acceptance bundle."
+        ],
+        "command": ""
+      }
+    ],
+    "claimBoundary": {
+      "kermit": "On Kermit, a proof is anchored to Accumulate L0 and independently verifiable (up to L4 with a live anchor). Kermit is the official pre-mainnet proving network.",
+      "mainnet": "Mainnet is gated: a mainnet production claim requires referenced mainnet evidence we have not produced. Nothing here defaults to mainnet, and pilot invoices stay non-payable until a mainnet commercial mode exists."
+    },
+    "boundaries": [
+      {
+        "id": "kermit-not-mainnet",
+        "title": "Kermit proof ≠ mainnet production claim",
+        "weDoNotClaim": "A Kermit proof is a mainnet production claim.",
+        "honest": "Kermit is the official pre-mainnet proving network. A Kermit proof is real and independently verifiable, but it is not a mainnet production claim — that requires referenced mainnet evidence we have not produced. Mainnet remains gated until that evidence exists.",
+        "why": "Verification on a testnet proves the mechanism, not production operation. We never let a Kermit result stand in for a mainnet guarantee."
+      },
+      {
+        "id": "l3-not-l4",
+        "title": "Local L3 proof ≠ L4",
+        "weDoNotClaim": "A local run produces an L4 proof.",
+        "honest": "A local run proves cryptographic structure and governance (L3 / G2). It is not L4: L4 requires confirming the anchor on Accumulate L0, which a local run never does. The verifier caps a local run below L4 and discloses what was deferred.",
+        "why": "L4 is an on-chain fact, not a local computation. Only a live Accumulate L0 anchor confirmation earns it, and the verifier — never the node — decides."
+      },
+      {
+        "id": "metamask-sdk-not-pass",
+        "title": "MetaMask SDK support ≠ provider PASS",
+        "weDoNotClaim": "MetaMask is a finished, certified provider experience.",
+        "honest": "MetaMask is supported through the SDK and API (the @infrix/client withMetaMask path) and covered by deterministic provider-simulation tests. That is not a provider PASS: a PASS requires a sealed real-browser acceptance bundle (tools/metamask-acceptance and the provider matrix), which stays pending until a real Chrome + MetaMask run is captured.",
+        "why": "Provider-simulation tests prove the logic; only a captured real-browser pass proves the user-facing flow. We keep the provider matrix honest about which is which."
+      },
+      {
+        "id": "token-staking-gated",
+        "title": "On-chain token \u0026 staking are gated",
+        "weDoNotClaim": "The on-chain INFRIX token and staking are operating today.",
+        "honest": "The off-chain IU billing meter is live and metered from real verifier verdicts. The on-chain INFRIX token and staking remain gated on pilot demand and stay planned until they ship on-chain.",
+        "why": "Shipping a token before there is pilot demand would be theater. The economics layer is real; the on-chain instrument waits for a reason to exist."
+      },
+      {
+        "id": "pilot-invoices-non-payable",
+        "title": "Commercial pilot invoices are non-payable",
+        "weDoNotClaim": "Pilot invoices can be settled today.",
+        "honest": "Commercial pilot invoices are generated from the IU meter, but they are non-payable: settlement requires a mainnet commercial mode that does not yet exist. Until then, invoices are informational and frame the eventual commercial relationship.",
+        "why": "We will not present a payable invoice for a settlement path that is not built. The meter is real; payment is gated on the commercial mode landing."
+      }
+    ]
+  }
+}

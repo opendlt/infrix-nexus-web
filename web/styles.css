@@ -8995,3 +8995,122 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 @media (max-width: 980px) {
   .app-grid-layout { grid-template-columns: 1fr; }
 }
+
+/* ---------------------------------------------------------------------------
+   plan-12 — Public Launch Trust Narrative: #/launch, #/trust-center, #/receipt.
+   Contrast-safe by construction (documented variable combos), responsive, with
+   accessible copy buttons and example chips.
+   --------------------------------------------------------------------------- */
+
+/* Screen-reader-only utility (used by the copy button's aria-live region). */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* Copy-to-clipboard command block. */
+.copy-command { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0 0; min-width: 0; }
+.copy-command-text { flex: 1 1 auto; min-width: 0; font-size: 0.82rem; color: var(--accent); background: var(--bg-alt); border: 1px solid var(--border-bold); border-radius: 8px; padding: 6px 10px; overflow-wrap: anywhere; }
+.copy-btn { flex: 0 0 auto; font-size: 0.76rem; font-weight: 600; color: var(--bg); background: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 5px 12px; cursor: pointer; }
+.copy-btn:hover { background: var(--accent-soft); color: var(--text); border-color: var(--border-strong); }
+.copy-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Shared section card look. */
+.launch-section, .launch-claim-boundary, .launch-noclaims, .trust-section, .trust-noclaims, .trust-mainnet,
+.receipt-summary, .receipt-verified, .receipt-notverified, .receipt-status, .receipt-actions, .launch-hero, .launch-preview {
+  border: 1px solid var(--border-bold); border-radius: 12px; background: var(--surface); padding: 14px 16px; min-width: 0;
+}
+.launch-body, .trust-center-body, .receipt-body { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+
+/* Banners + source lines. */
+.launch-banner, .trust-banner { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--surface); padding: 10px 14px; min-width: 0; }
+.launch-banner-tag, .trust-banner-tag { color: var(--accent); font-weight: 600; }
+.launch-banner-text, .trust-banner-text { color: var(--text-secondary); font-size: 0.88rem; }
+.launch-source, .trust-source, .receipt-source { margin: 6px 0 0; font-size: 0.8rem; color: var(--text-dim); }
+.launch-loading, .trust-loading, .receipt-loading { color: var(--text-secondary); }
+.launch-error, .trust-error, .receipt-error { color: var(--red); }
+
+/* Hero. */
+.launch-headline { margin: 0 0 6px; font-size: 1.5rem; color: var(--text); }
+.launch-subhead { margin: 0 0 14px; font-size: 0.95rem; color: var(--text-secondary); }
+.launch-prompt-field { display: flex; flex-direction: column; gap: 6px; }
+.launch-prompt-label { font-size: 0.82rem; color: var(--text-secondary); }
+.launch-prompt-input { width: 100%; box-sizing: border-box; resize: vertical; font: inherit; font-size: 0.9rem; color: var(--text); background: var(--bg-alt); border: 1px solid var(--border-bold); border-radius: 10px; padding: 10px 12px; }
+.launch-prompt-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.launch-examples { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.launch-example-chip { text-align: left; font: inherit; font-size: 0.8rem; color: var(--text); background: var(--surface-alt); border: 1px solid var(--border-bold); border-radius: 999px; padding: 6px 12px; cursor: pointer; max-width: 100%; overflow-wrap: anywhere; }
+.launch-example-chip:hover { border-color: var(--accent); color: var(--accent); }
+.launch-example-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.launch-primary { margin: 10px 0 0; }
+.launch-primary-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+.launch-primary-label { color: var(--text); font-size: 0.95rem; }
+.launch-primary-why { color: var(--text-secondary); font-size: 0.82rem; }
+.launch-previews { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-top: 14px; }
+.launch-preview-title { margin: 0 0 8px; font-size: 0.9rem; color: var(--text); }
+.launch-preview-empty { color: var(--text-dim); font-size: 0.84rem; }
+.launch-receipt-label { margin: 0 0 8px; font-size: 0.84rem; color: var(--text); overflow-wrap: anywhere; }
+.launch-preview-link, .launch-trust-link { display: inline-block; margin-top: 10px; font-size: 0.84rem; color: var(--accent); }
+.launch-cinema-frames { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.launch-cinema-frame { font-size: 0.82rem; color: var(--text-secondary); }
+.launch-cinema-note { margin: 8px 0 0; font-size: 0.78rem; color: var(--text-dim); }
+
+/* Shared badges (launch + receipt). */
+.launch-badges, .receipt-badges { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.launch-badge, .receipt-badge { font-size: 0.74rem; border: 1px solid var(--border-bold); border-radius: 6px; padding: 1px 8px; color: var(--text-dim); }
+.launch-badge[data-ok="true"], .receipt-badge[data-ok="true"] { border-color: var(--ok); color: var(--ok); }
+
+/* Below-fold sections. */
+.launch-sections { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.launch-section-title, .trust-section-title { margin: 0 0 6px; font-size: 1rem; color: var(--text); }
+.launch-section-body { margin: 0; font-size: 0.86rem; color: var(--text-secondary); }
+.launch-section-points { margin: 8px 0 0; padding-left: 18px; font-size: 0.82rem; color: var(--text-dim); display: flex; flex-direction: column; gap: 4px; }
+.launch-section-points li { overflow-wrap: anywhere; }
+
+/* Claim boundary. */
+.launch-boundary-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.launch-boundary-cell { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+.launch-boundary-key { color: var(--accent); display: block; margin-bottom: 4px; }
+.launch-boundary-cell p { margin: 0; font-size: 0.84rem; color: var(--text-secondary); }
+
+/* What we do not claim. */
+.launch-noclaims-intro { margin: 0 0 10px; font-size: 0.86rem; color: var(--text-secondary); }
+.launch-noclaims-list, .trust-noclaims-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.launch-noclaim, .trust-noclaim { border-left: 3px solid var(--warn); padding: 4px 0 4px 12px; }
+.launch-noclaim-title, .trust-noclaim-title { color: var(--text); font-size: 0.9rem; }
+.launch-noclaim-honest, .trust-noclaim-honest { margin: 4px 0 0; font-size: 0.82rem; color: var(--text-secondary); }
+.launch-noclaim-why { margin: 4px 0 0; font-size: 0.78rem; color: var(--text-dim); }
+.trust-noclaim-donot { margin: 4px 0 0; font-size: 0.8rem; color: var(--warn); }
+
+/* Trust center. */
+.trust-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.8rem; color: var(--text-secondary); }
+.trust-meta-commit { color: var(--accent); }
+.trust-sections { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.trust-section-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; }
+.trust-section-status { font-size: 0.74rem; color: var(--text-dim); border: 1px solid var(--border-bold); border-radius: 6px; padding: 1px 8px; }
+.trust-section-detail { margin: 8px 0 0; font-size: 0.84rem; color: var(--text-secondary); }
+.trust-section-link { margin: 8px 0 0; font-size: 0.78rem; color: var(--text-dim); overflow-wrap: anywhere; }
+.trust-mainnet-text { margin: 0; font-size: 0.86rem; color: var(--text-secondary); }
+
+/* Receipt. */
+.receipt-h2 { margin: 0 0 6px; font-size: 1.3rem; color: var(--text); }
+.receipt-h3 { margin: 0 0 8px; font-size: 1rem; color: var(--text); }
+.receipt-plain { margin: 0 0 10px; font-size: 0.92rem; color: var(--text-secondary); }
+.receipt-assurance-label { margin: 0 0 8px; font-size: 0.86rem; color: var(--text); overflow-wrap: anywhere; }
+.receipt-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+.receipt-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.receipt-list-item { font-size: 0.83rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.receipt-list-item[data-ok="false"] { color: var(--warn); }
+.receipt-status-grid { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; }
+.receipt-status-grid dt { color: var(--text-dim); font-size: 0.8rem; }
+.receipt-status-grid dd { margin: 0; color: var(--text-secondary); font-size: 0.83rem; overflow-wrap: anywhere; }
+.receipt-action-note { margin: 0 0 8px; font-size: 0.83rem; color: var(--text-secondary); }
+.receipt-action-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin: 12px 0; }
+.receipt-action-card { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+.receipt-action-title { color: var(--text); display: block; margin-bottom: 4px; }
+.receipt-action-sub { margin: 6px 0 0; font-size: 0.78rem; color: var(--text-dim); }
+
+@media (max-width: 980px) {
+  .launch-previews, .launch-sections, .launch-boundary-grid, .trust-sections, .receipt-columns, .receipt-action-grid {
+    grid-template-columns: 1fr;
+  }
+}
