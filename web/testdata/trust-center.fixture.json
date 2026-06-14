@@ -51,7 +51,7 @@
         "status": "Published",
         "detail": "The threat model states the trust boundaries (the node is trusted for nothing in verification; Accumulate L0 for inclusion only), the adversaries, and the defenses — and its non-goals.",
         "command": "",
-        "link": "docs/audit/archive/threat-model.md"
+        "link": "docs/audit/threat-model.md"
       }
     ],
     "boundaries": [
