@@ -148,7 +148,10 @@ export const startView = {
 
     const foot = document.createElement('p');
     foot.className = 'start-foot';
-    foot.textContent = 'Prefer the terminal? Run "infrix start" for the same paths, or "infrix demo start" for the one-command demo.';
+    foot.textContent = 'Prefer the terminal? The golden path is one command: ' +
+      'infrix new verifiable-app my-escrow "escrow that releases when two approvers sign" — ' +
+      'then infrix verify .infrixapp/my-escrow/runs/run-1/proof.infrix.json. ' +
+      'Run "infrix start" (or "infrix start --agent" for JSON) for the full plan.';
     shell.appendChild(foot);
   },
 
