@@ -1,4 +1,8 @@
 {
+  "_generatedBy": "infrix uxcopy generate",
+  "_source": "pkg/uxcopy",
+  "_schemaVersion": 1,
+  "_contentSha256": "d5b742d090454ab207a720b9f063c2def30f422017ccdd703ed359494e9418a4",
   "version": "1",
   "labels": [
     {
@@ -159,6 +163,13 @@
       "technical": "error_code: AGENT_CAPABILITY_DENIED"
     },
     {
+      "id": "error.AGENT_DOCS_SMOKE_FAILED",
+      "category": "error",
+      "short": "The agent-docs smoke gate failed",
+      "plain": "Running the AGENTS.md golden path in a temp workspace did not produce the documented artifacts, or AGENTS.md cites an infrix command that no longer resolves.",
+      "technical": "error_code: AGENT_DOCS_SMOKE_FAILED"
+    },
+    {
       "id": "error.AGENT_DRY_RUN_REQUIRED",
       "category": "error",
       "short": "A dry-run is required before this action",
@@ -236,6 +247,27 @@
       "technical": "error_code: CLI_USAGE"
     },
     {
+      "id": "error.EVIDENCE_MISSING",
+      "category": "error",
+      "short": "No release evidence proves the current commit",
+      "plain": "No release-evidence package proves HEAD — none was found, or the only packages present are historical/stale.",
+      "technical": "error_code: EVIDENCE_MISSING"
+    },
+    {
+      "id": "error.EVIDENCE_STALE",
+      "category": "error",
+      "short": "The release evidence proves an older commit",
+      "plain": "The release-evidence package proves a commit other than the one being claimed (HEAD).",
+      "technical": "error_code: EVIDENCE_STALE"
+    },
+    {
+      "id": "error.HUMAN_STUDY_INCOMPLETE",
+      "category": "error",
+      "short": "The human study is incomplete",
+      "plain": "The human task-success study has fewer completed sessions, or a lower success rate, than the release threshold requires.",
+      "technical": "error_code: HUMAN_STUDY_INCOMPLETE"
+    },
+    {
       "id": "error.L0_ANCHOR_UNAVAILABLE",
       "category": "error",
       "short": "The L0 anchor is unavailable",
@@ -292,6 +324,13 @@
       "technical": "error_code: L0_WRONG_NETWORK"
     },
     {
+      "id": "error.LAUNCH_PREREQUISITES_MISSING",
+      "category": "error",
+      "short": "Release launch-check inputs are missing",
+      "plain": "A release-grade launch-check cannot start because required inputs are absent (evidence package, node URL, tenant token, or L0 endpoint).",
+      "technical": "error_code: LAUNCH_PREREQUISITES_MISSING"
+    },
+    {
       "id": "error.METAMASK_ADDRESS_MISMATCH",
       "category": "error",
       "short": "The recovered address does not match MetaMask",
@@ -332,6 +371,13 @@
       "short": "The signature was rejected in MetaMask",
       "plain": "The user declined the connection or the signing prompt in MetaMask.",
       "technical": "error_code: METAMASK_USER_REJECTED"
+    },
+    {
+      "id": "error.NETWORK_TRUST_DENIED",
+      "category": "error",
+      "short": "An off-domain network call was denied",
+      "plain": "The consumption trust gate refused a network call because the host is not the configured, allow-listed node host (or a redirect tried to leave it).",
+      "technical": "error_code: NETWORK_TRUST_DENIED"
     },
     {
       "id": "error.PROFILE_LIVE_L0_MISSING",
@@ -383,6 +429,13 @@
       "technical": "error_code: PROOF_MALFORMED"
     },
     {
+      "id": "error.PROOF_NOT_VERIFIED",
+      "category": "error",
+      "short": "The proof did not verify",
+      "plain": "A proof / evidence package did not pass verification (a check failed or the package is not what it claims).",
+      "technical": "error_code: PROOF_NOT_VERIFIED"
+    },
+    {
       "id": "error.PROOF_OPERATOR_DIVERSITY_FAILED",
       "category": "error",
       "short": "Witness operator diversity not met",
@@ -402,6 +455,27 @@
       "short": "The required witness quorum is missing",
       "plain": "Not enough independent witness receipts attest this proof.",
       "technical": "error_code: PROOF_WITNESS_QUORUM_MISSING"
+    },
+    {
+      "id": "error.PROVIDER_EVIDENCE_MISSING",
+      "category": "error",
+      "short": "Wallet/provider acceptance evidence is missing",
+      "plain": "A wallet/provider (e.g. MetaMask) acceptance bundle is absent, or it does not bind to the claimed commit.",
+      "technical": "error_code: PROVIDER_EVIDENCE_MISSING"
+    },
+    {
+      "id": "error.PUBLICATION_STALE",
+      "category": "error",
+      "short": "The publication receipt does not bind to current evidence",
+      "plain": "The publication receipt proves an older commit or a different tarball hash than the current evidence.",
+      "technical": "error_code: PUBLICATION_STALE"
+    },
+    {
+      "id": "error.RECEIPT_OVERCLAIM",
+      "category": "error",
+      "short": "The receipt claims more than it backs",
+      "plain": "A shareable receipt asserts a higher assurance than its evidence supports (e.g. claims L4 with no live-L0 confirmation).",
+      "technical": "error_code: RECEIPT_OVERCLAIM"
     },
     {
       "id": "error.SDK_BALANCE_UNAVAILABLE",
@@ -467,11 +541,46 @@
       "technical": "error_code: SETUP_RUST_WASM_TARGET_MISSING"
     },
     {
+      "id": "error.TRUST_CENTER_STALE",
+      "category": "error",
+      "short": "The trust-center facts are stale",
+      "plain": "The exported trust-center JSON proves an older commit, or no current trust-center JSON exists where one is required.",
+      "technical": "error_code: TRUST_CENTER_STALE"
+    },
+    {
       "id": "error.UNKNOWN",
       "category": "error",
       "short": "Something went wrong",
       "plain": "Infrix hit an error it could not translate into specific guidance.",
       "technical": "error_code: UNKNOWN"
+    },
+    {
+      "id": "error.UX_MATRIX_BUDGET_EXCEEDED",
+      "category": "error",
+      "short": "The UX matrix exceeded its time budget",
+      "plain": "A UX matrix profile ran longer than its duration budget (release is budget-locked and never allows an override).",
+      "technical": "error_code: UX_MATRIX_BUDGET_EXCEEDED"
+    },
+    {
+      "id": "error.UX_MATRIX_COVERAGE_MISSING",
+      "category": "error",
+      "short": "The UX matrix is missing required coverage",
+      "plain": "A UX matrix run did not cover every required (group, viewport) for its profile.",
+      "technical": "error_code: UX_MATRIX_COVERAGE_MISSING"
+    },
+    {
+      "id": "error.UX_MATRIX_PROFILE_INVALID",
+      "category": "error",
+      "short": "The UX matrix selector or summary is invalid",
+      "plain": "An unknown profile/route/viewport selector, or a malformed UX matrix summary (wrong schema or missing fields).",
+      "technical": "error_code: UX_MATRIX_PROFILE_INVALID"
+    },
+    {
+      "id": "error.UX_MATRIX_SERVER_PORT_IN_USE",
+      "category": "error",
+      "short": "The UX demo server port is in use",
+      "plain": "The UX matrix runner failed before any test ran because the demo server port is already in use.",
+      "technical": "error_code: UX_MATRIX_SERVER_PORT_IN_USE"
     },
     {
       "id": "glossary.accumulate-l0",
@@ -1074,6 +1183,25 @@
       "technical": "error_code: AGENT_CAPABILITY_DENIED"
     },
     {
+      "code": "AGENT_DOCS_SMOKE_FAILED",
+      "title": "The agent-docs smoke gate failed",
+      "plainMeaning": "Running the AGENTS.md golden path in a temp workspace did not produce the documented artifacts, or AGENTS.md cites an infrix command that no longer resolves.",
+      "fixes": [
+        {
+          "label": "Run the executable agent-docs smoke gate",
+          "command": "infrix launch-check --agent-docs --smoke",
+          "safeToRun": true
+        },
+        {
+          "label": "List the documented commands and resolution",
+          "command": "infrix launch-check --agent-docs --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/agent-docs.md",
+      "technical": "error_code: AGENT_DOCS_SMOKE_FAILED"
+    },
+    {
       "code": "AGENT_DRY_RUN_REQUIRED",
       "title": "A dry-run is required before this action",
       "plainMeaning": "This action mutates state and must be dry-run before it can be executed.",
@@ -1229,6 +1357,58 @@
       "technical": "error_code: CLI_USAGE"
     },
     {
+      "code": "EVIDENCE_MISSING",
+      "title": "No release evidence proves the current commit",
+      "plainMeaning": "No release-evidence package proves HEAD — none was found, or the only packages present are historical/stale.",
+      "fixes": [
+        {
+          "label": "Check the evidence directory hygiene",
+          "command": "infrix release evidence-status --dir ./release-evidence --require-current --reject-generic-stale",
+          "safeToRun": true
+        },
+        {
+          "label": "Generate evidence for the current commit",
+          "command": "infrix release make-evidence --expected-commit \u003cHEAD\u003e --claim-network kermit",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/release-evidence.md",
+      "technical": "error_code: EVIDENCE_MISSING"
+    },
+    {
+      "code": "EVIDENCE_STALE",
+      "title": "The release evidence proves an older commit",
+      "plainMeaning": "The release-evidence package proves a commit other than the one being claimed (HEAD).",
+      "fixes": [
+        {
+          "label": "See which commit the evidence proves",
+          "command": "infrix release evidence-status --dir ./release-evidence --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Regenerate evidence for the current commit",
+          "command": "infrix release make-evidence --expected-commit \u003cHEAD\u003e --claim-network kermit",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/release-evidence.md",
+      "technical": "error_code: EVIDENCE_STALE"
+    },
+    {
+      "code": "HUMAN_STUDY_INCOMPLETE",
+      "title": "The human study is incomplete",
+      "plainMeaning": "The human task-success study has fewer completed sessions, or a lower success rate, than the release threshold requires.",
+      "fixes": [
+        {
+          "label": "Aggregate the study sessions and read the gap",
+          "command": "infrix study aggregate --dir \u003csessions\u003e --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/human-study.md",
+      "technical": "error_code: HUMAN_STUDY_INCOMPLETE"
+    },
+    {
       "code": "L0_ANCHOR_UNAVAILABLE",
       "title": "The L0 anchor is unavailable",
       "plainMeaning": "Infrix could not fetch the anchor transaction from Accumulate L0.",
@@ -1361,6 +1541,20 @@
       "technical": "error_code: L0_WRONG_NETWORK"
     },
     {
+      "code": "LAUNCH_PREREQUISITES_MISSING",
+      "title": "Release launch-check inputs are missing",
+      "plainMeaning": "A release-grade launch-check cannot start because required inputs are absent (evidence package, node URL, tenant token, or L0 endpoint).",
+      "fixes": [
+        {
+          "label": "Supply the release inputs",
+          "command": "infrix launch-check --release --strict --json --evidence \u003cevidence.tgz\u003e --l0 https://kermit.accumulatenetwork.io/v3 --node-url \u003cnode\u003e --tenant-token \u003ctoken\u003e",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/release-evidence.md",
+      "technical": "error_code: LAUNCH_PREREQUISITES_MISSING"
+    },
+    {
       "code": "METAMASK_ADDRESS_MISMATCH",
       "title": "The recovered address does not match MetaMask",
       "plainMeaning": "The address recovered from the signature does not match the connected MetaMask account.",
@@ -1448,6 +1642,25 @@
       "retryGuidance": "This is often transient — wait a moment and try again.",
       "docs": "docs/errors/metamask.md",
       "technical": "error_code: METAMASK_USER_REJECTED"
+    },
+    {
+      "code": "NETWORK_TRUST_DENIED",
+      "title": "An off-domain network call was denied",
+      "plainMeaning": "The consumption trust gate refused a network call because the host is not the configured, allow-listed node host (or a redirect tried to leave it).",
+      "fixes": [
+        {
+          "label": "Check the configured node endpoint",
+          "command": "infrix doctor --persona operator",
+          "safeToRun": true
+        },
+        {
+          "label": "Re-run against the configured node",
+          "command": "infrix launch-check --release --node-url \u003cconfigured-node\u003e --json",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/network-trust.md",
+      "technical": "error_code: NETWORK_TRUST_DENIED"
     },
     {
       "code": "PROFILE_LIVE_L0_MISSING",
@@ -1569,6 +1782,25 @@
       "technical": "error_code: PROOF_MALFORMED"
     },
     {
+      "code": "PROOF_NOT_VERIFIED",
+      "title": "The proof did not verify",
+      "plainMeaning": "A proof / evidence package did not pass verification (a check failed or the package is not what it claims).",
+      "fixes": [
+        {
+          "label": "Re-verify and read the failing check",
+          "command": "infrix verify \u003cbundle.infrix.json\u003e --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Verify a package against L0",
+          "command": "infrix release verify-evidence \u003cevidence.tgz\u003e --l0 https://kermit.accumulatenetwork.io/v3",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/proofs.md",
+      "technical": "error_code: PROOF_NOT_VERIFIED"
+    },
+    {
       "code": "PROOF_OPERATOR_DIVERSITY_FAILED",
       "title": "Witness operator diversity not met",
       "plainMeaning": "The valid witnesses do not span enough distinct independent operators.",
@@ -1611,6 +1843,58 @@
       ],
       "docs": "docs/errors/proofs.md",
       "technical": "error_code: PROOF_WITNESS_QUORUM_MISSING"
+    },
+    {
+      "code": "PROVIDER_EVIDENCE_MISSING",
+      "title": "Wallet/provider acceptance evidence is missing",
+      "plainMeaning": "A wallet/provider (e.g. MetaMask) acceptance bundle is absent, or it does not bind to the claimed commit.",
+      "fixes": [
+        {
+          "label": "Verify the captured acceptance bundle",
+          "command": "infrix metamask-acceptance verify --dir \u003cbundle\u003e --expected-commit \u003cHEAD\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/provider.md",
+      "technical": "error_code: PROVIDER_EVIDENCE_MISSING"
+    },
+    {
+      "code": "PUBLICATION_STALE",
+      "title": "The publication receipt does not bind to current evidence",
+      "plainMeaning": "The publication receipt proves an older commit or a different tarball hash than the current evidence.",
+      "fixes": [
+        {
+          "label": "Publish and re-verify the current package",
+          "command": "infrix release publish-evidence \u003cnew-tarball\u003e --verify-after-upload --sign-receipt",
+          "safeToRun": false
+        },
+        {
+          "label": "Verify the publication binds to HEAD",
+          "command": "infrix release verify-publication \u003creceipt.json\u003e --expected-commit \u003cHEAD\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/release-evidence.md",
+      "technical": "error_code: PUBLICATION_STALE"
+    },
+    {
+      "code": "RECEIPT_OVERCLAIM",
+      "title": "The receipt claims more than it backs",
+      "plainMeaning": "A shareable receipt asserts a higher assurance than its evidence supports (e.g. claims L4 with no live-L0 confirmation).",
+      "fixes": [
+        {
+          "label": "Re-verify the bundle and read the honest verdict",
+          "command": "infrix verify \u003cbundle.infrix.json\u003e --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Confirm the anchor against live L0 before claiming L4",
+          "command": "infrix verify \u003cbundle.infrix.json\u003e --l0 kermit --require L4/G2",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/proofs.md",
+      "technical": "error_code: RECEIPT_OVERCLAIM"
     },
     {
       "code": "SDK_BALANCE_UNAVAILABLE",
@@ -1755,6 +2039,20 @@
       "technical": "error_code: SETUP_RUST_WASM_TARGET_MISSING"
     },
     {
+      "code": "TRUST_CENTER_STALE",
+      "title": "The trust-center facts are stale",
+      "plainMeaning": "The exported trust-center JSON proves an older commit, or no current trust-center JSON exists where one is required.",
+      "fixes": [
+        {
+          "label": "Re-export trust-center facts from current evidence",
+          "command": "infrix trust-center export --evidence \u003cnew-tarball\u003e --publication-receipt \u003creceipt.json\u003e --out trust-center-current.json",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/release-evidence.md",
+      "technical": "error_code: TRUST_CENTER_STALE"
+    },
+    {
       "code": "UNKNOWN",
       "title": "Something went wrong",
       "plainMeaning": "Infrix hit an error it could not translate into specific guidance.",
@@ -1767,6 +2065,64 @@
       ],
       "docs": "docs/errors/README.md",
       "technical": "error_code: UNKNOWN"
+    },
+    {
+      "code": "UX_MATRIX_BUDGET_EXCEEDED",
+      "title": "The UX matrix exceeded its time budget",
+      "plainMeaning": "A UX matrix profile ran longer than its duration budget (release is budget-locked and never allows an override).",
+      "fixes": [
+        {
+          "label": "Read the budget verdict in the summary",
+          "command": "infrix launch-check --release --ux-matrix-summary \u003csummary.json\u003e --json",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/ux-matrix.md",
+      "technical": "error_code: UX_MATRIX_BUDGET_EXCEEDED"
+    },
+    {
+      "code": "UX_MATRIX_COVERAGE_MISSING",
+      "title": "The UX matrix is missing required coverage",
+      "plainMeaning": "A UX matrix run did not cover every required (group, viewport) for its profile.",
+      "fixes": [
+        {
+          "label": "Run the full release matrix",
+          "command": "infrix launch-check --release --ux-matrix-summary \u003csummary.json\u003e --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/ux-matrix.md",
+      "technical": "error_code: UX_MATRIX_COVERAGE_MISSING"
+    },
+    {
+      "code": "UX_MATRIX_PROFILE_INVALID",
+      "title": "The UX matrix selector or summary is invalid",
+      "plainMeaning": "An unknown profile/route/viewport selector, or a malformed UX matrix summary (wrong schema or missing fields).",
+      "fixes": [
+        {
+          "label": "Run a known-good profile",
+          "command": "infrix launch-check --release --ux-matrix-summary \u003csummary.json\u003e --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/ux-matrix.md",
+      "technical": "error_code: UX_MATRIX_PROFILE_INVALID"
+    },
+    {
+      "code": "UX_MATRIX_SERVER_PORT_IN_USE",
+      "title": "The UX demo server port is in use",
+      "plainMeaning": "The UX matrix runner failed before any test ran because the demo server port is already in use.",
+      "fixes": [
+        {
+          "label": "Stop a leftover demo server",
+          "command": "infrix demo stop",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/ux-matrix.md",
+      "technical": "error_code: UX_MATRIX_SERVER_PORT_IN_USE"
     }
   ],
   "nextActions": [

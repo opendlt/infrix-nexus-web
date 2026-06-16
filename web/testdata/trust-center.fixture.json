@@ -52,6 +52,14 @@
         "detail": "The threat model states the trust boundaries (the node is trusted for nothing in verification; Accumulate L0 for inclusion only), the adversaries, and the defenses — and its non-goals.",
         "command": "",
         "link": "docs/audit/threat-model.md"
+      },
+      {
+        "id": "uxcopy-parity",
+        "title": "Cross-surface UX-copy parity",
+        "status": "Release-gated",
+        "detail": "Nexus and the TypeScript SDK consume a byte-identical copy of the Go source of truth (pkg/uxcopy). `infrix uxcopy generate --check` is the fail-closed gate, and launch-check + rc-check refuse a release while any copy is stale.",
+        "command": "infrix uxcopy generate --check",
+        "link": "pkg/uxcopy"
       }
     ],
     "boundaries": [
