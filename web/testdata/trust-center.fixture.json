@@ -34,7 +34,7 @@
         "title": "User \u0026 agent proof study",
         "status": "AI-agent program complete; human cohort gated on real participants",
         "detail": "Each study bundle is independently re-verified and the cohort composition is enforced. The AI-agent program is sealed; the human program harness is ready and gated until the required participants run it.",
-        "command": "infrix study aggregate docs/audit/user-proof-study --require human",
+        "command": "infrix study aggregate docs/audit/user-proof-study --require human --require-agent",
         "link": "docs/audit/user-proof-study/REPORT.md"
       },
       {
