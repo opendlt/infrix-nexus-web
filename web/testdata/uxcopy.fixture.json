@@ -2,7 +2,7 @@
   "_generatedBy": "infrix uxcopy generate",
   "_source": "pkg/uxcopy",
   "_schemaVersion": 1,
-  "_contentSha256": "d5b742d090454ab207a720b9f063c2def30f422017ccdd703ed359494e9418a4",
+  "_contentSha256": "0ff3ba767eeea5ab48d64240cd2d2479e5ff3dc1e9d35557de58a3e367ad3ace",
   "version": "1",
   "labels": [
     {
@@ -371,6 +371,13 @@
       "short": "The signature was rejected in MetaMask",
       "plain": "The user declined the connection or the signing prompt in MetaMask.",
       "technical": "error_code: METAMASK_USER_REJECTED"
+    },
+    {
+      "id": "error.NETWORK_POSTURE_MISMATCH",
+      "category": "error",
+      "short": "The config's network does not match the claim",
+      "plain": "The config's bound network (its name, contents, and NETWORK_POSTURE_MANIFEST entry) disagrees with --claim-network — e.g. a mainnet config used for a Kermit claim — or a template/unmanifested config was used where a network-bound one is required.",
+      "technical": "error_code: NETWORK_POSTURE_MISMATCH"
     },
     {
       "id": "error.NETWORK_TRUST_DENIED",
@@ -1642,6 +1649,25 @@
       "retryGuidance": "This is often transient — wait a moment and try again.",
       "docs": "docs/errors/metamask.md",
       "technical": "error_code: METAMASK_USER_REJECTED"
+    },
+    {
+      "code": "NETWORK_POSTURE_MISMATCH",
+      "title": "The config's network does not match the claim",
+      "plainMeaning": "The config's bound network (its name, contents, and NETWORK_POSTURE_MANIFEST entry) disagrees with --claim-network — e.g. a mainnet config used for a Kermit claim — or a template/unmanifested config was used where a network-bound one is required.",
+      "fixes": [
+        {
+          "label": "Use the config bound to the claimed network",
+          "command": "infrix node-validate --config configs/kermit-public-production.accumulate.yaml --profile public_production --claim-network kermit --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Or correct --claim-network to match the config",
+          "command": "infrix node-validate --config \u003cconfig\u003e --claim-network \u003cnetwork\u003e --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/network-posture.md",
+      "technical": "error_code: NETWORK_POSTURE_MISMATCH"
     },
     {
       "code": "NETWORK_TRUST_DENIED",
