@@ -27,6 +27,7 @@ import { compareView } from '/views/compare.js';
 import { appView } from '/views/app.js';
 import { launchView } from '/views/launch.js';
 import { trustCenterView } from '/views/trust_center.js';
+import { walletLabView } from '/views/wallet_lab.js';
 import { receiptView } from '/views/receipt.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
@@ -220,6 +221,7 @@ const routes = {
   // #/receipt       — the shareable proof receipt (better than a block explorer).
   launch: launchView,
   'trust-center': trustCenterView,
+  'wallet-lab': walletLabView,
   receipt: receiptView,
 
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
