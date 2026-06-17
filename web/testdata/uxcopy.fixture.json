@@ -2,7 +2,7 @@
   "_generatedBy": "infrix uxcopy generate",
   "_source": "pkg/uxcopy",
   "_schemaVersion": 1,
-  "_contentSha256": "0ff3ba767eeea5ab48d64240cd2d2479e5ff3dc1e9d35557de58a3e367ad3ace",
+  "_contentSha256": "39305573f245e4b9e67b284172edfebdaca266b03853c8422e029824a8a0a985",
   "version": "1",
   "labels": [
     {
@@ -329,6 +329,13 @@
       "short": "Release launch-check inputs are missing",
       "plain": "A release-grade launch-check cannot start because required inputs are absent (evidence package, node URL, tenant token, or L0 endpoint).",
       "technical": "error_code: LAUNCH_PREREQUISITES_MISSING"
+    },
+    {
+      "id": "error.LOCAL_PHASE_TIMEOUT",
+      "category": "error",
+      "short": "The local phase ran past its time budget",
+      "plain": "A launch-check local-phase check (usually the full `go test ./...`) exceeded its phase timeout. This is never reported as a pass and never as a bare process kill.",
+      "technical": "error_code: LOCAL_PHASE_TIMEOUT"
     },
     {
       "id": "error.METAMASK_ADDRESS_MISMATCH",
@@ -1560,6 +1567,25 @@
       ],
       "docs": "docs/errors/release-evidence.md",
       "technical": "error_code: LAUNCH_PREREQUISITES_MISSING"
+    },
+    {
+      "code": "LOCAL_PHASE_TIMEOUT",
+      "title": "The local phase ran past its time budget",
+      "plainMeaning": "A launch-check local-phase check (usually the full `go test ./...`) exceeded its phase timeout. This is never reported as a pass and never as a bare process kill.",
+      "fixes": [
+        {
+          "label": "Run the fast local profile for quick feedback",
+          "command": "infrix launch-check --phase local --local-profile fast --strict",
+          "safeToRun": true
+        },
+        {
+          "label": "Re-run the full local phase with streaming progress",
+          "command": "infrix launch-check --phase local --local-profile full --jsonl",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/local-phase-timeout.md",
+      "technical": "error_code: LOCAL_PHASE_TIMEOUT"
     },
     {
       "code": "METAMASK_ADDRESS_MISMATCH",
