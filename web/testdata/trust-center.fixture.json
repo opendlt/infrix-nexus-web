@@ -46,6 +46,14 @@
         "link": "examples/metamask-golden-escrow/PROVIDER_MATRIX.md"
       },
       {
+        "id": "commercial-mode",
+        "title": "Commercial mode \u0026 settlement",
+        "status": "Non-payable Kermit pilot",
+        "detail": "Commercial mode: non-payable Kermit pilot. Invoice settlement: unavailable. Receipt signer: local-dev (pilot). Quota enforcement: configured per posture. No payable mainnet commercial mode is claimed.",
+        "command": "infrix account drill --network kermit --mode kermit_pilot_nonpayable",
+        "link": "docs/commercial.md"
+      },
+      {
         "id": "threat-model",
         "title": "Security \u0026 threat model",
         "status": "Published",
