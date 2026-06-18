@@ -215,7 +215,10 @@ header {
   background: var(--bg);
   position: sticky;
   top: 0;
-  z-index: 100;
+  /* Above all page content (which reaches z 200/800/999) so the header
+     dropdowns (identity switcher, theme palette, search results) are never
+     covered, while staying below the 9000 modal/command-palette layer. */
+  z-index: 2000;
 }
 
 .header-inner {
@@ -253,11 +256,19 @@ header {
   border-radius: 4px;
 }
 
-.header-right {
+/* Second-tier context strip: mode + acting-identity on the left, the
+   live/connection/block/theme status cluster floated to the right. Wraps
+   instead of clipping so nothing is ever squished or obscured. */
+.header-context {
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
+.header-context .header-pulse { margin-left: auto; }
 
 .status-indicator {
   display: flex;
@@ -4091,12 +4102,14 @@ header {
 }
 .spine-strip-grid {
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
   gap: 0;
+  row-gap: 6px;
 }
 .strip-card {
-  flex: 1 1 0;
-  min-width: 100px;
+  flex: 1 1 120px;
+  min-width: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -5110,10 +5123,12 @@ header {
     align-items: stretch;
     gap: 10px;
   }
-  .header-right {
-    flex-wrap: wrap;
-    gap: 8px;
+  .header-context {
+    gap: 8px 12px;
   }
+  /* On phones, let the status cluster flow left instead of forcing a
+     right-float that would orphan it on its own line. */
+  .header-context .header-pulse { margin-left: 0; }
   .header-search {
     margin: 0;
   }
@@ -5353,7 +5368,8 @@ header {
 }
 .cockpit-compose-meta-value { font-size: 11px; color: var(--text); }
 
-/* Header disclosure context display */
+/* Header disclosure context — now a clickable identity switcher */
+.header-disclosure-wrap { position: relative; }
 .header-disclosure {
   display: inline-flex;
   align-items: center;
@@ -5364,18 +5380,17 @@ header {
   border-radius: 999px;
   font-size: 11px;
   font-family: var(--font);
+  color: inherit;
+  cursor: pointer;
+  transition: border-color var(--motion-fast), background var(--motion-fast);
 }
-.header-disclosure-label {
-  font-size: 9.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-dim);
-  font-weight: 700;
-}
+.header-disclosure:hover { border-color: var(--accent); background: var(--surface); }
+.header-disclosure-icon { font-size: 12px; line-height: 1; }
+.header-disclosure-caret { color: var(--text-dim); font-size: 9px; }
 .header-disclosure-actor {
   color: var(--text);
   font-size: 11px;
-  max-width: 160px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -5388,9 +5403,87 @@ header {
 }
 .header-disclosure-sep { color: var(--text-dim); }
 
-@media (max-width: 1024px) {
-  .header-disclosure { display: none; }
+/* Compact theme palette icon (replaces the full-width theme <select>) */
+.header-theme-wrap { position: relative; }
+.header-theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color var(--motion-fast), background var(--motion-fast);
 }
+.header-theme-btn:hover { border-color: var(--accent); background: var(--surface); }
+
+/* Shared header popover (identity switcher + theme palette) */
+.header-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 200;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-bold);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+}
+.header-popover[hidden] { display: none; }
+.popover-label {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+.popover-input {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 12px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+}
+.popover-input:focus { outline: none; border-color: var(--accent); }
+.popover-actions { display: flex; justify-content: flex-end; margin-top: 2px; }
+.popover-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--bg);
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.popover-btn:hover { filter: brightness(1.08); }
+.popover-hint { font-size: 10px; color: var(--text-dim); margin: 2px 0 0; line-height: 1.4; }
+.popover-hint code { font-family: var(--mono); color: var(--text-secondary); }
+.theme-popover { min-width: 140px; }
+.theme-option {
+  text-align: left;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.theme-option:hover { background: var(--surface-alt); }
+.theme-option.active { border-color: var(--accent); color: var(--accent); }
 
 /* Reduced-motion respect */
 @media (prefers-reduced-motion: reduce) {

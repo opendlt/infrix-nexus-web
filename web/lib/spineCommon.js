@@ -19,14 +19,37 @@ export const STAGE_ORDER = [
   'anchor',
 ];
 
-// Operator-default disclosure context the explorer browses with. The
-// header eventually offers a context-switch dropdown (Section 4 of
-// the plan); for the local devnet operator the default is sufficient.
-export const DISCLOSURE = Object.freeze({
-  actor: 'acc://test.acme',
-  purpose: 'operational',
+// Disclosure context the explorer browses with. Hydrated from
+// localStorage so the header's identity switcher can persist a chosen
+// acting-ADI + purpose across reloads; defaults to the local devnet
+// operator. NOT frozen — setDisclosure() mutates it in place so every
+// consumer that spreads { ...DISCLOSURE } at call time picks up the
+// switch immediately.
+const ACTOR_KEY = 'nexus.actor';
+const PURPOSE_KEY = 'nexus.purpose';
+function readLS(key, fallback) {
+  try { return localStorage.getItem(key) || fallback; } catch (_) { return fallback; }
+}
+export const DISCLOSURE = {
+  actor: readLS(ACTOR_KEY, 'acc://test.acme'),
+  purpose: readLS(PURPOSE_KEY, 'operational'),
   workflowInstance: 'nexus-explorer',
-});
+};
+
+/** Switch the acting identity / purpose the explorer reads as. Persists
+ * to localStorage and mutates DISCLOSURE in place. Callers typically
+ * reload the view afterwards so already-rendered data re-fetches under
+ * the new context. */
+export function setDisclosure(actor, purpose) {
+  if (actor && actor.trim()) {
+    DISCLOSURE.actor = actor.trim();
+    try { localStorage.setItem(ACTOR_KEY, DISCLOSURE.actor); } catch (_) { /* private mode */ }
+  }
+  if (purpose && purpose.trim()) {
+    DISCLOSURE.purpose = purpose.trim();
+    try { localStorage.setItem(PURPOSE_KEY, DISCLOSURE.purpose); } catch (_) { /* private mode */ }
+  }
+}
 
 /** Issue a JSON-RPC call with the canonical disclosure context + the
  * current time-travel at-coordinate (if any) auto-injected. The at

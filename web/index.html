@@ -32,17 +32,30 @@
                spellcheck="false" autocomplete="off">
         <div id="globalSearchResults" class="header-search-results" hidden></div>
       </div>
-      <div class="header-right">
-        <div class="header-mode-toggle" id="headerModeToggle" role="group" aria-label="Mode">
+    </div>
+    <div class="header-context">
+      <div class="header-mode-toggle" id="headerModeToggle" role="group" aria-label="Mode">
           <button type="button" class="mode-btn" data-mode="guided" title="Guided — task-by-task in plain language">Guided</button>
           <button type="button" class="mode-btn" data-mode="expert" title="Expert — the full spine, evidence, policies, objects, anchors">Expert</button>
         </div>
-        <div class="header-disclosure" id="headerDisclosure" title="Acting identity + purpose context">
-          <span class="header-disclosure-label">acting as</span>
-          <span class="header-disclosure-actor mono" id="headerActor">—</span>
-          <span class="header-disclosure-sep">·</span>
-          <span class="header-disclosure-label">purpose</span>
-          <span class="header-disclosure-purpose" id="headerPurpose">—</span>
+        <div class="header-disclosure-wrap">
+          <button type="button" class="header-disclosure" id="headerDisclosure" title="Switch acting identity + purpose" aria-haspopup="true" aria-expanded="false">
+            <span class="header-disclosure-icon" aria-hidden="true">&#128100;</span>
+            <span class="header-disclosure-actor mono" id="headerActor">&mdash;</span>
+            <span class="header-disclosure-sep">·</span>
+            <span class="header-disclosure-purpose" id="headerPurpose">&mdash;</span>
+            <span class="header-disclosure-caret" aria-hidden="true">&#9662;</span>
+          </button>
+          <div class="header-popover" id="disclosurePopover" hidden>
+            <label class="popover-label" for="disclosureActorInput">Acting as (ADI)</label>
+            <input type="text" id="disclosureActorInput" class="popover-input mono" placeholder="acc://your-adi.acme" spellcheck="false" autocomplete="off">
+            <label class="popover-label" for="disclosurePurposeInput">Purpose</label>
+            <input type="text" id="disclosurePurposeInput" class="popover-input" placeholder="operational" spellcheck="false" autocomplete="off">
+            <div class="popover-actions">
+              <button type="button" class="popover-btn" id="disclosureApply">Switch identity</button>
+            </div>
+            <p class="popover-hint">The ADI must hold <code>explorer:view</code> or reads are denied.</p>
+          </div>
         </div>
         <div class="header-pulse" id="headerPulse" title="Spine activity">
           <span class="header-pulse-dot"></span>
@@ -56,13 +69,15 @@
         <div class="block-height-display" id="blockHeightDisplay">
           Block <span id="headerBlockHeight">-</span>
         </div>
-        <select id="themeSelect" class="header-theme-select" aria-label="Theme">
-          <option value="dark">Aurora</option>
-          <option value="light">Daylight</option>
-          <option value="contrast">Phosphor</option>
-        </select>
+        <div class="header-theme-wrap">
+          <button type="button" class="header-theme-btn" id="themeButton" title="Theme" aria-haspopup="true" aria-expanded="false" aria-label="Theme">&#127912;</button>
+          <div class="header-popover theme-popover" id="themePopover" hidden>
+            <button type="button" class="theme-option" data-theme="dark">Aurora</button>
+            <button type="button" class="theme-option" data-theme="light">Daylight</button>
+            <button type="button" class="theme-option" data-theme="contrast">Phosphor</button>
+          </div>
+        </div>
       </div>
-    </div>
   </div>
 </header>
 

@@ -5,7 +5,7 @@
 // keyboard navigation, and the theme dropdown to a localStorage-
 // persisted [data-theme] attribute on <html>.
 
-import { rpcWithDisclosure, shortHash } from '/lib/spineCommon.js';
+import { rpcWithDisclosure, shortHash, DISCLOSURE, setDisclosure } from '/lib/spineCommon.js';
 import { subscribe } from '/lib/spineBus.js';
 import { toggleCommandPalette, toggleShortcutHelp } from '/lib/commandPalette.js';
 import { startHeaderInboxBadge } from '/lib/cockpitRails.js';
@@ -91,17 +91,48 @@ async function initDisclosure() {
   const actorEl = document.getElementById('headerActor');
   const purposeEl = document.getElementById('headerPurpose');
   if (!actorEl || !purposeEl) return;
+
+  // Paint the current (possibly switched) context immediately so every
+  // view — not just the cockpit — shows the acting identity.
+  actorEl.textContent = shortHash(DISCLOSURE.actor, 12, 8) || DISCLOSURE.actor;
+  actorEl.title = DISCLOSURE.actor;
+  purposeEl.textContent = DISCLOSURE.purpose;
+
   try {
     const { subscribe2 } = await import('/lib/store.js');
     subscribe2('cockpit', (slice) => {
       if (!slice || slice.status !== 'visible' || !slice.data) return;
       const ctx = slice.data.disclosureContext || {};
-      if (ctx.actor) actorEl.textContent = ctx.actor;
+      if (ctx.actor) { actorEl.textContent = shortHash(ctx.actor, 12, 8) || ctx.actor; actorEl.title = ctx.actor; }
       if (ctx.purpose) purposeEl.textContent = ctx.purpose;
     });
   } catch (e) {
-    // Store import unavailable — silently keep dashes.
+    // Store import unavailable — silently keep the immediate paint.
   }
+
+  // Identity switcher popover.
+  const btn = document.getElementById('headerDisclosure');
+  const pop = document.getElementById('disclosurePopover');
+  const actorIn = document.getElementById('disclosureActorInput');
+  const purposeIn = document.getElementById('disclosurePurposeInput');
+  const apply = document.getElementById('disclosureApply');
+  if (!btn || !pop || !actorIn || !purposeIn || !apply) return;
+  btn.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    actorIn.value = DISCLOSURE.actor;
+    purposeIn.value = DISCLOSURE.purpose;
+    togglePopover(pop, btn);
+  });
+  const commit = () => {
+    setDisclosure(actorIn.value, purposeIn.value);
+    closePopover(pop, btn);
+    // Reload so every already-rendered view re-fetches under the new
+    // acting identity + purpose.
+    window.location.reload();
+  };
+  apply.addEventListener('click', commit);
+  purposeIn.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') commit(); });
+  actorIn.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') commit(); });
 }
 
 // Pulse meter — the dot flashes briefly every time the spine bus
@@ -305,20 +336,62 @@ function initSearch() {
 // Theme switcher
 // -----------------------------------------------------------------
 function initTheme() {
-  const select = document.getElementById('themeSelect');
-  // Aurora-Dark is the new default; respects an existing localStorage
-  // selection if the user already picked a different theme.
-  const saved = localStorage.getItem(THEME_KEY) || 'dark';
+  // Aurora-Dark is the default; respects an existing localStorage choice.
+  let saved = 'dark';
+  try { saved = localStorage.getItem(THEME_KEY) || 'dark'; } catch (_) { saved = 'dark'; }
   applyTheme(saved);
-  if (select) {
-    select.value = saved;
-    select.addEventListener('change', () => {
-      const v = select.value;
-      if (THEMES.includes(v)) {
-        applyTheme(v);
-        localStorage.setItem(THEME_KEY, v);
-      }
+
+  // Compact palette icon → popover of theme options (reclaims the header
+  // row the old full-width <select> consumed).
+  const btn = document.getElementById('themeButton');
+  const pop = document.getElementById('themePopover');
+  if (!btn || !pop) return;
+  const options = pop.querySelectorAll('.theme-option');
+  const paint = (v) => options.forEach((o) => o.classList.toggle('active', o.dataset.theme === v));
+  paint(saved);
+  btn.addEventListener('click', (ev) => { ev.stopPropagation(); togglePopover(pop, btn); });
+  options.forEach((o) => {
+    o.addEventListener('click', () => {
+      const v = o.dataset.theme;
+      if (!THEMES.includes(v)) return;
+      applyTheme(v);
+      try { localStorage.setItem(THEME_KEY, v); } catch (_) { /* private mode */ }
+      paint(v);
+      closePopover(pop, btn);
     });
+  });
+}
+
+// -----------------------------------------------------------------
+// Popover helper (theme palette + identity switcher)
+// -----------------------------------------------------------------
+let openPopoverEl = null;
+let openPopoverBtn = null;
+function closePopover(pop, btn) {
+  if (!pop) return;
+  pop.hidden = true;
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+  if (openPopoverEl === pop) { openPopoverEl = null; openPopoverBtn = null; }
+}
+function togglePopover(pop, btn) {
+  if (!pop) return;
+  if (!pop.hidden) { closePopover(pop, btn); return; }
+  // Close any other open popover first.
+  if (openPopoverEl && openPopoverEl !== pop) closePopover(openPopoverEl, openPopoverBtn);
+  pop.hidden = false;
+  if (btn) btn.setAttribute('aria-expanded', 'true');
+  openPopoverEl = pop; openPopoverBtn = btn;
+  // Dismiss on outside click / Escape.
+  if (!togglePopover._wired) {
+    document.addEventListener('click', (ev) => {
+      if (!openPopoverEl) return;
+      const wrap = openPopoverEl.parentElement;
+      if (wrap && !wrap.contains(ev.target)) closePopover(openPopoverEl, openPopoverBtn);
+    });
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && openPopoverEl) closePopover(openPopoverEl, openPopoverBtn);
+    });
+    togglePopover._wired = true;
   }
 }
 
