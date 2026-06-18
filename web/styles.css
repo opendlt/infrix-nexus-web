@@ -209,7 +209,11 @@ body::before {
 }
 
 /* ===== Header ===== */
-header {
+/* body > header scopes these to the TOP app header only — in-page views
+   create their own <header class="workspace-header"> elements, which must
+   NOT inherit the app bar's sticky positioning / z-index (that made the
+   Studio banner a sticky z-2000 element covering the header dropdowns). */
+body > header {
   padding: 16px 0;
   border-bottom: 3px solid var(--text);
   background: var(--bg);
@@ -2758,7 +2762,7 @@ footer {
 }
 
 /* Header refresh */
-header {
+body > header {
   background: var(--bg-alt);
   border-bottom: 1px solid var(--border);
   padding: 14px 0;
