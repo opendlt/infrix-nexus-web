@@ -26,6 +26,7 @@ export function initHeader() {
   initDisclosure();
   initShortcuts();
   initWorkspaceNav();
+  initBlockHeight();
   // Cinema-Inbox-Time E2C6 — Inbox unread badge in the workspace nav.
   startHeaderInboxBadge({ pollMs: 15000 });
   // Cinema-Inbox-Time E3C5 — time-travel cursor + non-live banner.
@@ -133,6 +134,26 @@ async function initDisclosure() {
   apply.addEventListener('click', commit);
   purposeIn.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') commit(); });
   actorIn.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') commit(); });
+}
+
+// Block-height meter — polls the node's operate-health so the header
+// "Block N" badge tracks the live Infrix block height instead of showing
+// a perpetual "-". Reads use the current disclosure context; if the
+// acting identity lacks explorer:view the badge keeps its last value.
+function initBlockHeight() {
+  const el = document.getElementById('headerBlockHeight');
+  if (!el) return;
+  const poll = async () => {
+    try {
+      const h = await rpcWithDisclosure('nexus.operateHealth', {});
+      const bh = h && h.network ? h.network.blockHeight : undefined;
+      if (bh !== undefined && bh !== null) el.textContent = String(bh);
+    } catch (_) {
+      // Keep the last painted value on a transient/denied read.
+    }
+  };
+  poll();
+  setInterval(poll, 8000);
 }
 
 // Pulse meter — the dot flashes briefly every time the spine bus

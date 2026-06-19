@@ -5489,6 +5489,81 @@ body > header {
 .theme-option:hover { background: var(--surface-alt); }
 .theme-option.active { border-color: var(--accent); color: var(--accent); }
 
+/* Time-travel selector — compact pill button + absolute popover panel.
+   Was unstyled, so the panel rendered inline and expanded the header row
+   to several lines. */
+.time-selector { position: relative; display: inline-flex; }
+.time-selector-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: var(--font);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.time-selector-button:hover { border-color: var(--accent); background: var(--surface); }
+.time-selector-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 200;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-bold);
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+}
+.time-selector-panel[hidden] { display: none; }
+.time-selector-row { display: flex; gap: 14px; }
+.time-selector-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+.time-selector-input-row { display: flex; flex-direction: column; gap: 5px; }
+.time-selector-label {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+.time-selector-input {
+  width: 100%;
+  padding: 6px 8px;
+  font-size: 12px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+}
+.time-selector-input:focus { outline: none; border-color: var(--accent); }
+.time-selector-note { font-size: 10.5px; color: var(--text-dim); line-height: 1.4; }
+.time-selector-apply-row { display: flex; justify-content: flex-end; gap: 8px; }
+.time-selector-apply,
+.time-selector-reset {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.time-selector-apply { color: var(--bg); background: var(--accent); border: none; }
+.time-selector-reset { color: var(--text); background: transparent; border: 1px solid var(--border); }
+
 /* Reduced-motion respect */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
