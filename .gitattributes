@@ -1,0 +1,6 @@
+# Pin LF on every text file so the manifest-pinned portable-fixture sha256 (and
+# all checked-in assets) stay byte-stable on every clean clone — core.autocrlf
+# must never rewrite line endings (a CRLF rewrite breaks the fixture's sha256).
+# Binary assets (images, fonts) are auto-detected and left untouched.
+* text=auto eol=lf
+web/testdata/*.json text eol=lf
