@@ -1,0 +1,5 @@
+# The SPA ships as static source + a Go embed; there is no build output.
+node_modules/
+**/node_modules/
+*.log
+.DS_Store
