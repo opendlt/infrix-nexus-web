@@ -68,19 +68,12 @@ export function createApprovalQueue() {
     }
     body.replaceChildren();
     for (const a of items) {
-      const row = document.createElement('button');
-      row.type = 'button';
-      row.className = 'cockpit-rail-row approval-row';
-      row.addEventListener('click', () => {
-        // NEXUS-REIMAGINED Phase 3: pending-approval rows open the
-        // dedicated approval review screen, not the spine narrative.
-        // The dossier is the canonical signing surface — operators
-        // sign here, not from a row inside the timeline.
-        const planId = a.planId || '';
-        if (planId) {
-          window.location.hash = '#/approve/' + encodeURIComponent(planId);
-        }
-      });
+      // RUNBOOK-02 Task 4a — review the dossier IN PLACE; the irreversible
+      // signature still happens on the dedicated #/approve surface (the
+      // canonical signing surface), reached via the secondary deep-link below.
+      const item = document.createElement('div');
+      item.className = 'cockpit-rail-item approval-item';
+
       const head = document.createElement('div');
       head.className = 'cockpit-rail-row-head';
       const role = document.createElement('span');
@@ -88,16 +81,52 @@ export function createApprovalQueue() {
       role.textContent = a.role || 'role: —';
       head.appendChild(role);
       head.appendChild(severityBadge('attention'));
-      row.appendChild(head);
+      item.appendChild(head);
+
       const id = document.createElement('div');
       id.className = 'cockpit-rail-row-id mono';
       id.textContent = shortHash(a.planId || a.id, 28, 6);
-      row.appendChild(id);
+      item.appendChild(id);
+
       const meta = document.createElement('div');
       meta.className = 'cockpit-rail-row-meta';
       meta.textContent = `signer: ${a.identity || '—'}`;
-      row.appendChild(meta);
-      body.appendChild(row);
+      item.appendChild(meta);
+
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'cockpit-rail-expand-toggle';
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.textContent = 'Review ▸';
+      const panel = document.createElement('div');
+      panel.className = 'cockpit-rail-expand';
+      panel.hidden = true;
+      let loaded = false;
+      toggle.addEventListener('click', async () => {
+        const open = panel.hidden;
+        panel.hidden = !open;
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.textContent = open ? 'Review ▾' : 'Review ▸';
+        if (open && !loaded && a.planId) {
+          loaded = true;
+          panel.replaceChildren(loadingPreview('Loading review…'));
+          try {
+            const dossier = await rpcWithDisclosure('nexus.approvalDossier', { planId: a.planId });
+            panel.replaceChildren(renderDossier(dossier));
+            const sign = document.createElement('a');
+            sign.className = 'cockpit-rail-deeplink';
+            sign.href = '#/approve/' + encodeURIComponent(a.planId);
+            sign.textContent = 'Review & sign →';
+            panel.appendChild(sign);
+          } catch (err) {
+            loaded = false; // allow a retry on the next expand
+            panel.replaceChildren(errorStateNode(err));
+          }
+        }
+      });
+      item.appendChild(toggle);
+      item.appendChild(panel);
+      body.appendChild(item);
     }
   }
 
@@ -224,20 +253,9 @@ export function createVerificationRail() {
     }
     body.replaceChildren();
     for (const t of tasks) {
-      const row = document.createElement('button');
-      row.type = 'button';
-      row.className = 'cockpit-rail-row verify-row';
-      row.addEventListener('click', () => {
-        // NEXUS-REIMAGINED Phase 5: verification-rail rows open the
-        // dedicated evidence reader (#/prove/<bundleId>) — the
-        // canonical surface for verifying outcome integrity, walking
-        // the chain, and exporting portable proof.
-        if (t.bundleId) {
-          window.location.hash = '#/prove/' + encodeURIComponent(t.bundleId);
-        } else if (t.intentId) {
-          window.location.hash = '#/spine/' + encodeURIComponent(t.intentId);
-        }
-      });
+      const item = document.createElement('div');
+      item.className = 'cockpit-rail-item verify-item';
+
       const head = document.createElement('div');
       head.className = 'cockpit-rail-row-head';
       const lvl = document.createElement('span');
@@ -245,19 +263,60 @@ export function createVerificationRail() {
       lvl.textContent = t.level || 'standard';
       head.appendChild(lvl);
       head.appendChild(severityBadge('normal'));
-      row.appendChild(head);
+      item.appendChild(head);
+
       const id = document.createElement('div');
       id.className = 'cockpit-rail-row-id mono';
       id.textContent = shortHash(t.bundleId, 22, 6);
-      row.appendChild(id);
+      item.appendChild(id);
+
       if (t.bundleHash) {
         const hash = document.createElement('div');
         hash.className = 'cockpit-rail-row-meta';
         hash.appendChild(document.createTextNode('hash: '));
         hash.appendChild(hashChip(t.bundleHash, { head: 10, tail: 6 }));
-        row.appendChild(hash);
+        item.appendChild(hash);
       }
-      body.appendChild(row);
+
+      if (t.bundleId) {
+        // RUNBOOK-02 Task 4b — verification is read-only + idempotent, so the
+        // 8-check runs fully IN PLACE here; the dedicated reader (#/prove) stays
+        // a secondary deep-link for chain-walk + portable export.
+        const result = document.createElement('div');
+        result.className = 'cockpit-rail-verify-result';
+        const run = document.createElement('button');
+        run.type = 'button';
+        run.className = 'cockpit-rail-expand-toggle';
+        run.textContent = 'Run 8-check';
+        run.addEventListener('click', async () => {
+          run.disabled = true;
+          result.replaceChildren(loadingPreview('Verifying…'));
+          try {
+            const r = await rpcWithDisclosure('evidence.verify', { id: t.bundleId });
+            result.replaceChildren(compactVerify(r));
+          } catch (err) {
+            result.replaceChildren(errorStateNode(err));
+          } finally {
+            run.disabled = false;
+          }
+        });
+        item.appendChild(run);
+        item.appendChild(result);
+        const open = document.createElement('a');
+        open.className = 'cockpit-rail-deeplink';
+        open.href = '#/prove/' + encodeURIComponent(t.bundleId);
+        open.textContent = 'Open full verifier →';
+        item.appendChild(open);
+      } else if (t.intentId) {
+        // No bundle yet — nothing to verify in place; keep the single deep-link.
+        const open = document.createElement('a');
+        open.className = 'cockpit-rail-deeplink';
+        open.href = '#/spine/' + encodeURIComponent(t.intentId);
+        open.textContent = 'Open intent →';
+        item.appendChild(open);
+      }
+
+      body.appendChild(item);
     }
   }
 
@@ -282,6 +341,12 @@ const GOAL_TYPES = [
   'SUBSYSTEM_ACTION',
 ];
 
+// RUNBOOK-02 Task 3 — this raw-JSON quick-compose dock is NO LONGER mounted on
+// the Cockpit (the home leads with the spine hero + attention rails; the
+// expert paste-JSON path belongs behind the Build/Studio surface). It stays
+// exported as the reference preview/submit implementation that the Studio view
+// (RUNBOOK-04) consumes behind an "Advanced: paste customParams" disclosure.
+// Do NOT re-add it to spine.js.
 export function createQuickComposeDock() {
   const root = document.createElement('section');
   root.className = 'cockpit-compose';
@@ -497,6 +562,22 @@ function loadingPreview(label = 'Compiling preview…') {
   d.textContent = label;
   return d;
 }
+// RUNBOOK-02 Task 4b — compact pass/fail line for the in-place verify rail. The
+// full per-check list lives on the dedicated #/prove reader (deep-linked). Reads
+// the same { verified, checks:[{passed}] } shape evidence.verify returns.
+function compactVerify(result) {
+  const checks = (result && result.checks) || [];
+  const passed = checks.filter((c) => c.passed).length;
+  const total = checks.length;
+  const d = document.createElement('div');
+  const ok = !!(result && result.verified);
+  d.className = 'cockpit-verify-summary verify-' + (ok ? 'pass' : 'fail');
+  d.setAttribute('role', 'status');
+  d.textContent = ok
+    ? `✓ Verified — ${passed}/${total} checks passed`
+    : `✗ Failed — ${total - passed}/${total} checks failed`;
+  return d;
+}
 
 // =================================================================
 // Drafts rail — Cinema-Inbox-Time E2C6
@@ -527,10 +608,12 @@ export function createDraftsRail({ pollMs = 30000 } = {}) {
   body.appendChild(skeletonRows(2));
   root.appendChild(body);
 
+  // RUNBOOK-02 Task 3 — the single primary compose CTA on the Cockpit. Targets
+  // the Build surface (#/compose); doubles as "resume a draft / start a new one".
   const composeNew = document.createElement('a');
   composeNew.className = 'cockpit-rail-footer-link';
   composeNew.href = '#/compose';
-  composeNew.textContent = 'Open Studio →';
+  composeNew.textContent = 'New action →';
   root.appendChild(composeNew);
 
   let timer = null;
@@ -541,7 +624,7 @@ export function createDraftsRail({ pollMs = 30000 } = {}) {
       count.textContent = String(drafts.length);
       body.replaceChildren();
       if (drafts.length === 0) {
-        body.appendChild(emptyRail('No drafts. Open Studio to start one.'));
+        body.appendChild(emptyRail('No drafts. Start a new action to begin.'));
         return;
       }
       for (const d of drafts) {

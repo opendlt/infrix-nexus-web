@@ -33,6 +33,7 @@ import {
   readField,
   loadingNode,
   errorNode,
+  STAGES,
 } from '/lib/spineCommon.js';
 import {
   openPluginDrawer,
@@ -43,15 +44,10 @@ import {
 } from '/lib/drawer.js';
 import { fetchNarrative } from '/lib/store.js';
 
-const CHAPTERS = [
-  { key: 'intent',    label: 'Intent',    blurb: 'goal submitted' },
-  { key: 'plan',      label: 'Plan',      blurb: 'compiled + hashed' },
-  { key: 'approval',  label: 'Approval',  blurb: 'signers + waivers' },
-  { key: 'execution', label: 'Execution', blurb: 'plugins fire' },
-  { key: 'outcome',   label: 'Outcome',   blurb: 'finality bound' },
-  { key: 'evidence',  label: 'Evidence',  blurb: 'hash chain sealed' },
-  { key: 'anchor',    label: 'Anchor',    blurb: 'L0 commitment' },
-];
+// One canonical STAGES source (RUNBOOK-02 Task 1): one narrative chapter per
+// spine stage, in canonical order. The extra `token` field on STAGES is ignored
+// here; {key,label,blurb} are used exactly as before.
+const CHAPTERS = STAGES;
 
 export function createNarrative({ onClose, onChapterEnter }) {
   const root = document.createElement('div');

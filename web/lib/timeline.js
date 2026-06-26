@@ -15,11 +15,12 @@
 //     place and gets a brief accent flash to draw the eye.
 //   - New rows arrive at the top with a slide-in animation.
 
-import { rpcWithDisclosure, formatTime, statusPill, shortHash } from '/lib/spineCommon.js';
+import { rpcWithDisclosure, formatTime, statusPill, shortHash, STAGE_KEYS } from '/lib/spineCommon.js';
 import { subscribe } from '/lib/spineBus.js';
 import { subscribe2, refreshSlice } from '/lib/store.js';
 
-const STAGE_KEYS = ['intent', 'plan', 'approval', 'execution', 'outcome', 'evidence', 'anchor'];
+// One canonical STAGES source (RUNBOOK-02 Task 1): STAGE_KEYS is imported, not
+// re-declared. Identical order to the old local array (intent…anchor).
 
 export function createTimeline({ onIntentSelect }) {
   const root = document.createElement('section');

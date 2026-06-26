@@ -24,7 +24,7 @@
 // The renderer is presentational only — RPC plumbing (export download,
 // raw fetches) lives in views/prove.js.
 
-import { shortHash, formatTime, jsonBlock, hashChip } from '/lib/spineCommon.js';
+import { shortHash, formatTime, jsonBlock, hashChip, STAGE_KEYS } from '/lib/spineCommon.js';
 import { severityBadge, sortBySeverity } from '/lib/severity.js';
 
 const STATUS_LABEL = {
@@ -442,7 +442,7 @@ function textChip(label, value) {
 }
 
 function stageIndex(kind) {
-  const idx = ['intent', 'plan', 'approval', 'execution', 'outcome', 'evidence', 'anchor'].indexOf(kind);
+  const idx = STAGE_KEYS.indexOf(kind);
   return idx >= 0 ? String(idx + 1) : '4';
 }
 

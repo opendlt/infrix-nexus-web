@@ -9,15 +9,26 @@
 import { rpc } from '/lib/rpc.js';
 import { withAt } from '/lib/timeContext.js';
 
-export const STAGE_ORDER = [
-  'intent',
-  'plan',
-  'approval',
-  'execution',
-  'outcome',
-  'evidence',
-  'anchor',
+// THE one canonical spine definition (RUNBOOK-02 Task 1). No other module may
+// re-declare the 7 stages — import STAGES / STAGE_KEYS / STAGE_INDEX from here.
+// `token` is the bare CSS-variable suffix matching --spine-1 … --spine-7 in
+// styles.css; consumers compose `var(--${stage.token})` or use STAGE_INDEX with
+// the [data-stage="N"] selectors.
+export const STAGES = [
+  { key: 'intent',    label: 'Intent',    blurb: 'goal submitted',    token: 'spine-1' },
+  { key: 'plan',      label: 'Plan',      blurb: 'compiled + hashed', token: 'spine-2' },
+  { key: 'approval',  label: 'Approval',  blurb: 'signers + waivers', token: 'spine-3' },
+  { key: 'execution', label: 'Execution', blurb: 'plugins fire',      token: 'spine-4' },
+  { key: 'outcome',   label: 'Outcome',   blurb: 'finality bound',    token: 'spine-5' },
+  { key: 'evidence',  label: 'Evidence',  blurb: 'hash chain sealed', token: 'spine-6' },
+  { key: 'anchor',    label: 'Anchor',    blurb: 'L0 commitment',     token: 'spine-7' },
 ];
+
+// Derived views — never hand-maintain these.
+export const STAGE_KEYS  = STAGES.map((s) => s.key);            // ['intent', … 'anchor']
+export const STAGE_ORDER = STAGE_KEYS;                          // back-compat alias (renderStageDots, external importers)
+export const STAGE_INDEX = Object.fromEntries(STAGES.map((s, i) => [s.key, i + 1])); // intent→1 … anchor→7
+export const STAGE_BY_KEY = Object.fromEntries(STAGES.map((s) => [s.key, s]));
 
 // Disclosure context the explorer browses with. Hydrated from
 // localStorage so the header's identity switcher can persist a chosen

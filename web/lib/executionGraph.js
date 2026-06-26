@@ -22,7 +22,7 @@
 // waiting). Dep edges show the lock state — a "blocking" edge looks
 // muted; an "unlocked" edge animates a gentle pulse.
 
-import { shortHash, formatTime, jsonBlock, hashChip } from '/lib/spineCommon.js';
+import { shortHash, formatTime, jsonBlock, hashChip, STAGE_KEYS } from '/lib/spineCommon.js';
 import { severityBadge, sortBySeverity } from '/lib/severity.js';
 import { mountDagRenderer } from '/lib/dagRenderer.js';
 import { applyStepCardTransitions, applyFailureOverlay, applyAnchorWaitOnStageStrip } from '/lib/stepCardAnimations.js';
@@ -148,7 +148,7 @@ export function renderExecutionGraph(graph, opts = {}) {
 function renderStageHeader(g) {
   const wrap = document.createElement('div');
   wrap.className = 'execution-stage-header';
-  const stages = ['intent', 'plan', 'approval', 'execution', 'outcome', 'evidence', 'anchor'];
+  const stages = STAGE_KEYS;
   const currentIdx = stages.indexOf(g.spineStage || 'execution');
   const track = document.createElement('div');
   track.className = 'execution-stage-track';
@@ -418,7 +418,7 @@ function renderStepCard(node, graph) {
 }
 
 function stageIndex(stage) {
-  const idx = ['intent', 'plan', 'approval', 'execution', 'outcome', 'evidence', 'anchor'].indexOf(stage);
+  const idx = STAGE_KEYS.indexOf(stage);
   return idx >= 0 ? String(idx + 1) : '4';
 }
 

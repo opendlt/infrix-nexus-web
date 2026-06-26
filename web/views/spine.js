@@ -22,10 +22,12 @@
 import { createTimeline } from '/lib/timeline.js';
 import { createNarrative } from '/lib/narrative.js';
 import { createTelemetry } from '/lib/telemetry.js';
-import { createApprovalQueue, createRiskRail, createVerificationRail, createQuickComposeDock, createDraftsRail } from '/lib/cockpitRails.js';
+import { createSpineStrip } from '/lib/spineStrip.js';
+import { createApprovalQueue, createRiskRail, createVerificationRail, createDraftsRail } from '/lib/cockpitRails.js';
 import { ensureSlice } from '/lib/store.js';
 
 let rootEl = null;
+let strip = null;
 let timeline = null;
 let narrative = null;
 let telemetry = null;
@@ -35,6 +37,7 @@ export const spineView = {
   mount(root, subpath) {
     rootEl = root;
     currentSubpath = Array.isArray(subpath) ? subpath : [];
+    if (strip) { strip.destroy && strip.destroy(); strip = null; }
     if (timeline) { timeline.destroy && timeline.destroy(); timeline = null; }
     if (narrative) { narrative.destroy && narrative.destroy(); narrative = null; }
     if (telemetry) { telemetry.destroy && telemetry.destroy(); telemetry = null; }
@@ -60,13 +63,29 @@ export const spineView = {
     canvas.className = 'cockpit-canvas';
     shell.appendChild(canvas);
 
+    // Spine strip — THE hero (RUNBOOK-02 Task 2). Always visible, spans both
+    // columns via grid-area "strip". With no selection its cards show live
+    // throughput and clicking filters the timeline; with an intent open its
+    // cards become chapter jump-anchors reflecting that intent's progression.
+    strip = createSpineStrip({
+      onStageClick: (stageKey) => {
+        if (currentSubpath.length > 0) {
+          if (narrative) narrative.scrollToChapter(stageKey);
+        } else {
+          if (timeline) timeline.setFilter(stageKey);
+        }
+      },
+    });
+    canvas.appendChild(strip.element);
+
     const flow = document.createElement('div');
     flow.className = 'spine-flow';
     canvas.appendChild(flow);
 
-    // Quick compose dock — first content in the flow region.
-    const composeDock = createQuickComposeDock();
-    flow.appendChild(composeDock.element);
+    // RUNBOOK-02 Task 3 — the raw-JSON quick-compose dock no longer leads the
+    // Cockpit. The home opens with the spine hero + the attention rails; the
+    // flow region leads with the timeline. The expert paste-JSON path lives
+    // behind the Build/Studio surface (#/compose).
 
     timeline = createTimeline({
       onIntentSelect: (intentId) => {
@@ -77,7 +96,7 @@ export const spineView = {
 
     narrative = createNarrative({
       onClose: () => { window.location.hash = '#/spine'; },
-      onChapterEnter: () => {},
+      onChapterEnter: (stageKey) => { if (strip) strip.setActiveChapter(stageKey); },
     });
     flow.appendChild(narrative.element);
 
@@ -124,8 +143,13 @@ export const spineView = {
 function applySelection() {
   if (currentSubpath.length > 0) {
     const intentId = currentSubpath[0];
-    if (narrative) narrative.openIntent(intentId, () => {});
+    if (narrative) {
+      narrative.openIntent(intentId, (stages) => {
+        if (strip) strip.showIntentProgression(stages); // cards reflect THIS intent
+      });
+    }
   } else {
     if (narrative) narrative.close();
+    if (strip) strip.showThroughput();                  // cards show live in-flight counts
   }
 }

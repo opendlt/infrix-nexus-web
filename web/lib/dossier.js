@@ -18,7 +18,7 @@
 // signal (policy denial) can never be missed even if the reviewer
 // only reads the Summary.
 
-import { shortHash, formatTime, jsonBlock, hashChip } from '/lib/spineCommon.js';
+import { shortHash, formatTime, jsonBlock, hashChip, STAGE_KEYS } from '/lib/spineCommon.js';
 import { severityBadge, sortBySeverity } from '/lib/severity.js';
 
 /**
@@ -394,7 +394,7 @@ function renderStepGraph(graph) {
 }
 
 function stageIndex(stageName) {
-  const idx = ['intent', 'plan', 'approval', 'execution', 'outcome', 'evidence', 'anchor'].indexOf(stageName);
+  const idx = STAGE_KEYS.indexOf(stageName);
   return idx >= 0 ? String(idx + 1) : '4';
 }
 

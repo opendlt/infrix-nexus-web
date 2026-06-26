@@ -28,9 +28,13 @@ test('the 17 orphan legacy view files are deleted', () => {
 });
 
 test('the orphaned spine-copy libs are deleted', () => {
-  for (const m of ['spineHero', 'spineStrip', 'liveEvents']) {
+  // spineHero.js and liveEvents.js are gone for good. spineStrip.js was deleted
+  // by RUNBOOK-01 but RESTORED and promoted to the Cockpit hero by RUNBOOK-02,
+  // so it is a live component again (covered by spine_strip_smoke.mjs).
+  for (const m of ['spineHero', 'liveEvents']) {
     assert.equal(exists(`lib/${m}.js`), false, `lib/${m}.js must be deleted`);
   }
+  assert.equal(exists('lib/spineStrip.js'), true, 'lib/spineStrip.js is the rendered Cockpit hero (RUNBOOK-02)');
 });
 
 test('the six fixture "fake builder" views + their private libs are deleted', () => {

@@ -3942,7 +3942,12 @@ body > header {
 .cockpit-canvas {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
-  grid-template-areas: "flow rail";
+  /* RUNBOOK-02 Task 2 — the spine strip is the hero band, spanning both
+     columns above flow+rail. (RUNBOOK-07 SP1 may insert a "scrub" row between
+     "strip" and "flow"; keep this a named-areas grid so it can.) */
+  grid-template-areas:
+    "strip strip"
+    "flow  rail";
   gap: 16px;
   align-items: start;
 }
@@ -3987,6 +3992,42 @@ body > header {
   pointer-events: none;
 }
 .spine-strip > * { position: relative; z-index: 1; }
+
+/* Spine strip promoted to the Cockpit hero (RUNBOOK-02 §2d). A taller band with
+   a full-bleed animated spine gradient sweeping cool→warm across the seven
+   stages. The connector-particle system (spineStrip.js animateConnector) fires
+   on intent.advanced at this hero scale with no extra JS. */
+.cockpit-canvas .spine-strip {
+  padding: 26px 28px 30px;     /* more vertical presence than the 16/20/18 base */
+  border-width: 1.5px;
+}
+.cockpit-canvas .spine-strip::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg,
+    color-mix(in srgb, var(--spine-1) 22%, transparent) 0%,
+    color-mix(in srgb, var(--spine-2) 16%, transparent) 16%,
+    color-mix(in srgb, var(--spine-3) 14%, transparent) 33%,
+    color-mix(in srgb, var(--spine-4) 14%, transparent) 50%,
+    color-mix(in srgb, var(--spine-5) 14%, transparent) 66%,
+    color-mix(in srgb, var(--spine-6) 16%, transparent) 83%,
+    color-mix(in srgb, var(--spine-7) 22%, transparent) 100%);
+  background-size: 220% 100%;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;                  /* below .spine-strip > * { z-index: 1 } */
+  animation: spine-hero-sweep 18s linear infinite;
+}
+@keyframes spine-hero-sweep {
+  0%   { background-position:   0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+/* RUNBOOK-02 §2e — freeze the sweep for reduced-motion. The global
+   prefers-reduced-motion block also neutralizes the card pulse + particles. */
+@media (prefers-reduced-motion: reduce) {
+  .cockpit-canvas .spine-strip::after { animation: none; background-position: 50% 50%; }
+}
+
 .spine-strip-eyebrow {
   display: flex;
   align-items: center;
@@ -4939,14 +4980,18 @@ body > header {
 
 /* < 1280px: telemetry rail narrows */
 @media (max-width: 1280px) {
-  .spine-canvas {
+  .spine-canvas,
+  .cockpit-canvas {
     grid-template-columns: minmax(0, 1fr) 280px;
   }
 }
 
-/* < 1024px: telemetry rail moves below the flow region */
+/* < 1024px: telemetry rail moves below the flow region. The spine strip hero
+   stacks on top (strip → flow → rail). Covers .cockpit-canvas (the Cockpit) as
+   well as the legacy .spine-canvas (RUNBOOK-02). */
 @media (max-width: 1024px) {
-  .spine-canvas {
+  .spine-canvas,
+  .cockpit-canvas {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "strip"
@@ -5113,6 +5158,57 @@ body > header {
   background: var(--accent-soft);
   border-color: var(--accent);
   transform: translateX(2px);
+}
+
+/* RUNBOOK-02 Task 4 — in-place rail actions: review an approval dossier or run
+   an evidence 8-check without leaving the Cockpit. The item carries the same
+   card chrome the old row-button had; the deep-link to the full surface stays
+   but is visually secondary. */
+.cockpit-rail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 7px 9px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-bold);
+  border-radius: var(--radius-sm);
+}
+.cockpit-rail-expand-toggle {
+  align-self: flex-start;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 0;
+  padding: 2px 0;
+  cursor: pointer;
+}
+.cockpit-rail-expand-toggle:hover { color: var(--text); }
+.cockpit-rail-expand-toggle[disabled] { opacity: 0.6; cursor: default; }
+.cockpit-rail-expand {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 2px;
+}
+.cockpit-rail-verify-result { margin-top: 2px; }
+.cockpit-verify-summary { font-size: 11px; font-weight: 700; }
+.cockpit-verify-summary.verify-pass { color: var(--ok); }
+.cockpit-verify-summary.verify-fail { color: var(--alert); }
+.cockpit-rail-deeplink {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+}
+.cockpit-rail-deeplink:hover { text-decoration: underline; }
+.cockpit-rail-expand-toggle:focus-visible,
+.cockpit-rail-deeplink:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .cockpit-rail-row-head {
   display: flex;
