@@ -45,6 +45,7 @@ function initWorkspaceNav() {
   // Routes that resolve to each workspace. Compose has sub-paths
   // like #/compose/<goal>; we match by the first hash segment.
   const ROUTE_TO_WORKSPACE = {
+    start:    'start',
     spine:    'spine',
     live:     'spine',
     inspect:  'spine',
@@ -54,7 +55,7 @@ function initWorkspaceNav() {
     evidence: 'spine',
     anchors:  'spine',
     compose:  'compose',
-    approve:  'compose',  // approval dossier sits adjacent to Studio
+    approve:  'compose',  // approval dossier sits adjacent to Build
     execute:  'spine',    // execution cinema is a lens on the spine
     govern:   'govern',
     approvals:'govern',
@@ -63,11 +64,14 @@ function initWorkspaceNav() {
     plugins:  'govern',
     capabilities: 'govern',
     roles:    'govern',
-    operate:  'operate',
-    subsystems: 'operate',
+    // RUNBOOK-01 IA: Console / Agent / Scenarios are no longer nav doors (they
+    // live in the command palette). Paint the nearest surviving door (Cockpit)
+    // when viewing them so no dangling workspace id is referenced.
+    operate:  'spine',
+    subsystems: 'spine',
+    network:  'spine',
     prove:    'prove',
     verify:   'prove',
-    network:  'operate',
     inbox:    'inbox',
   };
 
@@ -214,10 +218,15 @@ function initShortcuts() {
 
     if (waitingForSecond && !inField) {
       waitingForSecond = false;
+      // RUNBOOK-01 IA: chords point at the six canonical doors + Console.
+      // g·l → Cockpit (was #/live redirect), g·i → Inbox (was #/inspect),
+      // g·b and g·c → Build, g·s → Start.
       switch (ev.key) {
-        case 'l': window.location.hash = '#/live'; ev.preventDefault(); break;
-        case 'i': window.location.hash = '#/inspect'; ev.preventDefault(); break;
+        case 's': window.location.hash = '#/start'; ev.preventDefault(); break;
+        case 'l': window.location.hash = '#/spine'; ev.preventDefault(); break;
+        case 'i': window.location.hash = '#/inbox'; ev.preventDefault(); break;
         case 'o': window.location.hash = '#/operate'; ev.preventDefault(); break;
+        case 'b': window.location.hash = '#/compose'; ev.preventDefault(); break;
         case 'c': window.location.hash = '#/compose'; ev.preventDefault(); break;
         case 'p': window.location.hash = '#/prove'; ev.preventDefault(); break;
         case 'a': window.location.hash = '#/govern'; ev.preventDefault(); break;

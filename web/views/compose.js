@@ -56,12 +56,20 @@ export const composeView = {
     head.className = 'workspace-header';
     const title = document.createElement('h2');
     title.className = 'workspace-title';
-    title.textContent = 'Studio';
+    title.textContent = 'Build';
     head.appendChild(title);
     const sub = document.createElement('p');
     sub.className = 'workspace-subtitle';
     sub.textContent = 'Compose a new action. Pick a type, fill in the details, preview the plan, then submit.';
     head.appendChild(sub);
+    // RUNBOOK-01 IA — Build is the single "describe an intent" door. Scenarios
+    // (build + run a verifiable proof story) is its template on-ramp rather than
+    // a competing door.
+    const scenLink = document.createElement('a');
+    scenLink.className = 'compose-scenario-link';
+    scenLink.href = '#/scenarios';
+    scenLink.textContent = 'Start from a scenario template →';
+    head.appendChild(scenLink);
     shell.appendChild(head);
 
     const layout = document.createElement('div');

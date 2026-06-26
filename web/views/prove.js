@@ -45,6 +45,13 @@ export const proveView = {
     sub.className = 'workspace-subtitle';
     sub.textContent = 'Prove what happened. Drop a verification file, or open a result to check every claim against its source.';
     head.appendChild(sub);
+    // RUNBOOK-01 IA — Verify is the single verification door; the batch verifier
+    // (previously reachable only by typing #/verifyBatch) is surfaced from here.
+    const batchLink = document.createElement('a');
+    batchLink.className = 'prove-batch-link';
+    batchLink.href = '#/verifyBatch';
+    batchLink.textContent = 'Verify many at once (batch) →';
+    head.appendChild(batchLink);
     shell.appendChild(head);
 
     const main = document.createElement('section');

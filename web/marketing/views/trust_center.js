@@ -12,7 +12,7 @@ import { copyCommand } from '/lib/copyCommand.js';
 import {
   loadTrustCenter, isLive, commit, network, generatedNote, sections, boundaries,
   mainnetStatus, linksToCommit,
-} from '/lib/trustCenter.js';
+} from '/marketing/lib/trustCenter.js';
 
 function sourceBanner() {
   const wrap = elt('section', 'trust-banner');

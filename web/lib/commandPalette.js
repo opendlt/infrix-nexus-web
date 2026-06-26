@@ -3,8 +3,12 @@
 // NEXUS-REIMAGINED-2026-05-10 Phase 8 — Product Polish.
 //
 // Cmd/Ctrl+K opens a modal palette that surfaces:
-//   - 7 quick-jump destinations (cockpit / compose / govern / operate /
-//     prove / verify drop-zone / spine timeline)
+//   - quick-jump destinations: the six nav doors (Start / Build / Verify /
+//     Cockpit / Govern / Inbox) PLUS the folded-out long tail (Console /
+//     Agent / Scenarios / Learn / Quests / Tutor / Approvals). After RUNBOOK-01
+//     IA consolidation the palette is the ONLY discovery path for the long tail
+//     — global search (below) returns chain objects, not workspaces — so every
+//     workspace must appear here or it becomes URL-only.
 //   - Live results from explorer.search (any matching intent / plan /
 //     evidence / anchor / policy / role / capability / trust profile /
 //     plugin)
@@ -23,11 +27,25 @@
 import { rpcWithDisclosure, shortHash } from '/lib/spineCommon.js';
 
 const QUICK_JUMPS = [
-  { id: 'qj.cockpit',  label: 'Cockpit',     hint: 'What needs your attention right now', hash: '#/spine' },
-  { id: 'qj.compose',  label: 'Studio',      hint: 'Start a new action with guided form or raw JSON', hash: '#/compose' },
-  { id: 'qj.govern',   label: 'Atlas',       hint: 'Who can do what — actors, roles, capabilities, policies, trust', hash: '#/govern' },
-  { id: 'qj.operate',  label: 'Console',     hint: 'System health + ready-to-run governed actions', hash: '#/operate' },
-  { id: 'qj.prove',    label: 'Verifier',    hint: 'Drop a proof file or open a result to verify it', hash: '#/prove' },
+  // The six canonical nav doors (RUNBOOK-01 IA).
+  { id: 'qj.start',     label: 'Start',     hint: 'New here? Pick a task or learn the concepts', hash: '#/start' },
+  { id: 'qj.compose',   label: 'Build',     hint: 'Compose a new intent — guided form or raw JSON', hash: '#/compose' },
+  { id: 'qj.prove',     label: 'Verify',    hint: 'Drop a proof file or open a bundle to verify it', hash: '#/prove' },
+  { id: 'qj.cockpit',   label: 'Cockpit',   hint: 'What needs your attention right now', hash: '#/spine' },
+  { id: 'qj.govern',    label: 'Govern',    hint: 'Actors, roles, capabilities, policies, trust', hash: '#/govern' },
+  { id: 'qj.inbox',     label: 'Inbox',     hint: 'Approvals, assigned, mentions, handoffs, drafts, proofs', hash: '#/inbox' },
+  // Folded-out doors — the palette is now their only discovery path.
+  { id: 'qj.operate',   label: 'Console',   hint: 'System health + governed action templates', hash: '#/operate' },
+  { id: 'qj.agent',     label: 'Agent',     hint: 'What an AI agent can do, and approve what it will do', hash: '#/agent' },
+  { id: 'qj.scenarios', label: 'Scenarios', hint: 'Build, run, and share a verifiable proof story', hash: '#/scenarios' },
+  { id: 'qj.tasks',     label: 'Tasks',     hint: 'Signed, ready-to-run task templates', hash: '#/tasks' },
+  { id: 'qj.identity',  label: 'Identity',  hint: 'Wallet, identity, signing queue, sessions, permissions', hash: '#/identity' },
+  // Learning surfaces reachable from Start, also jumpable here.
+  { id: 'qj.learn',     label: 'Learn',     hint: 'The six concepts, as you-go panels', hash: '#/learn' },
+  { id: 'qj.quests',    label: 'Quests',    hint: 'Guided proof missions', hash: '#/quests' },
+  { id: 'qj.tutor',     label: 'Tutor',     hint: 'Explain a proof — what it can and cannot claim', hash: '#/tutor' },
+  // Approvals lane — the discoverable entry to the per-item approval dossier (J3).
+  { id: 'qj.approvals', label: 'Approvals', hint: 'Review and sign pending approvals', hash: '#/inbox/approvals' },
 ];
 
 let paletteEl = null;
@@ -269,11 +287,13 @@ function buildShortcutHelp() {
     ['Cmd/Ctrl+K',  'Open command palette'],
     ['?',           'Show keyboard shortcuts (this dialog)'],
     ['Esc',         'Close any modal / drawer'],
+    ['g · s',       'Go to Start'],
+    ['g · b',       'Go to Build (new action)'],
+    ['g · p',       'Go to Verify'],
     ['g · l',       'Go to Cockpit'],
-    ['g · c',       'Go to Studio (new action)'],
-    ['g · a',       'Go to Atlas (authority)'],
+    ['g · a',       'Go to Govern (authority)'],
+    ['g · i',       'Go to Inbox'],
     ['g · o',       'Go to Console (operations)'],
-    ['g · p',       'Go to Verifier'],
   ]) {
     const row = document.createElement('div');
     row.className = 'shortcut-help-row';

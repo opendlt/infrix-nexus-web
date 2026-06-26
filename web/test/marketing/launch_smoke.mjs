@@ -13,9 +13,9 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const webRoot = path.resolve(here, '..');
+const webRoot = path.resolve(here, '..', '..');
 
-const m = await import(pathToFileURL(path.join(webRoot, 'lib', 'launch.js')).href);
+const m = await import(pathToFileURL(path.join(webRoot, 'marketing', 'lib', 'launch.js')).href);
 const fixture = JSON.parse(fs.readFileSync(path.join(webRoot, 'testdata', 'launch.fixture.json'), 'utf8'));
 m.setLaunchData(fixture);
 

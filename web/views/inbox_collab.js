@@ -244,6 +244,30 @@ function populate(body) {
   renderDetail(detail, itemById(selectedId));
 }
 
+// Render the proof-review queue (queue + detail) into a host element. Shared by
+// the standalone view below and the Inbox "proofs" lane (RUNBOOK-01 IA
+// consolidation), so there is exactly one proof-review implementation. The
+// host is fully owned: its children are replaced.
+export async function renderProofQueue(host) {
+  host.replaceChildren();
+  host.appendChild(elt('p', 'inbox-loading', 'Loading the proof inbox…'));
+  try {
+    await loadInbox();
+    host.replaceChildren();
+    populate(host);
+  } catch (err) {
+    host.replaceChildren();
+    const msg = elt('div', 'inbox-error');
+    msg.setAttribute('role', 'alert');
+    msg.appendChild(elt('strong', null, 'Could not load the proof inbox.'));
+    msg.appendChild(elt('p', null, String((err && err.message) || err)));
+    host.appendChild(msg);
+  }
+}
+
+// Standalone proof-inbox view. Retained for compatibility and direct embedding;
+// the canonical entry point is now the Inbox "proofs" lane, and the #/proof-inbox
+// route redirects there (web/app.js). Both render through renderProofQueue().
 export const proofInboxView = {
   async mount(root) {
     root.replaceChildren();
@@ -254,21 +278,8 @@ export const proofInboxView = {
       'Review proof like an inbox: status, verifier verdict, trust boundary, comments, and decisions — every approval bound to the exact artifact, trusting no node.'));
     shell.appendChild(header);
     const body = elt('div', 'inbox-collab-body');
-    body.appendChild(elt('p', 'inbox-loading', 'Loading the proof inbox…'));
     shell.appendChild(body);
     root.appendChild(shell);
-
-    try {
-      await loadInbox();
-      body.replaceChildren();
-      populate(body);
-    } catch (err) {
-      body.replaceChildren();
-      const msg = elt('div', 'inbox-error');
-      msg.setAttribute('role', 'alert');
-      msg.appendChild(elt('strong', null, 'Could not load the proof inbox.'));
-      msg.appendChild(elt('p', null, String((err && err.message) || err)));
-      body.appendChild(msg);
-    }
+    await renderProofQueue(body);
   },
 };

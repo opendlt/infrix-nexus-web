@@ -12,22 +12,10 @@ import { guidedView } from '/views/guided.js';
 import { learnView } from '/views/learn.js';
 import { agentView } from '/views/agent.js';
 import { scenarioBuilderView } from '/views/scenario_builder.js';
-import { designView } from '/views/design.js';
 import { tasksView } from '/views/tasks.js';
-import { autopilotView } from '/views/autopilot.js';
-import { workbenchView } from '/views/workbench.js';
-import { proofInboxView } from '/views/inbox_collab.js';
 import { identityView } from '/views/identity.js';
-import { companionView } from '/views/companion.js';
 import { questsView } from '/views/quests.js';
-import { studioView } from '/views/studio.js';
 import { tutorView } from '/views/tutor.js';
-import { roomsView } from '/views/room.js';
-import { compareView } from '/views/compare.js';
-import { appView } from '/views/app.js';
-import { launchView } from '/views/launch.js';
-import { trustCenterView } from '/views/trust_center.js';
-import { walletLabView } from '/views/wallet_lab.js';
 import { receiptView } from '/views/receipt.js';
 import { spineView } from '/views/spine.js';
 import { composeView } from '/views/compose.js';
@@ -98,26 +86,23 @@ const routes = {
   // browser.
   scenarios: scenarioBuilderView,
 
-  // nextux-03 — Progressive Disclosure component gallery. #/design showcases
-  // every design-system component (badges, receipts, error cards, trust map,
-  // glossary, persona switcher) from the SAME Go-generated registry every
-  // surface uses. Testable via the ux-gate design-system spec.
-  design: designView,
+  // RUNBOOK-01 IA: the design-system gallery moved to web/marketing/ (a
+  // reference surface, not an operator workspace). Old #/design deep-links fall
+  // back into the cockpit until the marketing host serves it.
+  design: makeRedirect(() => '#/spine'),
 
   // nextux-04 — Task Template Marketplace. #/tasks is a gallery of signed,
   // ready-to-run task templates with trust badges, loaded from the same
   // Go-generated catalog the CLI + SDK use.
   tasks: tasksView,
 
-  // nextux-05 — Autopilot remediation. #/autopilot shows diagnosed findings,
-  // safe fixes, a dry-run diff, and the remediation receipt (a Go-generated
-  // sample). Apply is approval-gated and runs via the CLI / agent, never here.
-  autopilot: autopilotView,
+  // RUNBOOK-01 IA: the fixture-only Autopilot surface was removed; remediation
+  // is composed and previewed in the one real Build surface (Intent Studio).
+  autopilot: makeRedirect(() => '#/compose'),
 
-  // nextux-06 — Intent Copilot Workbench. #/workbench turns plain language into a
-  // grounded, typed plan (candidates, safety, refusals), from the same registries
-  // the CLI + agent use. Running is approval-gated and happens via the CLI/agent.
-  workbench: workbenchView,
+  // RUNBOOK-01 IA: the fixture-only Workbench was removed; plain-language → plan
+  // now lives in the one real Build surface (Intent Studio, #/compose).
+  workbench: makeRedirect(() => '#/compose'),
 
   // The single canonical view
   spine: spineView,
@@ -169,59 +154,51 @@ const routes = {
   // #/inbox/<tab>    — focus a lane (approvals|assigned|mentions|handoffs|drafts)
   inbox: inboxView,
 
-  // nextux-07 — Proof Inbox + Collaboration. Distinct from the node-level
-  // collaborative inbox above: this is the proof-review workspace where humans
-  // and agents verify, comment on, approve, reject, and archive proof artifacts.
-  // #/proof-inbox    — the review queue + item detail
-  'proof-inbox': proofInboxView,
+  // RUNBOOK-01 IA: the proof-review queue is now the "proofs" lane of the one
+  // Inbox. Old #/proof-inbox[/<id>] deep-links redirect into that lane.
+  'proof-inbox': makeRedirect((s) => s.length > 0 ? '#/inbox/proofs/' + encodeURIComponent(s[0]) : '#/inbox/proofs'),
 
   // nextux-08 — Wallet & Identity Control Center.
   // #/identity       — wallet, Accumulate identity, signature queue, sessions,
   //                    permissions, signing history, safety center
   identity: identityView,
 
-  // nextux-10 — Zero-Context Local Companion.
-  // #/companion      — workspace dashboard (artifacts, next actions, agent context)
-  companion: companionView,
+  // RUNBOOK-01 IA: the read-only Companion dashboard was superseded by the
+  // Cockpit; old #/companion deep-links land on the Start hub.
+  companion: makeRedirect(() => '#/start'),
 
   // nextux-11 — Proof Quest Mode.
   // #/quests         — learning trail: missions, progress, proof receipt, Cinema, next step
   quests: questsView,
 
-  // nextux-12 — Visual Workflow Studio.
-  // #/studio         — compose a flow, simulate it, preview assurance, export to a verified primitive
-  studio: studioView,
+  // RUNBOOK-01 IA: the fixture-only Visual Workflow Studio was removed; flow
+  // composition consolidates into the real Build surface (#/compose).
+  studio: makeRedirect(() => '#/compose'),
 
   // nextux-13 — Conversational Proof Tutor.
   // #/tutor          — explain a parsed artifact (can/cannot claim), audiences, lessons, quiz
   tutor: tutorView,
 
-  // nextux-14 — Multiplayer Demo Rooms.
-  // #/rooms                — launcher / list of rooms
-  // #/rooms/<room-id>      — a room: participants, approvals, roles, replay, proof, chat
-  rooms: roomsView,
+  // RUNBOOK-01 IA: the fixture "multiplayer" rooms demo was removed; old
+  // #/rooms deep-links land on the Start hub.
+  rooms: makeRedirect(() => '#/start'),
 
-  // nextux-15 — Migration & Comparison Lab.
-  // #/compare              — pattern catalog + honest sourced comparison report
-  compare: compareView,
+  // RUNBOOK-01 IA: the Comparison Lab moved to web/marketing/ (reference page);
+  // old #/compare deep-links fall back into the cockpit.
+  compare: makeRedirect(() => '#/spine'),
 
-  // nextux-16 — Prompt-to-Proof App Studio. The single golden front door:
-  // #/app                  — describe a verifiable app; Infrix builds, runs,
-  //                          proves, replays, verifies, and ships it. This is
-  //                          the default landing for non-expert users.
-  app: appView,
+  // RUNBOOK-01 IA: the fixture-only "Prompt-to-Proof App Studio" (no input box,
+  // no nav entry) was removed as the default landing; #/start is the newcomer
+  // front door now. Old #/app bookmarks redirect there.
+  app: makeRedirect(() => '#/start'),
 
-  // plan-12 — Public Launch Trust Narrative.
-  // #/launch        — the public launch page: hero path, why-it's-different,
-  //                   the Kermit-vs-mainnet claim boundary, and the "what we do
-  //                   not claim" panel.
-  // #/trust-center  — the trust center: release evidence (bound to HEAD),
-  //                   launch-check, UX matrix, study, provider matrix, threat
-  //                   model, boundaries, and the mainnet status.
-  // #/receipt       — the shareable proof receipt (better than a block explorer).
-  launch: launchView,
-  'trust-center': trustCenterView,
-  'wallet-lab': walletLabView,
+  // RUNBOOK-01 IA: the public launch page, trust center, and wallet-lab moved to
+  // web/marketing/ (reference/marketing surfaces). Until the marketing host
+  // serves them, old deep-links fall back to the nearest in-app surface.
+  // #/receipt stays in-app (the shareable proof receipt).
+  launch: makeRedirect(() => '#/start'),
+  'trust-center': makeRedirect(() => '#/govern'),
+  'wallet-lab': makeRedirect(() => '#/identity'),
   receipt: receiptView,
 
   // Cinema-Inbox-Time E3C8 — batch verifier surface.
@@ -248,15 +225,14 @@ window.addEventListener('DOMContentLoaded', () => {
   initTimeContext();
   initHeader();
 
-  // nextux-16 — the front door is the Prompt-to-Proof App Studio. With no
-  // explicit hash, non-expert users land on #/app (describe a verifiable app and
-  // Infrix builds, runs, and proves it); experts (who toggled the header to
-  // Expert) keep landing on the spine. #/start stays reachable. Any direct URL
-  // still works.
+  // IA consolidation (RUNBOOK-01) — the front door for a newcomer is the guided
+  // Start hub (#/start); experts (who toggled Expert) land on the spine. The old
+  // #/app prompt-to-proof landing was a fixture with no input box and no nav
+  // entry — it is gone. Any direct URL still works.
   const noHash = !window.location.hash || window.location.hash === '#' || window.location.hash === '#/';
   if (noHash) {
     const mode = (() => { try { return localStorage.getItem('nexus.mode'); } catch (_) { return null; } })();
-    if (mode !== 'expert') window.location.hash = '#/app';
+    window.location.hash = mode === 'expert' ? '#/spine' : '#/start';
   }
 
   const container = document.getElementById('view-container');

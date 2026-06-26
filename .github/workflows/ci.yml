@@ -29,3 +29,7 @@ jobs:
       # cinema-scenario gallery checks SKIP here (the gallery lives in the
       # Infrix monorepo); everything else runs in full.
       - run: node --test web/test/*.mjs
+      # Relocated marketing/reference surfaces (RUNBOOK-01 IA consolidation):
+      # these views moved out of the SPA router into web/marketing/; their
+      # smokes are not picked up by the non-recursive glob above.
+      - run: node --test web/test/marketing/*.mjs

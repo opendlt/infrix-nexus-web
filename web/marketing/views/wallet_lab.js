@@ -10,7 +10,7 @@ import { elt, setAttrs } from '/lib/uxDom.js';
 import { copyCommand } from '/lib/copyCommand.js';
 import {
   loadWalletLab, isLive, generatedNote, providers, hasOverclaim,
-} from '/lib/walletLab.js';
+} from '/marketing/lib/walletLab.js';
 
 function banner() {
   const wrap = elt('section', 'trust-banner');

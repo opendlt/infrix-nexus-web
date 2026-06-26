@@ -128,13 +128,29 @@ export const startView = {
     sub.textContent = 'Pick a task. Each one walks you through it in plain language — switch to Expert in the header any time for the full spine.';
     head.appendChild(sub);
 
-    // adoption-11 — a low-key door into the learning ladder for newcomers who
-    // want the concepts before a task.
+    // adoption-11 + RUNBOOK-01 IA — Start is the single newcomer/learning hub.
+    // The learning surfaces (Learn / Quests / Tutor) left the nav, so fan them
+    // out from here (they are also in the command palette). Keep these separate
+    // from the five guided start-cards below (asserted by start_route_smoke).
+    const learnRow = document.createElement('nav');
+    learnRow.className = 'start-learn-row';
+    learnRow.setAttribute('aria-label', 'Learn the concepts');
     const learnLink = document.createElement('a');
     learnLink.className = 'start-learn-link';
     learnLink.href = '#/learn';
     learnLink.textContent = 'New to Infrix? Learn the concepts →';
-    head.appendChild(learnLink);
+    learnRow.appendChild(learnLink);
+    const questsLink = document.createElement('a');
+    questsLink.className = 'start-learn-link';
+    questsLink.href = '#/quests';
+    questsLink.textContent = 'Proof quests →';
+    learnRow.appendChild(questsLink);
+    const tutorLink = document.createElement('a');
+    tutorLink.className = 'start-learn-link';
+    tutorLink.href = '#/tutor';
+    tutorLink.textContent = 'Proof tutor →';
+    learnRow.appendChild(tutorLink);
+    head.appendChild(learnRow);
 
     shell.appendChild(head);
 

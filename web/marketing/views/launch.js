@@ -12,7 +12,7 @@ import { elt, setAttrs } from '/lib/uxDom.js';
 import { copyCommand } from '/lib/copyCommand.js';
 import {
   loadLaunch, isLive, hero, sections, claimBoundary, boundaries, receiptPreview, receiptIsHonest,
-} from '/lib/launch.js';
+} from '/marketing/lib/launch.js';
 
 function sourceBanner() {
   const wrap = elt('section', 'launch-banner');

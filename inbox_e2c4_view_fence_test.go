@@ -42,9 +42,11 @@ func TestInboxE2C4_ViewModulePresent(t *testing.T) {
 		}
 	}
 
-	// Required tab keys — these match the lanes returned by nexus.inbox.
+	// Required tab keys — the lanes returned by nexus.inbox, plus the "proofs"
+	// proof-review lane folded in by RUNBOOK-01 IA consolidation (it used to be
+	// the standalone #/proof-inbox surface).
 	requiredTabs := []string{
-		"approvals", "assigned", "mentions", "handoffs", "drafts",
+		"approvals", "assigned", "mentions", "handoffs", "drafts", "proofs",
 	}
 	for _, k := range requiredTabs {
 		if !strings.Contains(src, k) {

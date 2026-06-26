@@ -13,9 +13,9 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const webRoot = path.resolve(here, '..');
+const webRoot = path.resolve(here, '..', '..');
 
-const m = await import(pathToFileURL(path.join(webRoot, 'lib', 'walletLab.js')).href);
+const m = await import(pathToFileURL(path.join(webRoot, 'marketing', 'lib', 'walletLab.js')).href);
 const fixture = JSON.parse(fs.readFileSync(path.join(webRoot, 'testdata', 'wallet-lab.fixture.json'), 'utf8'));
 m.setWalletLabData(fixture);
 

@@ -8,10 +8,11 @@
 //   - mentions on me            (@-mentions in notes)
 //   - handoffs to me            (pending invitations)
 //   - my drafts                 (in-flight intents in Studio)
+//   - proofs                    (proof-review queue — RUNBOOK-01 IA: was #/proof-inbox)
 //
 // Routes:
 //   #/inbox          — full inbox, default tab = approvals
-//   #/inbox/<tab>    — focus a specific lane (approvals|assigned|mentions|handoffs|drafts)
+//   #/inbox/<tab>    — focus a specific lane (approvals|assigned|mentions|handoffs|drafts|proofs)
 //
 // Bulk-action toolbar:
 //   [✓] approve selected   (opens rationale modal once, applies to all)
@@ -43,6 +44,10 @@ import {
   emptyState,
 } from '/lib/spineCommon.js';
 import { onAtChange, isAtLive } from '/lib/timeContext.js';
+// RUNBOOK-01 IA consolidation — the proof-review queue is now a lane of this
+// one Inbox (it used to be a separate #/proof-inbox surface). One shared
+// renderer paints it; #/proof-inbox redirects into #/inbox/proofs.
+import { renderProofQueue } from '/views/inbox_collab.js';
 
 let rootEl = null;
 let currentTab = 'approvals';
@@ -53,6 +58,9 @@ const selection = new Set(); // row keys: `${lane}:${id}`
 const stars = new Set();
 let focusedKey = null;
 let filterQuery = '';
+// The proofs lane is fixture-backed and self-contained; render it once per tab
+// entry so the 5s nexus.inbox poll does not thrash it or drop its selection.
+let proofsRendered = false;
 
 const TABS = [
   { key: 'approvals', label: 'Approvals', countField: 'approvalsCount' },
@@ -60,6 +68,7 @@ const TABS = [
   { key: 'mentions',  label: 'Mentions',  countField: 'mentionsCount' },
   { key: 'handoffs',  label: 'Handoffs',  countField: 'handoffsCount' },
   { key: 'drafts',    label: 'Drafts',    countField: 'draftsCount' },
+  { key: 'proofs',    label: 'Proofs',    countField: 'proofsCount' },
 ];
 
 export const inboxView = {
@@ -91,6 +100,7 @@ export const inboxView = {
 // -----------------------------------------------------------------
 function render() {
   if (!rootEl) return;
+  proofsRendered = false; // body is rebuilt; allow the proofs lane to mount once
   rootEl.replaceChildren();
 
   const shell = document.createElement('div');
@@ -228,6 +238,16 @@ function syncTabBadges() {
 function renderBody() {
   const body = document.getElementById('inboxBody');
   if (!body) return;
+  // Proofs lane — delegate to the shared proof-review queue renderer. It owns
+  // its own queue/detail layout and controls, so it is rendered once per tab
+  // entry (not on every poll tick) to preserve selection.
+  if (currentTab === 'proofs') {
+    if (proofsRendered) return;
+    proofsRendered = true;
+    renderProofQueue(body).catch((e) => { body.replaceChildren(); body.appendChild(errorNode(e)); });
+    return;
+  }
+  proofsRendered = false;
   body.replaceChildren();
   const rows = visibleRows();
   if (rows.length === 0) {

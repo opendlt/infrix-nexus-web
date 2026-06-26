@@ -11,7 +11,7 @@ import { elt, setAttrs } from '/lib/uxDom.js';
 import {
   loadCompare, isLive, patterns, report, capabilities,
   isExternalClaim, reportIsHonest, whyItMatters,
-} from '/lib/compare.js';
+} from '/marketing/lib/compare.js';
 
 function sourceBanner() {
   const wrap = elt('section', 'compare-banner');

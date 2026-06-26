@@ -1212,24 +1212,6 @@ footer {
   box-shadow: var(--shadow-pop-sm);
 }
 
-.nav-link.coming-soon {
-  color: var(--text-dim);
-  cursor: help;
-  opacity: 0.55;
-}
-
-.nav-link.coming-soon::after {
-  content: 'soon';
-  margin-left: 6px;
-  font-size: 0.6rem;
-  font-weight: 800;
-  background: var(--sunny);
-  color: var(--text);
-  border: 1px solid var(--text);
-  border-radius: 3px;
-  padding: 0 4px;
-}
-
 .nav-divider {
   width: 1px;
   height: 18px;
@@ -1240,38 +1222,6 @@ footer {
 /* Phase 0 view frame: each view module renders into this slot. */
 .view-frame { animation: pop 0.2s ease-out; }
 .view-frame[hidden] { display: none; }
-
-/* Placeholder card for views that aren't built yet (phases 1+). */
-.coming-soon-card {
-  background: var(--surface);
-  border: 3px dashed var(--border-bold);
-  border-radius: var(--radius);
-  padding: 48px 32px;
-  text-align: center;
-}
-
-.coming-soon-card h2 {
-  font-size: 1.4rem;
-  font-weight: 900;
-  margin-bottom: 8px;
-  background: var(--gradient-pop);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.coming-soon-card p { color: var(--text-secondary); font-size: 0.9rem; }
-.coming-soon-card .phase-tag {
-  display: inline-block;
-  margin-top: 14px;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 4px 12px;
-  background: var(--bg-alt);
-  border: 2px solid var(--text);
-  border-radius: 4px;
-}
 
 /* ============================================================
  * Phase 1 — live spine flow view.
@@ -3135,45 +3085,6 @@ body > header {
   font-size: 22px;
   color: var(--text-secondary);
 }
-
-/* =====================================================================
- * SPINE HERO (Live mode top canvas) — the canonical 7-stage pipeline
- * rendered as a horizontal flow chart. The visual hero of the explorer.
- * ===================================================================== */
-.spine-hero {
-  margin: 0 0 26px;
-  padding: 24px 28px 20px;
-  background: linear-gradient(135deg, var(--surface) 0%, var(--surface-alt) 100%);
-  border: 1px solid var(--border-bold);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
-  position: relative;
-  overflow: hidden;
-}
-.spine-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 50% 100% at 0% 50%, color-mix(in srgb, var(--spine-1) 14%, transparent) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 100% at 100% 50%, color-mix(in srgb, var(--spine-7) 12%, transparent) 0%, transparent 70%);
-}
-.spine-hero > * { position: relative; z-index: 1; }
-.spine-hero-head { margin-bottom: 16px; }
-.spine-hero-title {
-  font-size: 24px;
-  letter-spacing: -0.01em;
-  font-weight: 700;
-  margin: 0 0 6px;
-}
-.spine-hero-sub {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-secondary);
-  max-width: 80ch;
-  line-height: 1.5;
-}
 .spine-pipeline {
   display: flex;
   align-items: stretch;
@@ -3644,19 +3555,10 @@ body > header {
 }
 
 /* =====================================================================
- * SPINE HERO ANIMATIONS — particles flow along connectors when intents
+ * SPINE STRIP ANIMATIONS — particles flow along connectors when intents
  * advance; stage cards pulse on activity; throughput counters bump
  * when they change.
  * ===================================================================== */
-.spine-hero-eyebrow {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--accent);
-  font-weight: 700;
-  margin-bottom: 8px;
-  font-family: var(--mono);
-}
 .stage-pipe-card.pulsing {
   animation: stage-card-pulse 1.2s ease-out;
 }
@@ -8554,17 +8456,6 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
   .tasks-grid { grid-template-columns: 1fr; }
   .tasks-filter { flex-direction: row; }
 }
-
-/* ===================================================================== */
-/* nextux-05 — Autopilot remediation (#/autopilot)                         */
-/* Severity + fix-kind use glyph + text + border, never color alone.       */
-/* ===================================================================== */
-
-.autopilot-view { max-width: 1000px; }
-.autopilot-body { display: flex; flex-direction: column; gap: 22px; }
-.autopilot-loading { color: var(--text-secondary); }
-.autopilot-error { border: 1px solid var(--alert); background: var(--alert-soft); color: var(--text); padding: 14px 16px; border-radius: 10px; }
-.autopilot-view-body { display: flex; flex-direction: column; gap: 22px; }
 .ap-section-title { margin: 0 0 8px; font-size: 1.02rem; color: var(--text); }
 .ap-subtitle { margin: 10px 0 4px; font-size: 0.85rem; color: var(--text-secondary); }
 .ap-posture-line, .ap-approval-note, .ap-approval-manual { color: var(--text-secondary); font-size: 0.88rem; max-width: 72ch; margin: 0; }
@@ -8602,13 +8493,6 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 .ap-hashes dd.mono { font-family: var(--mono, monospace); }
 .ap-approval-cmd { display: block; font-family: var(--mono, monospace); font-size: 0.78rem; background: var(--bg); color: var(--text); padding: 4px 8px; border-radius: 6px; margin: 6px 0; }
 .ap-finding-summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-/* nextux-06 — Intent Copilot Workbench (#/workbench) */
-.workbench-view { max-width: 1000px; }
-.workbench-body { display: flex; flex-direction: column; gap: 22px; }
-.workbench-loading { color: var(--text-secondary); }
-.workbench-error { border: 1px solid var(--alert); background: var(--alert-soft); color: var(--text); padding: 14px 16px; border-radius: 10px; }
-.workbench-view-body { display: flex; flex-direction: column; gap: 22px; }
 .wb-section-title { margin: 0 0 8px; font-size: 1.02rem; color: var(--text); }
 .wb-subtitle { margin: 10px 0 4px; font-size: 0.85rem; color: var(--text-secondary); }
 .wb-note, .wb-run-note { color: var(--text-secondary); font-size: 0.88rem; max-width: 72ch; margin: 0; overflow-wrap: anywhere; }
@@ -8817,56 +8701,6 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
   .identity-grid-layout { grid-template-columns: 1fr; }
 }
 
-/* ── nextux-10 Zero-Context Local Companion (#/companion) ───────────────── */
-.companion-grid-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
-.companion-workspace-card,
-.companion-services,
-.companion-suggestions,
-.companion-artifacts,
-.companion-agent-context,
-.companion-privacy {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  padding: 14px 16px;
-  min-width: 0;
-}
-.companion-suggestions, .companion-artifacts, .companion-agent-context, .companion-privacy { margin-bottom: 16px; }
-.companion-subtitle { margin: 0 0 8px; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); }
-.companion-resume { margin: 0 0 8px; font-weight: 600; color: var(--text); overflow-wrap: anywhere; }
-.companion-grid { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; }
-.companion-grid dt { color: var(--text-secondary); font-size: 0.8rem; }
-.companion-grid dd { margin: 0; font-size: 0.8rem; word-break: break-all; }
-.companion-source { margin: 8px 0 0; font-size: 0.8rem; color: var(--text-dim); }
-.companion-source[data-live="true"] { color: var(--ok); }
-.companion-hint { color: var(--text-dim); font-size: 0.82rem; overflow-wrap: anywhere; }
-.companion-empty { color: var(--text-dim); font-size: 0.84rem; }
-.companion-artifact { border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; margin-bottom: 8px; }
-.companion-artifact-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.companion-artifact-path { font-size: 0.82rem; overflow-wrap: anywhere; flex: 1 1 200px; }
-.companion-artifact-status { margin-left: auto; font-size: 0.72rem; border-radius: 999px; padding: 1px 9px; border: 1px solid var(--border-bold); color: var(--text-secondary); white-space: nowrap; }
-.companion-artifact-status[data-status="verified"] { border-color: var(--ok); color: var(--ok); }
-.companion-artifact-status[data-status="failed"] { border-color: var(--red); color: var(--red); }
-.companion-artifact-status[data-status="unverified"] { border-color: var(--warn); color: var(--warn); }
-.companion-artifact-meta { margin: 4px 0 0; font-size: 0.78rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.companion-suggestion { border: 1px solid var(--border-bold); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
-.companion-suggestion[data-approval="true"] { border-left: 3px solid var(--warn); }
-.companion-suggestion-title { margin: 0 0 4px; font-weight: 600; }
-.companion-suggestion-reason { margin: 0 0 6px; font-size: 0.84rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.companion-suggestion-cmd { display: block; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 8px; padding: 6px 9px; font-size: 0.76rem; white-space: pre-wrap; overflow-wrap: anywhere; }
-.companion-suggestion-safety { margin: 6px 0 0; font-size: 0.78rem; color: var(--text-dim); }
-.companion-suggestion[data-approval="true"] .companion-suggestion-safety { color: var(--warn); }
-.companion-service-list, .companion-allowed-list, .companion-privacy-list { list-style: none; margin: 8px 0 0; padding: 0; }
-.companion-service { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; border-top: 1px solid var(--border); }
-.companion-service:first-child { border-top: 0; }
-.companion-service-state { color: var(--text-secondary); font-size: 0.8rem; }
-.companion-service[data-on="true"] .companion-service-state { color: var(--ok); }
-.companion-allowed, .companion-privacy-cmd { font-size: 0.78rem; color: var(--text); padding: 2px 0; overflow-wrap: anywhere; }
-.companion-error { color: var(--red); }
-@media (max-width: 768px) {
-  .companion-grid-layout { grid-template-columns: 1fr; }
-}
-
 /* ── nextux-11 Proof Quest Mode (#/quests) ─────────────────────────────── */
 .quest-progress { margin-bottom: 16px; min-width: 0; }
 .quest-progress-title { margin: 0 0 8px; font-size: 1rem; }
@@ -8924,60 +8758,6 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
   .quest-grid-layout { grid-template-columns: 1fr; }
 }
 
-/* nextux-12 — Visual Workflow Studio (#/studio) */
-.studio-banner { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--surface); padding: 10px 14px; margin-bottom: 14px; min-width: 0; }
-.studio-banner-tag { color: var(--accent); }
-.studio-banner-text { color: var(--text-secondary); font-size: 0.88rem; }
-.studio-source { margin: 6px 0 0; font-size: 0.78rem; color: var(--text-dim); }
-.studio-grid-layout { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) minmax(0, 320px); gap: 16px; align-items: start; }
-.studio-subtitle { margin: 0 0 10px; font-size: 0.95rem; }
-.studio-palette, .studio-graph, .studio-assurance, .studio-sim, .studio-export { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 12px 14px; min-width: 0; }
-.studio-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.studio-palette-group { margin-bottom: 12px; }
-.studio-palette-group-title { margin: 0 0 6px; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim); }
-.studio-palette-item { border: 1px solid var(--border-bold); border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; min-width: 0; }
-.studio-palette-label { display: block; font-size: 0.84rem; font-weight: 600; }
-.studio-palette-expert { display: block; font-size: 0.72rem; color: var(--text-dim); overflow-wrap: anywhere; }
-.studio-graph-track { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: stretch; gap: 2px; }
-.studio-node { border: 1px solid var(--border-bold); border-radius: 10px; padding: 8px 10px; min-width: 0; }
-.studio-node[data-kind="workflow_action"] { border-left: 3px solid var(--accent); }
-.studio-node[data-kind="proof_verify"], .studio-node[data-kind="proof_export"] { border-left: 3px solid var(--ok); }
-.studio-node[data-kind="approval"], .studio-node[data-kind="agent_approval"], .studio-node[data-kind="inbox_review"] { border-left: 3px solid var(--warn); }
-.studio-node-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.studio-node-kind { font-weight: 600; font-size: 0.86rem; }
-.studio-node-chip { font-size: 0.68rem; color: var(--text-dim); border: 1px solid var(--border); border-radius: 999px; padding: 1px 7px; }
-.studio-node-label { margin: 4px 0 0; font-size: 0.84rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.studio-node-detail { margin: 4px 0 0; font-size: 0.74rem; color: var(--text-dim); overflow-wrap: anywhere; }
-.studio-edge { list-style: none; text-align: center; color: var(--text-dim); font-size: 0.9rem; }
-.studio-edges { margin-top: 10px; }
-.studio-edges-summary { cursor: pointer; font-size: 0.8rem; color: var(--text-dim); }
-.studio-edges-list { margin: 6px 0 0; padding-left: 18px; }
-.studio-edge-row { font-size: 0.76rem; overflow-wrap: anywhere; }
-.studio-badge { display: inline-block; border-radius: 999px; padding: 3px 12px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border-bold); background: var(--bg-alt); }
-.studio-badge[data-tone="positive"] { border-color: var(--ok); }
-.studio-badge[data-tone="negative"] { border-color: var(--red); color: var(--red); }
-.studio-assurance-grid, .studio-expert-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 10px 0; font-size: 0.82rem; }
-.studio-assurance-grid dt, .studio-expert-grid dt { color: var(--text-dim); }
-.studio-assurance-honesty, .studio-trust-boundary { font-size: 0.8rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.studio-sim-path { font-size: 0.76rem; color: var(--text-dim); overflow-wrap: anywhere; white-space: normal; }
-.studio-sim-title { margin: 10px 0 4px; font-size: 0.8rem; }
-.studio-sim ul { margin: 0; padding-left: 18px; font-size: 0.8rem; }
-.studio-export { margin-top: 16px; }
-.studio-export-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.studio-export-chip { font: inherit; font-size: 0.78rem; cursor: pointer; border: 1px solid var(--border-bold); background: var(--bg-alt); color: var(--text); border-radius: 999px; padding: 4px 12px; }
-.studio-export-chip[aria-selected="true"] { border-color: var(--accent); background: var(--accent); color: var(--bg); }
-.studio-export-safe { display: inline-block; font-size: 0.74rem; border: 1px solid var(--ok); border-radius: 999px; padding: 2px 10px; color: var(--text-secondary); }
-.studio-export-safe[data-safe="false"] { border-color: var(--warn); }
-.studio-export-verify, .studio-export-docs { margin: 6px 0 0; font-size: 0.76rem; color: var(--text-dim); overflow-wrap: anywhere; }
-.studio-export-artifact { margin: 10px 0 0; max-height: 320px; overflow: auto; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.74rem; white-space: pre-wrap; overflow-wrap: anywhere; }
-.studio-why, .studio-expert { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 10px 16px; margin-top: 12px; }
-.studio-why-summary, .studio-expert-summary { cursor: pointer; font-weight: 600; font-size: 0.86rem; }
-.studio-why-body { margin: 8px 0 0; font-size: 0.86rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.studio-error { color: var(--red); }
-@media (max-width: 980px) {
-  .studio-grid-layout { grid-template-columns: 1fr; }
-}
-
 /* nextux-13 — Conversational Proof Tutor (#/tutor) */
 .tutor-banner { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--surface); padding: 10px 14px; margin-bottom: 14px; min-width: 0; }
 .tutor-banner-tag { color: var(--accent); }
@@ -9021,63 +8801,6 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 .tutor-error { color: var(--red); }
 @media (max-width: 980px) {
   .tutor-grid-layout { grid-template-columns: 1fr; }
-}
-
-/* nextux-14 — Multiplayer Demo Rooms (#/rooms) */
-.room-launcher { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 14px 16px; }
-.room-launcher-hint { color: var(--text-secondary); font-size: 0.88rem; margin: 4px 0 10px; }
-.room-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.room-list-item { border: 1px solid var(--border-bold); border-radius: 10px; padding: 8px 12px; }
-.room-list-link { color: var(--accent); font-weight: 600; text-decoration: none; }
-.room-list-meta { color: var(--text-dim); font-size: 0.78rem; }
-.room-state { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 12px; background: var(--surface); padding: 12px 16px; margin-bottom: 14px; min-width: 0; }
-.room-state-label { margin: 0 0 4px; font-size: 1.25rem; color: var(--text); }
-.room-state-meta { margin: 0; font-size: 0.8rem; color: var(--text-dim); }
-.room-promise { margin: 8px 0 0; font-size: 0.88rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.room-grid-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-.room-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.room-subtitle { margin: 0 0 10px; font-size: 0.95rem; }
-.room-participants, .room-approvals, .room-roles, .room-replay, .room-proof, .room-chat, .room-trust { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 12px 14px; min-width: 0; }
-.room-participant-list, .room-approval-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.room-participant { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border: 1px solid var(--border-bold); border-radius: 8px; padding: 6px 10px; }
-.room-participant-name { font-weight: 600; font-size: 0.86rem; }
-.room-participant-role { font-size: 0.78rem; color: var(--text-secondary); }
-.room-participant-agent { font-size: 0.7rem; color: var(--text-dim); border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; }
-.room-participant-approve { font-size: 0.72rem; color: var(--text-dim); margin-left: auto; }
-.room-participant-approve[data-can-approve="true"] { color: var(--ok); }
-.room-approval { display: flex; gap: 8px; align-items: center; font-size: 0.84rem; color: var(--text-secondary); }
-.room-approval[data-satisfied="true"] .room-approval-mark { color: var(--ok); }
-.room-approval-mark { color: var(--text-dim); }
-.room-role-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-.room-role-table th, .room-role-table td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
-.room-role-table th { color: var(--text-dim); font-weight: 600; }
-.room-role-cap[data-yes="true"] { color: var(--ok); }
-.room-role-cap[data-yes="false"] { color: var(--text-dim); }
-.room-replay-bound { display: inline-block; font-size: 0.74rem; border: 1px solid var(--border-bold); border-radius: 999px; padding: 2px 10px; color: var(--text-secondary); margin-bottom: 8px; }
-.room-replay-bound[data-bound="true"] { border-color: var(--ok); color: var(--ok); }
-.room-replay-binding, .room-replay-cinema { margin: 2px 0; font-size: 0.74rem; color: var(--text-dim); overflow-wrap: anywhere; }
-.room-event-log { margin: 8px 0 0; padding-left: 18px; font-size: 0.78rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 2px; }
-.room-event { list-style: decimal; }
-.room-event-actor { font-weight: 600; }
-.room-event-role { color: var(--text-dim); margin: 0 6px; }
-.room-proof-badge { display: inline-block; border-radius: 999px; padding: 3px 12px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border-bold); background: var(--bg-alt); color: var(--text); margin-bottom: 8px; }
-.room-proof-badge[data-verified="true"] { border-color: var(--ok); }
-.room-proof-grid, .room-expert-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0; font-size: 0.82rem; }
-.room-proof-grid dt, .room-expert-grid dt { color: var(--text-dim); }
-.room-proof-note { font-size: 0.8rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.room-chat-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.room-chat-msg { font-size: 0.82rem; }
-.room-chat-author { font-weight: 600; margin-right: 6px; }
-.room-chat-body { color: var(--text-secondary); overflow-wrap: anywhere; }
-.room-chat-empty { color: var(--text-dim); font-size: 0.82rem; }
-.room-trust { border-left: 3px solid var(--accent); }
-.room-trust-body { margin: 0; font-size: 0.84rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.room-why, .room-expert { border: 1px solid var(--border); border-radius: 12px; background: var(--surface); padding: 10px 16px; margin-top: 12px; }
-.room-why-summary, .room-expert-summary { cursor: pointer; font-weight: 600; font-size: 0.86rem; }
-.room-why-body { margin: 8px 0 0; font-size: 0.86rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.room-error { color: var(--red); }
-@media (max-width: 980px) {
-  .room-grid-layout { grid-template-columns: 1fr; }
 }
 
 /* nextux-15 — Migration & Comparison Lab (#/compare) */
@@ -9125,47 +8848,6 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
 .compare-error { color: var(--red); }
 @media (max-width: 980px) {
   .compare-grid-layout { grid-template-columns: 1fr; }
-}
-
-/* nextux-16 — Prompt-to-Proof App Studio (#/app). All colors come from theme
-   vars so contrast holds in both themes; overflow-wrap keeps long prompts,
-   commands, and share links from overflowing on narrow viewports. */
-.app-body { min-width: 0; }
-.app-banner { border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; background: var(--surface); padding: 10px 14px; margin-bottom: 14px; min-width: 0; }
-.app-banner-tag { color: var(--accent); font-weight: 600; }
-.app-banner-text { color: var(--text-secondary); font-size: 0.88rem; }
-.app-source { margin: 6px 0 0; font-size: 0.8rem; color: var(--text-dim); }
-.app-grid-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-.app-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.app-prompt, .app-workflow, .app-assurance, .app-artifacts, .app-next, .app-why { border: 1px solid var(--border-bold); border-radius: 12px; background: var(--surface); padding: 12px 14px; min-width: 0; }
-.app-subtitle { margin: 0 0 8px; font-size: 0.95rem; color: var(--text); }
-.app-prompt-text { margin: 0; padding: 8px 12px; border-left: 3px solid var(--accent); color: var(--text); font-style: italic; overflow-wrap: anywhere; }
-.app-pattern { margin: 8px 0 0; font-size: 0.82rem; color: var(--text-secondary); }
-.app-pattern-id { color: var(--accent); }
-.app-step-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
-.app-step { font-size: 0.84rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.app-step-kind { font-size: 0.7rem; border: 1px solid var(--border-bold); border-radius: 6px; padding: 1px 6px; margin-right: 6px; color: var(--text-dim); }
-.app-step-label { color: var(--text); }
-.app-assurance-label { margin: 0 0 8px; font-size: 0.86rem; color: var(--text); overflow-wrap: anywhere; }
-.app-badges { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
-.app-badge { font-size: 0.74rem; border: 1px solid var(--border-bold); border-radius: 6px; padding: 1px 8px; color: var(--text-dim); }
-.app-badge[data-ok="true"] { border-color: var(--ok); color: var(--ok); }
-.app-deferred { margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
-.app-deferred-tag { color: var(--text-secondary); font-size: 0.8rem; }
-.app-deferred-list { margin: 6px 0 0; padding-left: 18px; font-size: 0.8rem; color: var(--text-dim); overflow-wrap: anywhere; }
-.app-artifact-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.app-artifact { font-size: 0.82rem; display: flex; gap: 8px; overflow-wrap: anywhere; }
-.app-artifact-format { color: var(--accent); min-width: 84px; }
-.app-artifact-file { color: var(--text-secondary); overflow-wrap: anywhere; }
-.app-share { margin: 10px 0 0; font-size: 0.8rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.app-share-link { color: var(--accent); }
-.app-next-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.app-next-item { font-size: 0.82rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.app-next-command { color: var(--accent); }
-.app-why-text { margin: 0; font-size: 0.86rem; color: var(--text-secondary); overflow-wrap: anywhere; }
-.app-error { color: var(--red); }
-@media (max-width: 980px) {
-  .app-grid-layout { grid-template-columns: 1fr; }
 }
 
 /* ---------------------------------------------------------------------------
