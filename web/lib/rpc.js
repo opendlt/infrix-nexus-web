@@ -7,6 +7,8 @@
 // closure for byte-faithful behaviour preservation but now delegates
 // to this same fetch shape.
 
+import { parseUserError } from '/lib/userError.js';
+
 const RPC_PATH = '/rpc';
 
 /**
@@ -29,9 +31,14 @@ export async function rpc(method, params) {
   });
   const data = await res.json();
   if (data.error) {
-    const err = new Error(data.error.message || 'rpc error');
+    // RUNBOOK-03 Task 7 — route through the same translation layer the REST
+    // surface uses (rest.js), so a server-translated error carries its
+    // title / impact / fixes / docs instead of a raw -32xxx JSON-RPC string.
+    const ue = parseUserError(data.error); // reads data.error.data when translated
+    const err = new Error(ue && ue.title ? ue.title : (data.error.message || 'rpc error'));
     err.code = data.error.code;
     err.rpcMethod = method;
+    if (ue) { err.userError = ue; err.code = ue.code; }
     throw err;
   }
   return data.result;

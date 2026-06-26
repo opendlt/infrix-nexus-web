@@ -272,7 +272,9 @@ body > header {
   padding-top: 12px;
   border-top: 1px solid var(--border);
 }
-.header-context .header-pulse { margin-left: auto; }
+/* RUNBOOK-03 Task 6 — #headerPulse was removed; the time-selector is now the
+   first item of the right-aligned header group. */
+.header-context .header-time-selector { margin-left: auto; }
 
 .status-indicator {
   display: flex;
@@ -292,7 +294,11 @@ body > header {
   animation: pulse-dot 2s infinite;
 }
 
-.status-dot.disconnected { background: var(--red); }
+/* RUNBOOK-03 Task 1 — the status dot reflects REAL fetch health. It pulses green
+   only while genuinely connected; reconnecting is static amber and offline is
+   static red (no pulse — a pulsing red would imply activity that isn't there). */
+.status-dot.disconnected { background: var(--red); animation: none; }
+.status-dot.reconnecting { background: var(--sunny); animation: none; }
 
 .block-height-display {
   font-family: var(--mono);
@@ -3657,18 +3663,10 @@ body > header {
   color: var(--text-secondary);
   font-weight: 700;
 }
-.live-pulse-heartbeat {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 0 0 var(--ok);
-  animation: heartbeat 2.4s ease-in-out infinite;
-}
-@keyframes heartbeat {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); }
-  50%      { box-shadow: 0 0 0 6px color-mix(in srgb, var(--ok) 0%, transparent); }
-}
+/* RUNBOOK-03 Task 3 — the .live-pulse-heartbeat rule + its infinite @keyframes
+   heartbeat were removed (the live.js surface that used them was deleted in
+   RUNBOOK-01). The honest heartbeat lives on .tele-heartbeat below and beats on
+   real data arrival, not a fixed timer. */
 .live-pulse-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3843,39 +3841,10 @@ body > header {
 /* =====================================================================
  * HEADER PULSE METER — flashes on every spine activity event.
  * ===================================================================== */
-.header-pulse {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  cursor: default;
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-dim);
-  font-weight: 700;
-}
-.header-pulse-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--text-dim);
-  transition: background var(--motion-fast), box-shadow var(--motion-fast);
-}
-.header-pulse-dot.flash {
-  background: var(--accent);
-  box-shadow: 0 0 0 0 var(--accent);
-  animation: pulse-flash 0.8s ease-out;
-}
-.header-pulse-label { font-family: var(--mono); }
-@keyframes pulse-flash {
-  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent); }
-  60%  { box-shadow: 0 0 0 10px color-mix(in srgb, var(--accent) 0%, transparent); }
-  100% { box-shadow: 0 0 0 0 transparent; }
-}
+/* RUNBOOK-03 Task 6 — the #headerPulse "live" dot and its flash animation were
+   removed: they subscribed to a spine bus with no publisher (RUNBOOK-01 deleted
+   connectLive), so the dot never flashed. The honest connection signal is the
+   status light (.status-dot above), driven by real fetch outcomes. */
 
 /* =====================================================================
  * MODE SWITCH ANIMATION — view container fades + slides on activation.
@@ -4632,17 +4601,23 @@ body > header {
   color: var(--text-secondary);
   font-weight: 700;
 }
+/* RUNBOOK-03 Task 3 — the heartbeat beats once per REAL data arrival (the store
+   fires a tick on every visible setSlice), not on a fixed timer. It stops when
+   data stops, so the beat is a truthful "alive" signal. Reduced-motion off. */
 .tele-heartbeat {
   width: 8px; height: 8px;
   border-radius: 50%;
   background: var(--ok);
-  animation: heartbeat 2.4s ease-in-out infinite;
+  animation: none;
 }
-@keyframes heartbeat {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); }
-  50%      { box-shadow: 0 0 0 6px color-mix(in srgb, var(--ok) 0%, transparent); }
+.tele-heartbeat.beat { animation: heartbeat-beat 600ms ease-out; }
+@keyframes heartbeat-beat {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 70%, transparent); }
+  100% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--ok) 0%, transparent); }
 }
-.tele-sub { font-size: 10px; color: var(--text-dim); font-family: var(--mono); letter-spacing: 0.06em; text-transform: uppercase; }
+@media (prefers-reduced-motion: reduce) {
+  .tele-heartbeat.beat { animation: none; }
+}
 .tele-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -4681,60 +4656,11 @@ body > header {
 }
 .tele-tile.alert .tele-value { color: var(--alert); }
 .tele-tile.ok .tele-value { color: var(--ok); }
-.tele-activity {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 200px;
-}
-.tele-activity-list {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  max-height: 360px;
-}
-.tele-row {
-  display: grid;
-  grid-template-columns: 8px 1fr auto;
-  gap: 8px;
-  align-items: center;
-  padding: 4px 4px;
-  font-size: 11.5px;
-  border-bottom: 1px dotted var(--border);
-}
-.tele-row:last-child { border-bottom: none; }
-.tele-row.arrive {
-  animation: tele-row-arrive 0.6s ease-out;
-}
-@keyframes tele-row-arrive {
-  0%   { transform: translateX(8px); opacity: 0; background: color-mix(in srgb, var(--accent) 15%, transparent); }
-  60%  { transform: translateX(0); opacity: 1; }
-  100% { background: transparent; }
-}
-.tele-row-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--text-dim);
-  box-shadow: 0 0 8px currentColor;
-}
-.tele-row-txt { font-size: 11.5px; color: var(--text); }
-.tele-stage {
-  display: inline-block;
-  text-transform: uppercase;
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
-  color: var(--text-secondary);
-  font-weight: 700;
-  margin-right: 5px;
-}
-.tele-id { color: var(--accent); font-size: 11px; }
-.tele-row-ts {
-  font-size: 10px;
-  color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
-}
+/* RUNBOOK-03 Task 6 — the "Activity" live-event-log styles (.tele-activity,
+   .tele-row*, .tele-stage, .tele-id, @keyframes tele-row-arrive) were removed
+   with the feed itself: it subscribed to a spine bus with no publisher, so it
+   was a permanently-empty panel labelled "live". The honest live signals are
+   the heartbeat and the value bumps on the pulse tiles above. */
 .tele-console-btn {
   display: flex;
   align-items: center;
@@ -5079,7 +5005,7 @@ body > header {
   }
   /* On phones, let the status cluster flow left instead of forcing a
      right-float that would orphan it on its own line. */
-  .header-context .header-pulse { margin-left: 0; }
+  .header-context .header-time-selector { margin-left: 0; }
   .header-search {
     margin: 0;
   }
@@ -5131,6 +5057,16 @@ body > header {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
+}
+/* RUNBOOK-03 Task 2 — last-known-good freshness. A kept-stale rail (a transient
+   poll error that preserved its data) dims its body and shows "updated Ns ago ·
+   retrying" so the operator knows the data is real but N seconds old. */
+.cockpit-rail.stale .cockpit-rail-body { opacity: 0.55; transition: opacity .2s; }
+.cockpit-rail-fresh {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  margin-left: auto;
 }
 .cockpit-rail-body {
   display: flex;

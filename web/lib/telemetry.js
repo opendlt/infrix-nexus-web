@@ -1,20 +1,20 @@
 // Nexus — telemetry rail.
 //
-// Always-on right column. Three sections:
+// Always-on right column. Two sections:
 //   1. Pulse — runtime heartbeat + 6 key metrics (block / anchor mode /
 //      plugins admitted / trust drift / outcome failures / compensation).
-//      Values bump when they change. Tile color tracks state (alert / ok).
-//   2. Activity — live event log of the last 20 spine transitions with
-//      color-coded stage dots and tabular timestamps.
-//   3. Console trigger — small button that opens the operate slide-in
+//      Values bump when they change; the heartbeat beats on real data arrival
+//      (RUNBOOK-03 Task 3). Tile color tracks state (alert / ok).
+//   2. Console trigger — small button that opens the operate slide-in
 //      (Network / Verify / Subsystems).
+//
+// RUNBOOK-03 Task 6: the old "Activity" live-event-log section was removed — it
+// subscribed to a spine bus with no publisher (RUNBOOK-01 deleted connectLive),
+// so it was a permanently-empty panel labelled "live". The honest live signals
+// are the heartbeat (beats on real fetches) and the value bumps.
 
-import { rpcWithDisclosure, formatTime, shortHash } from '/lib/spineCommon.js';
-import { subscribe, getRecent } from '/lib/spineBus.js';
-import { subscribe2 } from '/lib/store.js';
+import { subscribe2, subscribeTick } from '/lib/store.js';
 import { openOperateConsole } from '/lib/operateConsole.js';
-
-const STAGE_INDEX = { intent: 1, plan: 2, approval: 3, execution: 4, outcome: 5, evidence: 6, anchor: 7 };
 
 export function createTelemetry() {
   const root = document.createElement('aside');
@@ -59,25 +59,6 @@ export function createTelemetry() {
   pulse.appendChild(grid);
   root.appendChild(pulse);
 
-  // ── Activity feed ──
-  const activity = document.createElement('section');
-  activity.className = 'tele-card tele-activity';
-  const actHead = document.createElement('div');
-  actHead.className = 'tele-head';
-  const actTitle = document.createElement('h3');
-  actTitle.textContent = 'Activity';
-  actHead.appendChild(actTitle);
-  const actSub = document.createElement('span');
-  actSub.className = 'tele-sub';
-  actSub.textContent = 'live';
-  actHead.appendChild(actSub);
-  activity.appendChild(actHead);
-  const list = document.createElement('div');
-  list.className = 'tele-activity-list';
-  list.id = 'tele-activity-list';
-  activity.appendChild(list);
-  root.appendChild(activity);
-
   // ── Console trigger ──
   const consoleBtn = document.createElement('button');
   consoleBtn.type = 'button';
@@ -86,14 +67,18 @@ export function createTelemetry() {
   consoleBtn.addEventListener('click', () => openOperateConsole());
   root.appendChild(consoleBtn);
 
-  // Seed with any buffered events
-  for (const e of getRecent(20)) addRow(list, e.event, e.payload, e.t, true);
-
-  // Live event subscriptions
   const subs = [];
-  subs.push(subscribe('intent.advanced', (p) => addRow(list, 'intent.advanced', p, Date.now())));
-  subs.push(subscribe('anchor.observed', (p) => addRow(list, 'anchor.observed', p, Date.now())));
-  subs.push(subscribe('spine.evidence', (p) => addRow(list, 'evidence', p, Date.now())));
+
+  // RUNBOOK-03 Task 3 — beat the heartbeat on REAL data arrival (any visible
+  // store update), not a fixed CSS loop. It stops when data stops, so the beat
+  // is a truthful "alive" signal. Reduced-motion is honored in CSS.
+  subs.push(subscribeTick(() => {
+    heartbeat.classList.remove('beat');
+    // eslint-disable-next-line no-unused-expressions
+    heartbeat.offsetWidth;           // reflow so the animation re-triggers
+    heartbeat.classList.add('beat');
+    setTimeout(() => heartbeat.classList.remove('beat'), 650);
+  }));
 
   // Phase 0: read runtime pulse from the central store (one fetch per
   // 4s tick fans out to every component that consumes runtimePulse).
@@ -143,42 +128,4 @@ export function createTelemetry() {
     el.classList.remove('ok', 'alert', 'warn');
     el.classList.add(kind);
   }
-}
-
-function addRow(list, event, payload, t, seed) {
-  if (!list || !payload) return;
-  const row = document.createElement('div');
-  row.className = 'tele-row';
-  if (!seed) row.classList.add('arrive');
-
-  const dot = document.createElement('span');
-  dot.className = 'tele-row-dot';
-  if (event === 'intent.advanced' && payload.stage) {
-    const idx = STAGE_INDEX[payload.stage];
-    if (idx) dot.style.background = `var(--spine-${idx})`;
-  } else if (event === 'anchor.observed') {
-    dot.style.background = 'var(--spine-7)';
-  } else if (event === 'evidence') {
-    dot.style.background = 'var(--spine-6)';
-  }
-  row.appendChild(dot);
-
-  const txt = document.createElement('div');
-  txt.className = 'tele-row-txt';
-  if (event === 'intent.advanced') {
-    txt.innerHTML = `<span class="tele-stage">${payload.stage}</span><span class="mono tele-id">${shortHash(payload.intentId, 14, 6)}</span>`;
-  } else if (event === 'anchor.observed') {
-    txt.innerHTML = `<span class="tele-stage">anchor</span><span class="mono tele-id">${shortHash(payload.intentId || payload.anchorId || '?', 14, 6)}</span>`;
-  } else {
-    txt.textContent = event;
-  }
-  row.appendChild(txt);
-
-  const ts = document.createElement('span');
-  ts.className = 'tele-row-ts mono';
-  ts.textContent = new Date(t).toLocaleTimeString();
-  row.appendChild(ts);
-
-  list.insertBefore(row, list.firstChild);
-  while (list.children.length > 20) list.removeChild(list.lastChild);
 }

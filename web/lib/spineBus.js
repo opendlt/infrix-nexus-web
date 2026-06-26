@@ -1,10 +1,8 @@
 // Nexus — spine activity bus.
 //
-// Tiny pub/sub that every "live" component subscribes to:
-//   - spineHero animates particle flow + pulses stage cards
-//   - live event log adds a row
-//   - header pulse meter flashes
-//   - inspect view (when looking at the same intent) refreshes
+// Tiny pub/sub that "live" components subscribe to (the spine strip animates
+// connector particles + pulses stage cards; the timeline flashes advancing
+// rows; the store invalidates pushed slices).
 //
 // Events:
 //   'intent.advanced' { intentId, fromStage, toStage, timestamp }
@@ -12,9 +10,12 @@
 //   'intent.failed' { intentId, stage, reason, timestamp }
 //   'anchor.confirmed' { anchorId, intentId, l0Block, timestamp }
 //
-// The connectLive() WebSocket bridge (lib/liveEvents.js) emits the
-// events; subscribers act on them. This decouples the data layer
-// from the visual layer.
+// STATUS (RUNBOOK-03): the bus is currently DORMANT — its only publisher was the
+// connectLive() WebSocket bridge (lib/liveEvents.js), which RUNBOOK-01 removed
+// (no /v4/ws actor in this build). The subscribers above are harmless inert
+// wiring (they make no on-screen liveness claim, so the honesty rule holds) and
+// are the exact substrate a future "make it real" push layer re-lights by adding
+// a publisher. Until then the store's interval poller is the source of truth.
 
 const subscribers = new Map(); // event → Set<handler>
 const recentEvents = []; // ring buffer of last 50 events for late subscribers

@@ -6,7 +6,7 @@
 // persisted [data-theme] attribute on <html>.
 
 import { rpcWithDisclosure, shortHash, DISCLOSURE, setDisclosure } from '/lib/spineCommon.js';
-import { subscribe } from '/lib/spineBus.js';
+import { isAtLive } from '/lib/timeContext.js';
 import { toggleCommandPalette, toggleShortcutHelp } from '/lib/commandPalette.js';
 import { startHeaderInboxBadge } from '/lib/cockpitRails.js';
 import { mountTimeSelector, mountTimeBanner } from '/lib/timeSelector.js';
@@ -22,7 +22,7 @@ export function initHeader() {
   initSearch();
   initTheme();
   initMode();
-  initPulse();
+  initConnectionStatus();
   initDisclosure();
   initShortcuts();
   initWorkspaceNav();
@@ -148,6 +148,9 @@ function initBlockHeight() {
   const el = document.getElementById('headerBlockHeight');
   if (!el) return;
   const poll = async () => {
+    // RUNBOOK-03 Task 5 — skip when the tab is hidden or time is frozen on an
+    // immutable historical snapshot; either way a re-poll is pure waste.
+    if (document.hidden || !isAtLive()) return;
     try {
       const h = await rpcWithDisclosure('nexus.operateHealth', {});
       const bh = h && h.network ? h.network.blockHeight : undefined;
@@ -158,23 +161,28 @@ function initBlockHeight() {
   };
   poll();
   setInterval(poll, 8000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && isAtLive()) poll(); });
 }
 
-// Pulse meter — the dot flashes briefly every time the spine bus
-// emits an activity event. Operators get a peripheral signal that
-// the spine is alive even when they're not looking at Live mode.
-function initPulse() {
-  const wrap = document.getElementById('headerPulse');
-  if (!wrap) return;
-  const dot = wrap.querySelector('.header-pulse-dot');
-  if (!dot) return;
-  subscribe('*', () => {
-    dot.classList.remove('flash');
-    // eslint-disable-next-line no-unused-expressions
-    dot.offsetWidth;
-    dot.classList.add('flash');
-    setTimeout(() => dot.classList.remove('flash'), 800);
-  });
+// RUNBOOK-03 Task 1 — real connection status. Drives #statusDot / #statusText
+// from the store's health signal (Connected / Reconnecting… / Offline), which
+// rolls up actual fetch outcomes. Replaces the old #headerPulse, which flashed
+// off a spine bus that has no publisher (RUNBOOK-01 removed connectLive), so it
+// could never beat.
+async function initConnectionStatus() {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  if (!dot || !txt) return;
+  try {
+    const { subscribeHealth, getHealthLabel } = await import('/lib/store.js');
+    subscribeHealth((state) => {
+      dot.classList.toggle('disconnected', state === 'offline');
+      dot.classList.toggle('reconnecting', state === 'reconnecting');
+      txt.textContent = getHealthLabel();
+    });
+  } catch (e) {
+    // Store unavailable — leave the pre-JS "Connecting…" copy in place.
+  }
 }
 
 // Keyboard shortcuts: power-user navigation without touching the mouse.

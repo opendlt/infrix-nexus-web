@@ -19,6 +19,10 @@
 
 import { rpcWithDisclosure } from '/lib/spineCommon.js';
 import { subscribe } from '/lib/spineBus.js';
+import { onAtChange, isAtLive } from '/lib/timeContext.js';
+import {
+  OFFLINE_THRESHOLD, healthFromFailures, healthLabel, isStale, nextBackoff,
+} from '/lib/liveness.js';
 
 // ---------------------------------------------------------------------
 // Slice types — the canonical state model.
@@ -41,14 +45,46 @@ const subscribers = new Map(); // sliceKey → Set<handler>
 const slices = new Map();      // sliceKey → { status, data, error, fetchedAt }
 const inflight = new Map();    // sliceKey → Promise
 
-// Polling cadence per slice (ms). Live event bus collapses these
-// when activity is observed.
+// RUNBOOK-03 — liveness state. Consecutive per-slice failures roll into one
+// global health signal (Connected / Reconnecting… / Offline); a success tick
+// fans out on real data arrival (drives the heartbeat). DOM-free math lives in
+// /lib/liveness.js so it is unit-testable on its own.
+const failures = new Map();          // sliceKey → consecutive failure count
+const healthSubscribers = new Set(); // handler(state)
+let healthState = 'ok';              // 'ok' | 'reconnecting' | 'offline'
+const tickSubscribers = new Set();   // handler(sliceKey) — fires on a visible setSlice
+
+function recomputeHealth() {
+  const next = healthFromFailures(failures, OFFLINE_THRESHOLD);
+  if (next === healthState) return;
+  healthState = next;
+  for (const h of healthSubscribers) {
+    try { h(healthState); } catch (e) { console.error('store health handler', e); }
+  }
+}
+
+export function getHealth() { return healthState; }
+export function getHealthLabel() { return healthLabel(healthState); }
+export function subscribeHealth(handler) {
+  healthSubscribers.add(handler);
+  try { handler(healthState); } catch (e) { console.error('store health init', e); } // fire current
+  return () => healthSubscribers.delete(handler);
+}
+export function subscribeTick(handler) {
+  tickSubscribers.add(handler);
+  return () => tickSubscribers.delete(handler);
+}
+
+// Polling cadence per slice (ms). The poller pauses on hidden tabs / frozen
+// time and backs off on failure (RUNBOOK-03 Task 5).
 const POLL_INTERVAL_MS = {
   recentIntents: 5000,
   runtimePulse:  4000,
   cockpit:       4000,
 };
-const pollers = new Map();
+const BACKOFF_CAP_MS = 16000;
+const pollers = new Map();       // sliceKey → true (active flag for the scheduler)
+const pollTimers = new Map();    // sliceKey → setTimeout handle (backoff scheduler)
 
 // ---------------------------------------------------------------------
 // Public API
@@ -56,6 +92,19 @@ const pollers = new Map();
 
 export function getSlice(key) {
   return slices.get(key) || { status: 'loading' };
+}
+
+// RUNBOOK-03 Task 2 — freshness reader for the rails. Returns when the data was
+// last actually good and whether it is stale (kept across a transient error or
+// older than STALE_INTERVALS poll cadences).
+export function sliceFreshness(key) {
+  const s = slices.get(key);
+  if (!s) return { fetchedAt: 0, stale: false };
+  const interval = POLL_INTERVAL_MS[key] || 0;
+  return {
+    fetchedAt: s.fetchedAt || 0,
+    stale: Boolean(s.stale) || isStale(s.fetchedAt, interval),
+  };
 }
 
 export function subscribe2(sliceKey, handler) {
@@ -71,9 +120,11 @@ export function subscribe2(sliceKey, handler) {
   return () => {
     const set = subscribers.get(sliceKey);
     if (set) set.delete(handler);
-    // If no subscribers remain for a polled slice, stop the poller.
-    if (set && set.size === 0 && pollers.has(sliceKey)) {
-      clearInterval(pollers.get(sliceKey));
+    // If no subscribers remain for a polled slice, stop the scheduler.
+    if (set && set.size === 0 && (pollers.has(sliceKey) || pollTimers.has(sliceKey))) {
+      const t = pollTimers.get(sliceKey);
+      if (t) clearTimeout(t);
+      pollTimers.delete(sliceKey);
       pollers.delete(sliceKey);
     }
   };
@@ -94,13 +145,35 @@ export function refreshSlice(sliceKey) {
     return Promise.resolve(setSlice(sliceKey, { status: 'unavailable', reason: 'unknown slice' }));
   }
   const p = (async () => {
-    setSlice(sliceKey, { status: slices.get(sliceKey)?.data ? slices.get(sliceKey).status : 'loading' });
+    // RUNBOOK-03 Task 2 — keep last-known-good visible during a refresh. Only
+    // show the loading placeholder when there is NO prior data; otherwise leave
+    // the slice intact so its data both stays on screen (no flicker on a routine
+    // re-poll) and survives into the error branch's keep-last-known-good path.
+    const cur0 = slices.get(sliceKey);
+    if (!(cur0 && cur0.data)) setSlice(sliceKey, { status: 'loading' });
     try {
       const data = await fetcher();
       const next = normaliseSlice(sliceKey, data);
       setSlice(sliceKey, next);
+      // RUNBOOK-03 Task 1 — only polled slices drive global health (a one-shot
+      // narrative fetch failing must not paint the whole app offline).
+      if (POLL_INTERVAL_MS[sliceKey]) { failures.set(sliceKey, 0); recomputeHealth(); }
       return next;
     } catch (err) {
+      if (POLL_INTERVAL_MS[sliceKey]) {
+        failures.set(sliceKey, (failures.get(sliceKey) || 0) + 1);
+        recomputeHealth();
+      }
+      // RUNBOOK-03 Task 2 — keep last-known-good. A transient failure must not
+      // wipe the operator's data while the dot still implies health: retain the
+      // data, flag it stale, and attach the error for badging. fetchedAt stays =
+      // the moment the data was actually good (setSlice preserves it via spread).
+      const prev = slices.get(sliceKey);
+      if (prev && prev.data) {
+        const kept = { ...prev, status: 'visible', stale: true, error: err, errorAt: Date.now() };
+        setSlice(sliceKey, kept);
+        return kept;
+      }
       const errSlice = { status: 'error', error: err, fetchedAt: Date.now() };
       setSlice(sliceKey, errSlice);
       return errSlice;
@@ -144,21 +217,48 @@ function setSlice(key, slice) {
       try { h(slice); } catch (e) { console.error('store notify handler', key, e); }
     }
   }
+  // RUNBOOK-03 Task 3 — a generic success tick on REAL data arrival only, so the
+  // heartbeat beats on truth (and stops when data stops). A kept-stale slice (a
+  // transient error preserving last-known-good) is not a fresh arrival → no tick.
+  if (slice.status === 'visible' && !slice.stale) {
+    for (const h of tickSubscribers) {
+      try { h(key); } catch (e) { console.error('store tick handler', e); }
+    }
+  }
   return slice;
 }
 
+// RUNBOOK-03 Task 5 — self-scheduling poller. Skips a tick when the tab is
+// hidden or time is frozen on an (immutable) historical snapshot, and backs off
+// 4s→8s→16s on consecutive failures. Resumes immediately on visibilitychange
+// (listener at the bottom of this module).
 function ensurePoller(sliceKey) {
-  if (pollers.has(sliceKey)) return;
-  const interval = POLL_INTERVAL_MS[sliceKey];
-  if (!interval) {
-    // One-shot fetch for slices without a poll cadence
+  if (pollers.has(sliceKey) || pollTimers.has(sliceKey)) return;
+  const base = POLL_INTERVAL_MS[sliceKey];
+  if (!base) {
+    // One-shot fetch for slices without a poll cadence (e.g. narrative).
     refreshSlice(sliceKey).catch(() => {});
     return;
   }
-  // Initial fetch + interval
-  refreshSlice(sliceKey).catch(() => {});
-  const t = setInterval(() => refreshSlice(sliceKey).catch(() => {}), interval);
-  pollers.set(sliceKey, t);
+  refreshSlice(sliceKey).catch(() => {});  // initial fetch
+  pollers.set(sliceKey, true);             // mark active (teardown checks this)
+  scheduleNext(sliceKey, base);
+}
+
+function scheduleNext(sliceKey, base) {
+  const attempt = failures.get(sliceKey) || 0;
+  const delay = attempt > 0 ? nextBackoff(base, attempt - 1, BACKOFF_CAP_MS) : base;
+  const t = setTimeout(async () => {
+    // Pause when the tab is hidden or the cursor is frozen on a historical
+    // snapshot (immutable — re-fetching is pure waste). Reschedule a probe.
+    if ((typeof document !== 'undefined' && document.hidden) || !isAtLive()) {
+      scheduleNext(sliceKey, base);
+      return;
+    }
+    await refreshSlice(sliceKey).catch(() => {});
+    if (pollers.has(sliceKey)) scheduleNext(sliceKey, base); // next gap reads the failures map
+  }, delay);
+  pollTimers.set(sliceKey, t);
 }
 
 // ---------------------------------------------------------------------
@@ -265,8 +365,14 @@ function normaliseSlice(sliceKey, data) {
 }
 
 // ---------------------------------------------------------------------
-// Live event-bus integration — when a relevant event arrives, mark the
-// slice stale so the next consumer sees fresh data.
+// Live event-bus integration — when a pushed event arrives, invalidate the
+// relevant slice so the next consumer sees fresh data.
+//
+// RUNBOOK-03 note: this wiring is currently DORMANT — RUNBOOK-01 removed the
+// only publisher (lib/liveEvents.js / connectLive). It is intentionally kept:
+// it is INVISIBLE (it makes no on-screen liveness claim, so the honesty rule is
+// satisfied), and it is the exact substrate a future "make it real" push layer
+// re-lights with one call. Until then the interval poller above is the source.
 // ---------------------------------------------------------------------
 
 subscribe('intent.advanced', (p) => {
@@ -291,3 +397,27 @@ subscribe('spine.approval', (ev) => {
   invalidateSlice('cockpit');
   if (ev && ev.intentId) invalidateSlice('narrative:' + ev.intentId);
 });
+
+// RUNBOOK-03 Task 4 (P3) — time-cursor correctness. When the cursor moves, every
+// read must be re-issued under the new `at` coordinate. rpcWithDisclosure already
+// injects withAt(...), so a plain refresh re-fetches at the new point in time.
+// Invalidate the polled projections AND every open narrative (which has no poll
+// cadence of its own and would otherwise show live data forever — P3).
+onAtChange(() => {
+  invalidateSlice('recentIntents');
+  invalidateSlice('runtimePulse');
+  invalidateSlice('cockpit');
+  const keys = new Set([...slices.keys(), ...subscribers.keys()]);
+  for (const key of keys) {
+    if (key.startsWith('narrative:')) invalidateSlice(key);
+  }
+});
+
+// RUNBOOK-03 Task 5 — when the tab returns to the foreground (and time is live),
+// catch every polled slice up immediately rather than waiting out the gap.
+if (typeof document !== 'undefined' && document.addEventListener) {
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden || !isAtLive()) return;
+    for (const key of pollTimers.keys()) refreshSlice(key).catch(() => {});
+  });
+}

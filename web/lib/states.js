@@ -69,8 +69,35 @@ export function unavailableNode(reason = 'Backend unavailable', detail = '') {
   return makeStateNode('unavailable', reason, detail);
 }
 
-/** Error — transient failure. */
+/** Error — transient failure. Renders the structured UserError (title / impact /
+ * fixes / docs) when the server translated it (err.userError, attached by rpc.js
+ * via parseUserError — RUNBOOK-03 Task 7); falls back to the plain message
+ * otherwise. Never shows a raw -32xxx JSON-RPC string. */
 export function errorStateNode(err) {
+  const ue = err && err.userError ? err.userError : null;
+  if (ue) {
+    const wrap = makeStateNode('error', ue.title || 'Error', ue.impact || ue.message || '');
+    if (Array.isArray(ue.fixes) && ue.fixes.length) {
+      const ul = document.createElement('ul');
+      ul.className = 'state-fixes';
+      for (const f of ue.fixes) {
+        const li = document.createElement('li');
+        li.textContent = f.command ? `${f.label} — ${f.command}` : f.label;
+        ul.appendChild(li);
+      }
+      wrap.appendChild(ul);
+    }
+    if (ue.docs) {
+      const a = document.createElement('a');
+      a.className = 'state-docs';
+      a.href = ue.docs;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = 'Docs';
+      wrap.appendChild(a);
+    }
+    return wrap;
+  }
   const msg = err && err.message ? err.message : (typeof err === 'string' ? err : 'Unknown error');
   return makeStateNode('error', 'Error', msg);
 }

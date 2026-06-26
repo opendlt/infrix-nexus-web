@@ -25,6 +25,7 @@ import { subscribe2, refreshSlice } from '/lib/store.js';
 import { severityBadge, sortBySeverity, severityRank } from '/lib/severity.js';
 import { renderDossier } from '/lib/dossier.js';
 import { onAtChange, isAtLive } from '/lib/timeContext.js';
+import { agoLabel } from '/lib/liveness.js';
 
 // =================================================================
 // Pending approval queue
@@ -43,6 +44,9 @@ export function createApprovalQueue() {
   count.id = 'approvals-count';
   count.textContent = '0';
   head.appendChild(count);
+  const fresh = document.createElement('span');
+  fresh.className = 'cockpit-rail-fresh';
+  head.appendChild(fresh);
   root.appendChild(head);
 
   const body = document.createElement('div');
@@ -57,8 +61,13 @@ export function createApprovalQueue() {
       body.replaceChildren(skeletonRows(2));
       return;
     }
-    if (slice.status === 'error') { body.replaceChildren(errorStateNode(slice.error)); return; }
+    // RUNBOOK-03 Task 2 — only show the full error node when there is genuinely
+    // no prior data to keep. A kept-stale slice (transient error preserving
+    // last-known-good) keeps rendering its data, dimmed + badged "retrying".
+    if (slice.status === 'error' && !slice.data) { body.replaceChildren(errorStateNode(slice.error)); return; }
     if (slice.status === 'hidden') { body.replaceChildren(hiddenNode()); return; }
+    root.classList.toggle('stale', Boolean(slice.stale));
+    setFresh(fresh, slice);
     const data = slice.data || {};
     const items = Array.isArray(data.pendingApprovals) ? data.pendingApprovals : [];
     count.textContent = String(items.length);
@@ -153,6 +162,9 @@ export function createRiskRail() {
   count.id = 'risks-count';
   count.textContent = '0';
   head.appendChild(count);
+  const fresh = document.createElement('span');
+  fresh.className = 'cockpit-rail-fresh';
+  head.appendChild(fresh);
   root.appendChild(head);
 
   const body = document.createElement('div');
@@ -167,8 +179,10 @@ export function createRiskRail() {
       body.replaceChildren(skeletonRows(2));
       return;
     }
-    if (slice.status === 'error') { body.replaceChildren(errorStateNode(slice.error)); return; }
+    if (slice.status === 'error' && !slice.data) { body.replaceChildren(errorStateNode(slice.error)); return; }
     if (slice.status === 'hidden') { body.replaceChildren(hiddenNode()); return; }
+    root.classList.toggle('stale', Boolean(slice.stale));
+    setFresh(fresh, slice);
     const data = slice.data || {};
     const signals = sortBySeverity(Array.isArray(data.riskSignals) ? data.riskSignals : []);
     count.textContent = String(signals.length);
@@ -228,6 +242,9 @@ export function createVerificationRail() {
   count.id = 'verify-count';
   count.textContent = '0';
   head.appendChild(count);
+  const fresh = document.createElement('span');
+  fresh.className = 'cockpit-rail-fresh';
+  head.appendChild(fresh);
   root.appendChild(head);
 
   const body = document.createElement('div');
@@ -242,8 +259,10 @@ export function createVerificationRail() {
       body.replaceChildren(skeletonRows(2));
       return;
     }
-    if (slice.status === 'error') { body.replaceChildren(errorStateNode(slice.error)); return; }
+    if (slice.status === 'error' && !slice.data) { body.replaceChildren(errorStateNode(slice.error)); return; }
     if (slice.status === 'hidden') { body.replaceChildren(hiddenNode()); return; }
+    root.classList.toggle('stale', Boolean(slice.stale));
+    setFresh(fresh, slice);
     const data = slice.data || {};
     const tasks = Array.isArray(data.verificationTasks) ? data.verificationTasks : [];
     count.textContent = String(tasks.length);
@@ -577,6 +596,34 @@ function compactVerify(result) {
     ? `✓ Verified — ${passed}/${total} checks passed`
     : `✗ Failed — ${total - passed}/${total} checks failed`;
   return d;
+}
+
+// RUNBOOK-03 Task 2 — paint a rail's "updated Ns ago" badge from the slice's
+// fetchedAt (the last GOOD fetch, preserved across transient errors) and tag it
+// "retrying" while stale. data-at lets the shared ticker advance it each second.
+function setFresh(el, slice) {
+  if (!el) return;
+  const at = slice && slice.fetchedAt ? slice.fetchedAt : 0;
+  el.dataset.at = String(at);
+  if (slice && slice.stale) el.dataset.stale = '1'; else delete el.dataset.stale;
+  el.textContent = at
+    ? 'updated ' + agoLabel(at) + (slice && slice.stale ? ' · retrying' : '')
+    : '';
+}
+
+// One module-level ticker advances every mounted rail badge once a second so the
+// relative label stays honest between polls. A no-op when no badges are mounted
+// or the tab is hidden (no always-on cost when the cockpit isn't visible).
+if (typeof document !== 'undefined' && typeof setInterval === 'function') {
+  setInterval(() => {
+    if (document.hidden) return;
+    const badges = document.querySelectorAll('.cockpit-rail-fresh[data-at]');
+    for (const el of badges) {
+      const at = Number(el.dataset.at) || 0;
+      if (!at) continue;
+      el.textContent = 'updated ' + agoLabel(at) + (el.dataset.stale ? ' · retrying' : '');
+    }
+  }, 1000);
 }
 
 // =================================================================

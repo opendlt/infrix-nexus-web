@@ -62,14 +62,17 @@
             <p class="popover-hint">The ADI must hold <code>explorer:view</code> or reads are denied.</p>
           </div>
         </div>
-        <div class="header-pulse" id="headerPulse" title="Spine activity">
-          <span class="header-pulse-dot"></span>
-          <span class="header-pulse-label">live</span>
-        </div>
+        <!-- RUNBOOK-03 Task 6 — the #headerPulse "live" dot was removed: it
+             subscribed to a spine bus with no publisher (RUNBOOK-01 deleted the
+             connectLive bridge), so it never beat. The honest liveness signal
+             is the status light below, driven by real fetch outcomes. -->
         <div class="header-time-selector" id="headerTimeSelector"></div>
-        <div class="status-indicator">
+        <!-- RUNBOOK-03 Task 1 — real connection status. The text starts at the
+             honest "Connecting…" (never the hardcoded "Connected") and is driven
+             by the store's health signal (header.js initConnectionStatus). -->
+        <div class="status-indicator" aria-live="polite">
           <span class="status-dot" id="statusDot"></span>
-          <span id="statusText">Connected</span>
+          <span id="statusText">Connecting…</span>
         </div>
         <div class="block-height-display" id="blockHeightDisplay">
           Block <span id="headerBlockHeight">-</span>
