@@ -5893,6 +5893,66 @@ body > header {
 .dossier-step-card[data-stage="5"] { border-left-color: var(--spine-5); }
 .dossier-step-card[data-stage="6"] { border-left-color: var(--spine-6); }
 .dossier-step-card[data-stage="7"] { border-left-color: var(--spine-7); }
+
+/* ===================================================================== */
+/* RUNBOOK-04 — Governance surfaces (Approve / Operate / Atlas / Studio / */
+/* Identity) decision-grade affordances.                                 */
+/* ===================================================================== */
+/* Task 2 — approval decision-grade */
+.approval-banner-badge { margin-left: 10px; vertical-align: middle; }
+.approval-diff-banner {
+  border: 1px solid var(--warn); border-left: 3px solid var(--warn);
+  background: var(--warn-soft); border-radius: var(--radius-sm);
+  padding: 10px 14px; margin: 8px 0;
+}
+.approval-diff-head { font-weight: 700; font-size: 12px; color: var(--text); margin-bottom: 4px; }
+.approval-diff-list { margin: 0; padding-left: 18px; font-size: 12px; color: var(--text-secondary); }
+.approval-role-pick { align-items: center; }
+.approval-role-select {
+  font: inherit; font-size: 12px; background: var(--surface-alt); color: var(--text);
+  border: 1px solid var(--border-bold); border-radius: var(--radius-xs); padding: 4px 8px;
+}
+.approval-cta-honesty { font-size: 11px; color: var(--text-dim); margin: 8px 0 0; }
+.approve-consequence { display: flex; flex-direction: column; gap: 8px; }
+.approve-consequence-slot { font-size: 11px; color: var(--text-secondary); }
+.approve-consequence-headline { font-weight: 700; font-size: 13px; color: var(--text); margin: 0; }
+.approve-consequence-error { font-size: 12px; color: var(--warn); }
+.approve-consequence-grid { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; margin: 0; font-size: 12px; }
+.approve-consequence-grid dt { color: var(--text-dim); }
+.approve-consequence-grid dd { margin: 0; color: var(--text); }
+.approve-consequence-list { margin: 0; padding-left: 18px; font-size: 12px; color: var(--text-secondary); }
+.approve-consequence-warnings { margin: 0; padding-left: 18px; font-size: 12px; color: var(--alert); }
+
+/* Task 3 — operate drill-through */
+.operate-panel-clickable { cursor: pointer; transition: background var(--motion-fast), border-color var(--motion-fast); }
+.operate-panel-clickable:hover { background: var(--accent-soft); border-color: var(--accent); }
+.operate-panel-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.operate-renew-btn {
+  font: inherit; font-size: 10px; font-weight: 700; margin-left: 8px; padding: 1px 6px; cursor: pointer;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent); border-radius: 999px;
+}
+.operate-renew-btn:hover { background: var(--accent-soft); }
+
+/* Task 4 — atlas drawer actions + rules table */
+.govern-drawer-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.govern-policy-rules { width: 100%; }
+.govern-rules-raw { margin-top: 8px; }
+
+/* Task 5 — studio submit confirm */
+.compose-confirm-detail { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.compose-confirm-hashrow { font-size: 12px; color: var(--text-secondary); }
+.compose-confirm-steps { font-size: 12px; color: var(--text-dim); margin: 0; }
+
+/* Task 7 — identity preview */
+.identity-preview-banner {
+  border: 1px solid var(--info); border-left: 3px solid var(--info); background: var(--info-soft);
+  border-radius: var(--radius-sm); padding: 8px 14px; margin-top: 8px; font-size: 12px; color: var(--text-secondary);
+}
+.identity-sig-link {
+  display: inline-block; margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--accent); text-decoration: none;
+}
+.identity-sig-link:hover { text-decoration: underline; }
+
 .dossier-step-head {
   display: flex;
   justify-content: space-between;

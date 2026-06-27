@@ -378,6 +378,21 @@ function renderAnchorPanel(a) {
       : 'L0 cross-check not yet available — anchor pending.';
     sec.body.appendChild(note);
   }
+  if (a.txHash) {
+    // RUNBOOK-04 Task 6 (G3.7) — the anchor coordinates (tx + block) are on
+    // screen, so the in-app L0 cross-check entry point belongs here. But the
+    // live cross-check needs a server RPC that does NOT exist yet (SP8 /
+    // RUNBOOK-07 delivers it), so the button is rendered DISABLED — it must
+    // never claim a cross-check it can't perform. The copy-paste "Verify
+    // independently (live L0)" command in this report is the working path.
+    const x = document.createElement('button');
+    x.type = 'button';
+    x.className = 'verify-btn evidence-l0-crosscheck';
+    x.textContent = 'Cross-check against L0 now';
+    x.disabled = true;
+    x.title = 'In-app live L0 cross-check is coming (SP8). For now, run the "Verify independently (live L0)" command above.';
+    sec.body.appendChild(x);
+  }
   return sec.element;
 }
 

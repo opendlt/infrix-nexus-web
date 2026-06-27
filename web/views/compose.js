@@ -26,8 +26,9 @@
 //   │                │  Dossier output (renders below after preview)   │
 //   └────────────────┴────────────────────────────────────────────────┘
 
-import { rpcWithDisclosure, errorStateNode } from '/lib/spineCommon.js';
+import { rpcWithDisclosure, errorStateNode, hashChip } from '/lib/spineCommon.js';
 import { renderDossier } from '/lib/dossier.js';
+import { openConfirmModal } from '/lib/rationaleModal.js';
 
 let rootEl = null;
 let templates = [];
@@ -690,16 +691,60 @@ function buildRawForm(tmpl, container) {
 // goalType + customParams the dossier was built from.
 // =================================================================
 async function submitDossier(out) {
-  if (!lastDossier) return;
+  if (!lastDossier || !lastDossier.response || !lastDossier.response.plan) return;
+  const plan = lastDossier.response.plan;
+
+  // RUNBOOK-04 Task 5 (G3.6) — re-show the EXACT plan hash the user reviewed and
+  // require an explicit confirm, so the binding they commit to is visible. This
+  // makes the "last chance to review" promise one the code can keep.
+  const detail = document.createElement('div');
+  detail.className = 'compose-confirm-detail';
+  const row = document.createElement('div');
+  row.className = 'compose-confirm-hashrow';
+  row.appendChild(document.createTextNode('Plan hash: '));
+  row.appendChild(hashChip(plan.planHash, { head: 10, tail: 8 }));
+  detail.appendChild(row);
+  const steps = document.createElement('p');
+  steps.className = 'compose-confirm-steps';
+  steps.textContent = `${plan.stepCount || 0} step${plan.stepCount === 1 ? '' : 's'} — this submits the exact plan you reviewed.`;
+  detail.appendChild(steps);
+
+  const confirmed = await openConfirmModal({
+    title: 'Submit this exact plan?',
+    message: 'You are committing to the plan below. If the server re-plans to a different hash, submission is flagged and you can re-preview.',
+    detailNode: detail,
+    confirmText: 'Submit this exact plan',
+  });
+  if (!confirmed) return;
+
   const banner = document.createElement('div');
   banner.className = 'verify-summary verify-warn compose-out-loading';
   banner.textContent = 'Submitting plan…';
   out.replaceChildren(banner);
   try {
+    // RUNBOOK-04 Task 5 — Option A (verify-after): governed.submit still re-plans
+    // server-side from {goalType, customParams}, so also send the previewed
+    // expectedPlanHash. If the server echoes a produced plan hash that differs,
+    // do NOT navigate — warn and tell the user to re-preview. (Option B —
+    // submit-by-plan-id to skip re-planning — is the backend-gated true fix.)
     const result = await rpcWithDisclosure('governed.submit', {
       goalType: lastDossier.goalType,
       customParams: lastDossier.customParams,
+      expectedPlanHash: plan.planHash,
     });
+    const producedHash = result && (
+      result.planHash
+      || (result.Plan && result.Plan.planHash)
+      || (result.plan && result.plan.planHash)
+      || (result.Intent && result.Intent.PlanHash)
+    );
+    if (producedHash && producedHash !== plan.planHash) {
+      const warn = document.createElement('div');
+      warn.className = 'verify-summary verify-warn';
+      warn.textContent = '⚠ The server produced a different plan than you reviewed (the plan hash changed since preview). Re-preview before submitting — nothing was executed under the old hash.';
+      out.replaceChildren(warn);
+      return;
+    }
     const ok = document.createElement('div');
     ok.className = 'verify-summary verify-pass';
     const intentID = result && result.Intent && result.Intent.ID;

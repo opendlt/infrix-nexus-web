@@ -23,9 +23,10 @@
 
 import { rpcWithDisclosure, errorStateNode } from '/lib/spineCommon.js';
 import { renderApprovalDossier } from '/lib/approvalDossier.js';
-import { openRationaleModal } from '/lib/rationaleModal.js';
+import { openRationaleModal, openConfirmModal } from '/lib/rationaleModal.js';
 import { mountCommentThread } from '/lib/commentThread.js';
 import { onAtChange, isAtLive } from '/lib/timeContext.js';
+import { explainSignature } from '/lib/identity.js';
 
 const POLL_MS = 10000;
 
@@ -117,7 +118,7 @@ async function refreshDossier() {
   try {
     const dossier = await rpcWithDisclosure('nexus.approvalDossier', { planId: currentPlanId });
     bodyEl.replaceChildren(renderApprovalDossier(dossier, {
-      onSign: (d) => signApproval(d),
+      onSign: (d, slot) => signApproval(d, slot),
       onReject: (d) => rejectApproval(d),
       onInspectRaw: () => {
         const raw = bodyEl.querySelector('.dossier-raw');
@@ -145,30 +146,51 @@ async function refreshDossier() {
   }
 }
 
-async function signApproval(dossier) {
+async function signApproval(dossier, slot) {
   if (!dossier || !dossier.intentId) {
-    bodyEl.replaceChildren(errorStateNode(new Error('Cannot sign — dossier has no intentId.')));
+    bodyEl.replaceChildren(errorStateNode(new Error('Cannot record approval — dossier has no intentId.')));
     return;
   }
+  // RUNBOOK-04 Task 2 (G3.2) — use the role/stage the signer PICKED (slot), not
+  // a silent remaining[0] auto-pick. Fall back to remaining[0]/requiredRoles[0].
+  const role = (slot && slot.role)
+    || (dossier.remaining && dossier.remaining[0] && dossier.remaining[0].role)
+    || (dossier.requiredRoles && dossier.requiredRoles[0]) || '';
+  const stageId = (slot && slot.stageId)
+    || (dossier.remaining && dossier.remaining[0] && dossier.remaining[0].stageId) || '';
+  const keyPage = (slot && slot.keyPage) || role;
+
+  // RUNBOOK-04 Task 2.5 (G3.8 / SP6) — pre-action consequence panel: the same
+  // explainSignature engine the Identity page demos, now in the LIVE flow. It
+  // fails closed; where the dossier doesn't surface goalType / key-page it can't
+  // explain, so we say so honestly and still allow proceeding (the blocked-
+  // invalidator gate at approvalDossier is the real safety gate). Where it CAN
+  // explain, this is the consequence confirmation the spec wants.
+  const ex = explainSignature({
+    goalType: dossier.goalType,
+    signer: keyPage,
+    network: dossier.network || 'local',
+    agentInitiated: !!dossier.agentInitiated,
+    sourceAssets: dossier.scope && dossier.scope.sourceAssets,
+    targetAssets: dossier.scope && dossier.scope.targetAssets,
+  });
+  const confirmed = await openConfirmModal({
+    title: 'Before you record this approval',
+    message: ex.error
+      ? 'A consequence preview could not be generated from this dossier (details below). You can still proceed — the blocked-invalidator gate already prevents recording an invalid plan.'
+      : 'Here is what recording this approval allows. Continue to add your rationale.',
+    detailNode: buildConsequenceNode(ex, role, stageId),
+    confirmText: 'Continue',
+  });
+  if (!confirmed) return;
+
   // Mandatory rationale — backend rejects with -32602 if <10 chars.
   const rationale = await openRationaleModal({ verb: 'sign', intentId: dossier.intentId });
   if (rationale === null) return;
 
-  // Pick the first remaining role-slot the actor *could* sign for as
-  // the default; the user will see this in the result.
-  let role = '';
-  if (Array.isArray(dossier.remaining) && dossier.remaining.length > 0) {
-    role = dossier.remaining[0].role || '';
-  } else if (Array.isArray(dossier.requiredRoles) && dossier.requiredRoles.length > 0) {
-    role = dossier.requiredRoles[0];
-  }
-  let stageId = '';
-  if (Array.isArray(dossier.remaining) && dossier.remaining.length > 0) {
-    stageId = dossier.remaining[0].stageId || '';
-  }
   const banner = document.createElement('div');
   banner.className = 'verify-summary verify-warn approve-action-status';
-  banner.textContent = 'Signing approval…';
+  banner.textContent = 'Recording approval…';
   bodyEl.prepend(banner);
   try {
     const result = await rpcWithDisclosure('governed.approve', {
@@ -181,18 +203,67 @@ async function signApproval(dossier) {
     banner.classList.remove('verify-warn');
     banner.classList.add('verify-pass');
     if (result && result.status === 'resumed') {
-      banner.textContent = '✓ Signed and resumed — execution advanced.';
+      banner.textContent = '✓ Approval recorded and resumed — execution advanced.';
     } else if (result && result.status === 'awaiting_more_approvals') {
-      banner.textContent = '✓ Signed — awaiting other approvers.';
+      banner.textContent = '✓ Approval recorded — awaiting other approvers.';
     } else {
-      banner.textContent = '✓ Signature recorded.';
+      banner.textContent = '✓ Approval recorded.';
     }
     setTimeout(() => { refreshDossier().catch(() => {}); }, 500);
   } catch (err) {
     banner.classList.remove('verify-warn');
     banner.classList.add('verify-fail');
-    banner.textContent = 'Sign failed: ' + (err.message || 'unknown');
+    banner.textContent = 'Recording approval failed: ' + (err.message || 'unknown');
   }
+}
+
+// RUNBOOK-04 Task 2.5 — render the explainSignature consequence block (or its
+// fail-closed reason) for the confirm gate.
+function buildConsequenceNode(ex, role, stageId) {
+  const box = document.createElement('div');
+  box.className = 'approve-consequence';
+  const slotLine = document.createElement('p');
+  slotLine.className = 'approve-consequence-slot mono';
+  slotLine.textContent = 'Recording as role: ' + (role || '—') + (stageId ? ' @ ' + stageId : '');
+  box.appendChild(slotLine);
+  if (ex.error) {
+    const err = document.createElement('p');
+    err.className = 'approve-consequence-error';
+    err.textContent = 'Consequence preview unavailable: ' + ex.error;
+    box.appendChild(err);
+    return box;
+  }
+  const headline = document.createElement('p');
+  headline.className = 'approve-consequence-headline';
+  headline.textContent = 'This approval allows: ' + ex.action + ' on ' + ex.network;
+  box.appendChild(headline);
+  const dl = document.createElement('dl');
+  dl.className = 'approve-consequence-grid';
+  for (const [k, v] of [
+    ['Identity touched', ex.identityTouched],
+    ['Funds/credits move', ex.fundsOrCreditsMove ? 'yes' : 'no'],
+    ['Data disclosed', ex.dataDisclosed ? 'yes' : 'no'],
+    ['Agent-initiated', ex.agentInitiated ? 'yes' : 'no'],
+    ['Expected proof', ex.expectedProof],
+  ]) {
+    const dt = document.createElement('dt'); dt.textContent = k;
+    const dd = document.createElement('dd'); dd.textContent = String(v);
+    dl.appendChild(dt); dl.appendChild(dd);
+  }
+  box.appendChild(dl);
+  if (Array.isArray(ex.irreversibleEffects) && ex.irreversibleEffects.length) {
+    const ul = document.createElement('ul');
+    ul.className = 'approve-consequence-list';
+    for (const e of ex.irreversibleEffects) { const li = document.createElement('li'); li.textContent = e; ul.appendChild(li); }
+    box.appendChild(ul);
+  }
+  if (Array.isArray(ex.warnings) && ex.warnings.length) {
+    const ul = document.createElement('ul');
+    ul.className = 'approve-consequence-warnings';
+    for (const w of ex.warnings) { const li = document.createElement('li'); li.textContent = '⚠ ' + w; ul.appendChild(li); }
+    box.appendChild(ul);
+  }
+  return box;
 }
 
 async function rejectApproval(dossier) {

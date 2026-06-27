@@ -95,6 +95,12 @@ function signatureQueuePanel() {
     const item = elt('article', 'identity-sig-request');
     item.appendChild(elt('p', 'identity-sig-title', req.action || req.goalType));
     item.appendChild(explanationBlock(req));
+    // RUNBOOK-04 Task 7 — point the demo at the live surface instead of
+    // dead-ending: route to the real Approve dossier (or the approvals lane).
+    const link = elt('a', 'identity-sig-link');
+    link.href = req.planId ? '#/approve/' + encodeURIComponent(req.planId) : '#/inbox/approvals';
+    link.textContent = 'Review on the live Approve screen →';
+    item.appendChild(link);
     panel.appendChild(item);
   }
   return panel;
@@ -201,6 +207,14 @@ export const identityView = {
     header.appendChild(setAttrs(elt('h1', 'workspace-title', 'Identity'), { id: 'identity-title' }));
     header.appendChild(elt('p', 'workspace-subtitle',
       'Who you are, what you can sign, what authority you hold, and what a signature will do — in one honest place. No private keys, ever.'));
+    // RUNBOOK-04 Task 7 — this page reads a SAMPLE identity to demonstrate the
+    // signature explainer; it controls nothing. Say so plainly and point at the
+    // live signing surface (the explainSignature engine itself now also runs on
+    // the live Approve screen — Task 2).
+    header.appendChild(setAttrs(
+      elt('p', 'identity-preview-banner',
+        'Preview — this screen reads a sample identity to demonstrate the signature explainer. Live signing happens on the Approve screen.'),
+      { role: 'note' }));
     shell.appendChild(header);
     const body = elt('div', 'identity-body');
     body.appendChild(elt('p', 'identity-loading', 'Loading your identity…'));

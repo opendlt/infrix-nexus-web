@@ -83,6 +83,7 @@ function renderHealthGrid(h) {
   grid.appendChild(renderGasRegimePanel(h.gasRegime));
   grid.appendChild(renderRateLimitRegimePanel(h.rateLimitRegime));
   grid.appendChild(renderSubsystemStatePanel(h.subsystemState));
+  grid.appendChild(renderExpiringAuthorityPanel(h.expiringAuthority));
   sec.body.appendChild(grid);
 
   if (h.network) {
@@ -128,6 +129,10 @@ function renderTrustDriftPanel(rows) {
   for (const r of sortBySeverity(list).slice(0, 5)) {
     const li = document.createElement('li');
     li.innerHTML = `<span class="mono">${shortHash(r.profileId || '', 22, 6)}</span> · ${r.state}${r.degradedReason ? ' — ' + r.degradedReason : ''}`;
+    // RUNBOOK-04 Task 3 — drill into the Atlas trust drawer for this profile.
+    if (r.profileId) {
+      makeNavigable(li, () => '#/govern/trustProfiles/' + encodeURIComponent(r.profileId));
+    }
     ul.appendChild(li);
   }
   card.appendChild(ul);
@@ -160,6 +165,14 @@ function renderPolicyDenialsPanel(d) {
   if (!d) { card.appendChild(emptyText('no data')); return card; }
   card.appendChild(headlineRow(d.count || 0, 'recent denials'));
   card.appendChild(severityRow((d.count || 0) > 0 ? 'attention' : 'normal'));
+  // RUNBOOK-04 Task 3 — drill into governance. Degraded fallback to the policies
+  // list until operateHealth emits the denying-policy id.
+  // TODO(RUNBOOK-04 T3 / backend operateHealth): emit recent[].policyId to deep-link the exact node.
+  if ((d.count || 0) > 0) {
+    makeNavigable(card, () => (d.recent && d.recent[0] && d.recent[0].policyId)
+      ? '#/govern/policies/' + encodeURIComponent(d.recent[0].policyId)
+      : '#/govern/policies');
+  }
   return card;
 }
 
@@ -168,6 +181,8 @@ function renderPendingApprovalsPanel(a) {
   if (!a) { card.appendChild(emptyText('no data')); return card; }
   card.appendChild(headlineRow(a.count || 0, 'awaiting signature'));
   card.appendChild(severityRow((a.count || 0) > 0 ? 'attention' : 'normal'));
+  // RUNBOOK-04 Task 3 — one click from "3 awaiting signature" to the approvals lane.
+  makeNavigable(card, () => '#/inbox/approvals');
   return card;
 }
 
@@ -339,6 +354,70 @@ function emptyText(text) {
   p.className = 'operate-panel-empty';
   p.textContent = text;
   return p;
+}
+
+// RUNBOOK-04 Task 3 — make a health element navigable (mouse + keyboard) so an
+// operator is one click from acting on what they see. `hashFn` is evaluated at
+// activation so per-row ids resolve correctly.
+function makeNavigable(el, hashFn) {
+  el.classList.add('operate-panel-clickable');
+  el.setAttribute('role', 'button');
+  el.tabIndex = 0;
+  const go = () => { const h = hashFn(); if (h) window.location.hash = h; };
+  el.addEventListener('click', go);
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+  });
+}
+
+// RUNBOOK-04 Task 3 (G3.4) — expiring-authority panel + renew seed. Lists
+// capabilities/roles the backend flags as expiring; each row seeds a previewable
+// renew intent (never mutates directly — same operator-template loop the Console
+// already uses). BACKEND DEP: operateHealth must expose expiringAuthority[]
+// (id, kind, expiresAtBlock, renewGoalType). Until then this renders "no data" —
+// no crash, no fabricated numbers.
+function renderExpiringAuthorityPanel(list) {
+  const card = healthPanelCard('expiringAuthority');
+  const rows = Array.isArray(list) ? list.filter((r) => r && r.expiryState === 'expires_soon' || (r && r.expiresAtBlock)) : [];
+  card.appendChild(headlineRow(rows.length, 'expiring soon'));
+  if (rows.length === 0) {
+    card.appendChild(severityRow('normal'));
+    card.appendChild(emptyText('no data'));
+    return card;
+  }
+  card.appendChild(severityRow('attention'));
+  const ul = document.createElement('ul');
+  ul.className = 'operate-panel-list';
+  for (const r of rows.slice(0, 5)) {
+    const li = document.createElement('li');
+    const label = document.createElement('span');
+    label.className = 'mono';
+    label.textContent = `${r.kind || 'capability'} · ${shortHash(r.id || '', 18, 6)}` +
+      (r.expiresAtBlock ? ` · @${r.expiresAtBlock}` : '');
+    li.appendChild(label);
+    if (r.renewGoalType) {
+      const renew = document.createElement('button');
+      renew.type = 'button';
+      renew.className = 'operate-renew-btn';
+      renew.textContent = 'Renew →';
+      renew.addEventListener('click', (e) => {
+        e.stopPropagation();
+        try {
+          localStorage.setItem(SEED_LOCALSTORAGE_KEY, JSON.stringify({
+            goalType: r.renewGoalType,
+            customParams: { capabilityId: r.id },
+            source: 'operate-expiring',
+            capturedAt: new Date().toISOString(),
+          }));
+        } catch (_) { /* localStorage unavailable */ }
+        window.location.hash = '#/compose/' + encodeURIComponent(r.renewGoalType);
+      });
+      li.appendChild(renew);
+    }
+    ul.appendChild(li);
+  }
+  card.appendChild(ul);
+  return card;
 }
 
 /** localStorage seed key the compose view reads on mount. */

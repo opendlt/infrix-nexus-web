@@ -21,6 +21,70 @@ export const MIN_RATIONALE_CHARS = 10;
 // API:
 //   openInputModal({ title, label, placeholder?, value?, multiline?, required? })
 //     → Promise<string|null>   (resolves to the trimmed value, or null on cancel)
+// RUNBOOK-04 Task 5 — a generic confirm modal (reuses the rationale-modal
+// styling). Renders an optional detail node (e.g. a plan-hash chip) and resolves
+// true on confirm / false on cancel.
+//
+// API:
+//   openConfirmModal({ title, message?, detailNode?, confirmText?, cancelText? })
+//     → Promise<boolean>
+export function openConfirmModal({
+  title = 'Confirm', message = '', detailNode = null,
+  confirmText = 'Confirm', cancelText = 'Cancel',
+} = {}) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'rationale-modal-overlay';
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) done(false); });
+
+    const modal = document.createElement('div');
+    modal.className = 'rationale-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    overlay.appendChild(modal);
+
+    const h = document.createElement('h3');
+    h.className = 'rationale-modal-title';
+    h.textContent = title;
+    modal.appendChild(h);
+
+    if (message) {
+      const sub = document.createElement('p');
+      sub.className = 'rationale-modal-sub';
+      sub.textContent = message;
+      modal.appendChild(sub);
+    }
+    if (detailNode) modal.appendChild(detailNode);
+
+    const buttons = document.createElement('div');
+    buttons.className = 'rationale-modal-buttons';
+    modal.appendChild(buttons);
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'rationale-modal-btn rationale-modal-cancel';
+    cancelBtn.textContent = cancelText;
+    cancelBtn.addEventListener('click', () => done(false));
+    buttons.appendChild(cancelBtn);
+
+    const okBtn = document.createElement('button');
+    okBtn.type = 'button';
+    okBtn.className = 'rationale-modal-btn rationale-modal-submit';
+    okBtn.textContent = confirmText;
+    okBtn.addEventListener('click', () => done(true));
+    buttons.appendChild(okBtn);
+
+    function done(v) { document.removeEventListener('keydown', onKey); overlay.remove(); resolve(v); }
+    function onKey(e) {
+      if (e.key === 'Escape') { done(false); e.preventDefault(); }
+      else if (e.key === 'Enter') { done(true); e.preventDefault(); }
+    }
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+    setTimeout(() => okBtn.focus(), 0);
+  });
+}
+
 export function openInputModal({
   title = 'Enter a value', label = '', placeholder = '', value = '',
   multiline = false, required = true, confirmText = 'Confirm',

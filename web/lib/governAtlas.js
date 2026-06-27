@@ -296,6 +296,13 @@ function renderRolePanel(root, r) {
 
   // Bound policies
   root.appendChild(renderListPanel('Bound policies', r.policies, (p) => `${p.policyType} → ${shortHash(p.targetId || '', 22, 6)}`));
+
+  // RUNBOOK-04 Task 4 — seed a previewable re-assign/amend of this role binding
+  // (ROLE_ASSIGN). No REVOKE goal type exists in the catalogue, so we do not
+  // fabricate one — re-assign is the supported governed operation.
+  root.appendChild(drawerActions([
+    seedIntentAction('Re-assign / amend →', 'ROLE_ASSIGN', { role: r.role, identity: r.identity }),
+  ]));
 }
 
 function renderCapabilityPanel(root, c) {
@@ -325,6 +332,72 @@ function renderCapabilityPanel(root, c) {
   if (Array.isArray(c.delegationChain) && c.delegationChain.length > 0) {
     root.appendChild(renderListPanel('Delegation chain', c.delegationChain.map((id) => ({ id })), (e) => e.id));
   }
+
+  // RUNBOOK-04 Task 4 — act on an expiring/active grant without leaving the
+  // governance model: seed a previewable renew intent (CAPABILITY_GRANT).
+  root.appendChild(drawerActions([
+    seedIntentAction('Renew capability →', 'CAPABILITY_GRANT', { capabilityId: c.id }),
+  ]));
+}
+
+// RUNBOOK-04 Task 4 — seed a previewable governed intent from a drawer. NEVER
+// mutates directly: it writes the operator seed Studio already reads, then opens
+// the preview form. Reuses the exact SEED_KEY literal the Operate console uses
+// (operatePanel SEED_LOCALSTORAGE_KEY) so Studio's seed reader picks it up.
+const GOVERN_SEED_KEY = 'nexus.compose.operatorSeed';
+function seedIntentAction(label, goalType, customParams) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'verify-btn govern-drawer-action';
+  btn.textContent = label;
+  btn.addEventListener('click', () => {
+    try {
+      localStorage.setItem(GOVERN_SEED_KEY, JSON.stringify({
+        goalType, customParams, source: 'govern-drawer',
+        capturedAt: new Date().toISOString(),
+      }));
+    } catch (_) { /* localStorage unavailable */ }
+    window.location.hash = '#/compose/' + encodeURIComponent(goalType);
+  });
+  return btn;
+}
+function drawerActions(btns) {
+  const sec = panelSection('Actions');
+  const row = document.createElement('div');
+  row.className = 'govern-drawer-actions';
+  for (const b of btns) row.appendChild(b);
+  sec.body.appendChild(row);
+  return sec.element;
+}
+
+// RUNBOOK-04 Task 4 (G3.5) — render policy rules as a readable table instead of a
+// raw JSON dump. Columns are the union of keys with stable leading ones.
+function renderPolicyRulesTable(rules) {
+  const tbl = document.createElement('table');
+  tbl.className = 'dossier-table govern-policy-rules';
+  const lead = ['effect', 'condition', 'action', 'target', 'priority'];
+  const present = lead.filter((c) => rules.some((r) => r && r[c] !== undefined));
+  const extras = [...new Set(rules.flatMap((r) => Object.keys(r || {})))].filter((k) => !present.includes(k));
+  const head = [...present, ...extras];
+  const thead = document.createElement('thead');
+  const htr = document.createElement('tr');
+  for (const h of head) { const th = document.createElement('th'); th.textContent = h; htr.appendChild(th); }
+  thead.appendChild(htr);
+  tbl.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  for (const r of rules) {
+    const tr = document.createElement('tr');
+    for (const h of head) {
+      const td = document.createElement('td');
+      td.className = 'mono';
+      const v = r ? r[h] : undefined;
+      td.textContent = v === undefined ? '—' : (typeof v === 'object' ? JSON.stringify(v) : String(v));
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+  tbl.appendChild(tbody);
+  return tbl;
 }
 
 function renderPolicyPanel(root, p) {
@@ -338,14 +411,26 @@ function renderPolicyPanel(root, p) {
   sec.body.appendChild(grid);
   root.appendChild(sec.element);
 
-  // Rules
+  // Rules — readable table, with the raw JSON kept under a <details> for experts.
   if (Array.isArray(p.rules) && p.rules.length > 0) {
     const rsec = panelSection(`Rules · ${p.rules.length}`);
-    rsec.body.appendChild(jsonBlock(p.rules));
+    rsec.body.appendChild(renderPolicyRulesTable(p.rules));
+    const raw = document.createElement('details');
+    raw.className = 'govern-rules-raw';
+    const sum = document.createElement('summary');
+    sum.textContent = 'Raw rule JSON';
+    raw.appendChild(sum);
+    raw.appendChild(jsonBlock(p.rules));
+    rsec.body.appendChild(raw);
     root.appendChild(rsec.element);
   }
   // Affected intents
   root.appendChild(renderListPanel('Affected intents', p.affected, (i) => `${shortHash(i.id, 22, 6)} (${i.state || '—'})`));
+
+  // RUNBOOK-04 Task 4 — seed a previewable amend (POLICY_BIND re-bind).
+  root.appendChild(drawerActions([
+    seedIntentAction('Amend policy →', 'POLICY_BIND', { policyId: p.id || p.targetId }),
+  ]));
 }
 
 function renderTrustPanel(root, t) {

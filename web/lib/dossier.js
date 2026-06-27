@@ -349,7 +349,10 @@ function renderOperational(d) {
   return wrap;
 }
 
-function renderStepGraph(graph) {
+// RUNBOOK-04 Task 2 (G3.1) — exported so the approval dossier can render the
+// SAME step graph the author saw at compose preview (a signer must not see less
+// than the author).
+export function renderStepGraph(graph) {
   const wrap = document.createElement('div');
   wrap.className = 'dossier-step-graph';
   for (const node of graph.nodes) {
@@ -431,30 +434,39 @@ function renderCryptographic(d) {
   // Ghost evidence per-step predictions
   if (d.ghostEvidence && Array.isArray(d.ghostEvidence.steps) && d.ghostEvidence.steps.length > 0) {
     const sec = subSection('Ghost simulation per-step predictions');
-    const tbl = document.createElement('table');
-    tbl.className = 'dossier-table';
-    tbl.innerHTML = '<thead><tr><th>Step</th><th>Predicted gas</th><th>Predicted status</th><th>State root after</th><th>Read · Write</th></tr></thead>';
-    const tbody = document.createElement('tbody');
-    for (const s of d.ghostEvidence.steps) {
-      const tr = document.createElement('tr');
-      tr.appendChild(td(s.stageId, 'mono'));
-      tr.appendChild(td(String(s.gasPredicted || 0), 'mono'));
-      tr.appendChild(td(s.statusPredicted, 'mono'));
-      const rootCell = document.createElement('td');
-      rootCell.appendChild(hashChip(s.stateRootAfter, { head: 10, tail: 6 }));
-      tr.appendChild(rootCell);
-      tr.appendChild(td(`${s.readSetSize} · ${s.writeSetSize}`, 'mono'));
-      tbody.appendChild(tr);
-    }
-    tbl.appendChild(tbody);
-    sec.body.appendChild(tbl);
-    const head = document.createElement('div');
-    head.className = 'cockpit-rail-row-meta';
-    head.textContent = `confidence: ${(d.ghostEvidence.overallConfidence || 0).toFixed(3)} · freshness: ${d.ghostEvidence.freshnessStatus || '—'}`;
-    sec.body.insertBefore(head, sec.body.firstChild);
+    sec.body.appendChild(renderGhostPredictions(d.ghostEvidence));
     wrap.appendChild(sec.element);
   }
 
+  return wrap;
+}
+
+// RUNBOOK-04 Task 2 (G3.1) — exported per-step ghost-prediction table so the
+// approval dossier shows the same predicted outcomes the author saw.
+export function renderGhostPredictions(ghost) {
+  const wrap = document.createElement('div');
+  wrap.className = 'dossier-ghost-predictions';
+  const head = document.createElement('div');
+  head.className = 'cockpit-rail-row-meta';
+  head.textContent = `confidence: ${(ghost.overallConfidence || 0).toFixed(3)} · freshness: ${ghost.freshnessStatus || '—'}`;
+  wrap.appendChild(head);
+  const tbl = document.createElement('table');
+  tbl.className = 'dossier-table';
+  tbl.innerHTML = '<thead><tr><th>Step</th><th>Predicted gas</th><th>Predicted status</th><th>State root after</th><th>Read · Write</th></tr></thead>';
+  const tbody = document.createElement('tbody');
+  for (const s of (ghost.steps || [])) {
+    const tr = document.createElement('tr');
+    tr.appendChild(td(s.stageId, 'mono'));
+    tr.appendChild(td(String(s.gasPredicted || 0), 'mono'));
+    tr.appendChild(td(s.statusPredicted, 'mono'));
+    const rootCell = document.createElement('td');
+    rootCell.appendChild(hashChip(s.stateRootAfter, { head: 10, tail: 6 }));
+    tr.appendChild(rootCell);
+    tr.appendChild(td(`${s.readSetSize} · ${s.writeSetSize}`, 'mono'));
+    tbody.appendChild(tr);
+  }
+  tbl.appendChild(tbody);
+  wrap.appendChild(tbl);
   return wrap;
 }
 

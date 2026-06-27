@@ -31,14 +31,26 @@
 
 import { shortHash, formatTime, jsonBlock, hashChip } from '/lib/spineCommon.js';
 import { severityBadge, sortBySeverity } from '/lib/severity.js';
+import { renderStepGraph, renderGhostPredictions } from '/lib/dossier.js';
+
+// RUNBOOK-04 Task 2 (G3.3) — map known invalidator reason codes to a plain
+// "what changed since earlier signatures" phrase (the plan-vs-previous diff).
+// Only codes actually present in d.invalidators are rendered.
+const DIFF_REASONS = {
+  plan_hash_changed:      'The plan was regenerated — its hash differs from earlier signatures.',
+  simulation_stale:       'The simulation is stale — re-preview before signing.',
+  trust_profile_degraded: 'A trust profile this plan depends on degraded.',
+  role_revoked:           'A required role/credential was revoked.',
+  policy_changed:         'A governing policy changed since this plan was built.',
+};
 
 /**
  * Render a complete approval dossier.
  * @param {Object} dossier — nexus.approvalDossier response
  * @param {Object} [opts]
- * @param {() => void} [opts.onSign]
- * @param {() => void} [opts.onReject]
- * @param {() => void} [opts.onInspectRaw]
+ * @param {(dossier, slot) => void} [opts.onSign] — slot is the picked {role, stageId, keyPage}
+ * @param {(dossier) => void} [opts.onReject]
+ * @param {(dossier) => void} [opts.onInspectRaw]
  * @returns {HTMLElement}
  */
 export function renderApprovalDossier(dossier, opts = {}) {
@@ -53,8 +65,23 @@ export function renderApprovalDossier(dossier, opts = {}) {
     return root;
   }
 
-  // ── 1. Status banner ───────────────────────────────────────────
+  // RUNBOOK-04 Task 2 — the sign slot the user commits to. Defaults to the
+  // first remaining role-slot; the identity-panel picker (G3.2) updates it, and
+  // the CTA passes it to onSign so we no longer auto-pick remaining[0] silently.
+  const slot = { stageId: '', role: '' };
+  if (Array.isArray(dossier.remaining) && dossier.remaining[0]) {
+    slot.stageId = dossier.remaining[0].stageId || '';
+    slot.role = dossier.remaining[0].role || '';
+  } else if (Array.isArray(dossier.requiredRoles) && dossier.requiredRoles[0]) {
+    slot.role = dossier.requiredRoles[0];
+  }
+
+  // ── 1. Status banner (+ single max-severity risk badge, G3.3) ──
   root.appendChild(renderApprovalBanner(dossier));
+
+  // ── Plan-vs-previous diff — what changed since earlier signatures ──
+  const diff = renderDiffBanner(dossier);
+  if (diff) root.appendChild(diff);
 
   // ── Plan summary bullets ───────────────────────────────────────
   if (Array.isArray(dossier.summary) && dossier.summary.length > 0) {
@@ -72,11 +99,25 @@ export function renderApprovalDossier(dossier, opts = {}) {
   const risks = Array.isArray(dossier.risk) ? sortBySeverity(dossier.risk) : [];
   if (risks.length > 0) root.appendChild(renderRisks(risks));
 
-  // ── 2. Identity panel ──────────────────────────────────────────
-  root.appendChild(renderIdentityPanel(dossier));
+  // ── 2. Identity panel (with role/key picker — G3.2) ────────────
+  root.appendChild(renderIdentityPanel(dossier, slot));
 
   // ── 3. Plan + simulation binding panel ─────────────────────────
   root.appendChild(renderBindingPanel(dossier));
+
+  // ── 3b. What this plan will do — step graph + ghost predictions (G3.1) ──
+  // A signer must see at least what the author saw at preview. Rendered only
+  // when the dossier carries them (backend field-parity with previewDossier).
+  if (dossier.stepGraph && Array.isArray(dossier.stepGraph.nodes) && dossier.stepGraph.nodes.length) {
+    const sec = panelSection('What this plan will do (step by step)');
+    sec.body.appendChild(renderStepGraph(dossier.stepGraph));
+    root.appendChild(sec.element);
+  }
+  if (dossier.ghostEvidence && Array.isArray(dossier.ghostEvidence.steps) && dossier.ghostEvidence.steps.length) {
+    const sec = panelSection('Predicted per-step outcome');
+    sec.body.appendChild(renderGhostPredictions(dossier.ghostEvidence));
+    root.appendChild(sec.element);
+  }
 
   // ── 4. Threshold panel (requirements gauge) ────────────────────
   root.appendChild(renderThresholdPanel(dossier));
@@ -90,7 +131,7 @@ export function renderApprovalDossier(dossier, opts = {}) {
   root.appendChild(renderInvalidatorsPanel(dossier));
 
   // ── 7. CTA bar ─────────────────────────────────────────────────
-  root.appendChild(renderCTABar(dossier, opts));
+  root.appendChild(renderCTABar(dossier, opts, slot));
 
   // ── 8. Raw JSON ────────────────────────────────────────────────
   const rawDetails = document.createElement('details');
@@ -126,10 +167,42 @@ function renderApprovalBanner(d) {
   } else {
     banner.textContent = 'Be the first to sign.';
   }
+  // RUNBOOK-04 Task 2 (G3.3) — one-glance max-severity badge across the risk
+  // signals ∪ the invalidators, so the reviewer triages at a glance.
+  const sevItems = [...(d.risk || []), ...(d.invalidators || [])].filter((x) => x && x.severity);
+  if (sevItems.length > 0) {
+    const worst = sortBySeverity(sevItems)[0];
+    if (worst && worst.severity) {
+      const badge = severityBadge(worst.severity);
+      badge.classList.add('approval-banner-badge');
+      banner.appendChild(badge);
+    }
+  }
   return banner;
 }
 
-function renderIdentityPanel(d) {
+// RUNBOOK-04 Task 2 (G3.3) — plan-vs-previous diff. Summarises the change-classes
+// present in the invalidators as a plain "what changed since this plan was built"
+// banner. Pure presentation of the existing invalidators[] — no new RPC.
+function renderDiffBanner(d) {
+  const codes = new Set((d.invalidators || []).map((i) => i && i.reason).filter(Boolean));
+  const lines = [];
+  for (const code of codes) if (DIFF_REASONS[code]) lines.push(DIFF_REASONS[code]);
+  if (lines.length === 0) return null;
+  const wrap = document.createElement('div');
+  wrap.className = 'approval-diff-banner';
+  const h = document.createElement('div');
+  h.className = 'approval-diff-head';
+  h.textContent = 'What changed since this plan was built';
+  wrap.appendChild(h);
+  const ul = document.createElement('ul');
+  ul.className = 'approval-diff-list';
+  for (const l of lines) { const li = document.createElement('li'); li.textContent = l; ul.appendChild(li); }
+  wrap.appendChild(ul);
+  return wrap;
+}
+
+function renderIdentityPanel(d, slot) {
   const sec = panelSection('Acting identity & role');
   const grid = document.createElement('div');
   grid.className = 'dossier-summary-grid';
@@ -137,9 +210,6 @@ function renderIdentityPanel(d) {
   grid.appendChild(metaRow('Acting as', dc.actor || '—'));
   grid.appendChild(metaRow('Purpose', dc.purpose || '—'));
   grid.appendChild(metaRow('Workflow', dc.workflowInstance || '—'));
-  // The signer's *intended* role is implicit on the request; the
-  // dossier surfaces the role-set this plan demands so the user
-  // picks the right one when they sign.
   if (Array.isArray(d.requiredRoles) && d.requiredRoles.length > 0) {
     grid.appendChild(metaRow('Plan requires roles', d.requiredRoles.join(', ')));
   }
@@ -147,6 +217,45 @@ function renderIdentityPanel(d) {
     grid.appendChild(metaRow('Required credentials', d.requiredCredentials.join(', ')));
   }
   sec.body.appendChild(grid);
+
+  // RUNBOOK-04 Task 2 (G3.2) — role/key-page picker. Replaces the silent
+  // remaining[0] auto-pick: the signer chooses which role-slot they sign for.
+  const remaining = Array.isArray(d.remaining) ? d.remaining : [];
+  const options = remaining.map((r) => ({
+    stageId: r.stageId || '', role: r.role || '', keyPage: r.keyPage || '', shortBy: r.shortBy,
+  }));
+  const covered = new Set(options.map((o) => o.role));
+  for (const role of (d.requiredRoles || [])) {
+    if (!covered.has(role)) options.push({ stageId: '', role, keyPage: '' });
+  }
+  if (options.length <= 1) {
+    const only = options[0];
+    sec.body.appendChild(metaRow('Signing as role',
+      only ? (only.role || '—') + (only.stageId ? ' @ ' + only.stageId : '') : '—'));
+  } else {
+    const row = document.createElement('div');
+    row.className = 'cockpit-compose-meta-row approval-role-pick';
+    const l = document.createElement('label');
+    l.className = 'cockpit-compose-meta-label';
+    l.textContent = 'Sign as';
+    l.htmlFor = 'approvalRolePick';
+    row.appendChild(l);
+    const sel = document.createElement('select');
+    sel.id = 'approvalRolePick';
+    sel.className = 'approval-role-select mono';
+    options.forEach((o, i) => {
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = (o.role || '(role)') + (o.stageId ? ' @ ' + o.stageId : '') +
+        (o.shortBy !== undefined ? ` · short by ${o.shortBy}` : '');
+      sel.appendChild(opt);
+    });
+    const apply = (i) => { const o = options[i] || {}; slot.role = o.role || ''; slot.stageId = o.stageId || ''; slot.keyPage = o.keyPage || ''; };
+    sel.addEventListener('change', () => apply(Number(sel.value)));
+    apply(0); // initialise slot to the first option
+    row.appendChild(sel);
+    sec.body.appendChild(row);
+  }
   return sec.element;
 }
 
@@ -270,7 +379,7 @@ function renderInvalidatorsPanel(d) {
   return sec.element;
 }
 
-function renderCTABar(d, opts) {
+function renderCTABar(d, opts, slot) {
   const wrap = document.createElement('div');
   wrap.className = 'approval-cta-bar';
   const blocked = (d.invalidators || []).some((i) => i.severity === 'blocked' || i.severity === 'failed');
@@ -278,10 +387,13 @@ function renderCTABar(d, opts) {
   const sign = document.createElement('button');
   sign.type = 'button';
   sign.className = 'verify-btn approval-sign-btn';
-  sign.textContent = 'Sign';
+  // RUNBOOK-04 Task 2 (G3.8, Option A) — honest label. This records a governed
+  // approval under the session actor; it is NOT a key-page cryptographic
+  // signature (that is the backend/wallet-gated Option B). Don't overstate it.
+  sign.textContent = 'Record approval';
   sign.disabled = blocked || !d.plan;
-  if (blocked) sign.title = 'Can\'t sign right now — at least one issue would invalidate the signature.';
-  if (typeof opts.onSign === 'function') sign.addEventListener('click', () => opts.onSign(d));
+  if (blocked) sign.title = 'Can\'t record right now — at least one issue would invalidate this approval.';
+  if (typeof opts.onSign === 'function') sign.addEventListener('click', () => opts.onSign(d, slot));
   wrap.appendChild(sign);
 
   const reject = document.createElement('button');
@@ -309,10 +421,16 @@ function renderCTABar(d, opts) {
   }
   wrap.appendChild(inspect);
 
+  // RUNBOOK-04 Task 2 (G3.8) — say plainly what "Record approval" does.
+  const honesty = document.createElement('p');
+  honesty.className = 'approval-cta-honesty';
+  honesty.textContent = 'This records a governed approval under your session actor. It is not a key-page cryptographic signature.';
+  wrap.appendChild(honesty);
+
   if (blocked) {
     const note = document.createElement('p');
     note.className = 'approval-cta-blocked-note';
-    note.textContent = 'Fix the underlying issue first — regenerate the plan, restore the role, or refresh the trust profile — then come back and sign.';
+    note.textContent = 'Fix the underlying issue first — regenerate the plan, restore the role, or refresh the trust profile — then come back and record your approval.';
     wrap.appendChild(note);
   }
   return wrap;

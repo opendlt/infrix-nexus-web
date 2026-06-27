@@ -247,6 +247,18 @@ function renderDropZone() {
       result.appendChild(receiptHost);
       mountProofReceipt(receiptHost, receipt);
       result.appendChild(renderPortableChecks(out.checks));
+      // RUNBOOK-04 Task 6 — the offline path is where an external auditor (outside
+      // the operator's trust boundary) most needs a durable artifact. Let them
+      // download the verification result, like the live bundle-reader path can.
+      const dl = document.createElement('button');
+      dl.type = 'button';
+      dl.className = 'verify-btn prove-offline-download';
+      dl.textContent = 'Download verification result';
+      dl.addEventListener('click', () => downloadJSON(
+        `offline-verification-${(bundle.id || bundle.bundleId || 'bundle')}.json`,
+        { generatedAt: new Date().toISOString(), passed: out.passed, checks: out.checks, receipt },
+      ));
+      result.appendChild(dl);
     } catch (err) {
       banner.classList.remove('verify-warn');
       banner.classList.add('verify-fail');
