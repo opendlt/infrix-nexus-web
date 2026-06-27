@@ -44,6 +44,11 @@ import {
   emptyState,
 } from '/lib/spineCommon.js';
 import { onAtChange, isAtLive } from '/lib/timeContext.js';
+// RUNBOOK-04 Task 1 — bulk approve/reject use the same audited rationale modal
+// the single-approve path uses (no more window.prompt), and the bulk path now
+// honours the blocked/invalidator gate + full plan binding per item.
+import { openRationaleModal, openInputModal } from '/lib/rationaleModal.js';
+import { approvalCallFromDossier } from '/lib/approvalGate.js';
 // RUNBOOK-01 IA consolidation — the proof-review queue is now a lane of this
 // one Inbox (it used to be a separate #/proof-inbox surface). One shared
 // renderer paints it; #/proof-inbox redirects into #/inbox/proofs.
@@ -418,38 +423,59 @@ function updateSelectionCount() {
 // -----------------------------------------------------------------
 // Bulk actions
 // -----------------------------------------------------------------
+// RUNBOOK-04 Task 1 (Gate 0) — bulk approve is now a loop of the SAFE single
+// path: per item it fetches the dossier, honours the same blocked/invalidator
+// gate the dedicated screen uses, and binds planHash + stageId + role. It no
+// longer signs blind with {intentId, rationale} alone.
 async function onBulkApprove() {
-  if (selection.size === 0) {
-    alert('Select at least one row to approve.');
-    return;
+  const rows = collectSelectedApprovalRows();
+  if (rows.length === 0) { flashToast('Select at least one approval row.'); return; }
+
+  // One rationale, but the user explicitly confirms it applies to all selected.
+  const rationale = await openRationaleModal({
+    verb: 'sign',
+    intentId: rows.length === 1
+      ? (rows[0].intentId || rows[0].id)
+      : `${rows.length} selected approvals`,
+  });
+  if (rationale === null) return; // modal enforces the >=10-char floor
+
+  const results = [];
+  for (const row of rows) {
+    const planId = row.planId || row.intentId || row.id;
+    try {
+      const d = await rpcWithDisclosure('nexus.approvalDossier', { planId });
+      // GATE + binding — the same predicate + fields the single path uses.
+      const call = approvalCallFromDossier(d, row);
+      if (call.blocked) {
+        results.push({ status: 'rejected', reason: new Error(`blocked (${call.reason}): ${planId}`) });
+        continue;
+      }
+      const r = await rpcWithDisclosure('governed.approve', {
+        intentId: call.intentId,
+        stageId: call.stageId,
+        planHash: call.planHash,
+        role: call.role,
+        rationale,
+      });
+      results.push({ status: 'fulfilled', value: r });
+    } catch (err) {
+      results.push({ status: 'rejected', reason: err });
+    }
   }
-  const rationale = window.prompt('Rationale for approving (min 10 chars):', '');
-  if (rationale === null) return;
-  if (rationale.length < 10) {
-    alert('Rationale must be at least 10 characters.');
-    return;
-  }
-  const ids = collectSelectedIntentIds();
-  const results = await Promise.allSettled(ids.map((intentId) =>
-    rpcWithDisclosure('governed.approve', { intentId, rationale })
-  ));
   reportBulkOutcome(results, 'approve');
   selection.clear();
   await refresh();
 }
 
 async function onBulkReject() {
-  if (selection.size === 0) {
-    alert('Select at least one row to reject.');
-    return;
-  }
-  const rationale = window.prompt('Rationale for rejecting (min 10 chars):', '');
-  if (rationale === null) return;
-  if (rationale.length < 10) {
-    alert('Rationale must be at least 10 characters.');
-    return;
-  }
   const ids = collectSelectedIntentIds();
+  if (ids.length === 0) { flashToast('Select at least one row to reject.'); return; }
+  const rationale = await openRationaleModal({
+    verb: 'reject',
+    intentId: ids.length === 1 ? ids[0] : `${ids.length} selected`,
+  });
+  if (rationale === null) return;
   const results = await Promise.allSettled(ids.map((intentId) =>
     rpcWithDisclosure('governed.reject', { intentId, rationale })
   ));
@@ -459,20 +485,35 @@ async function onBulkReject() {
 }
 
 async function onBulkHandoff() {
-  if (selection.size === 0) {
-    alert('Select at least one row to hand off.');
-    return;
-  }
-  const assignee = window.prompt('Assignee (acc:// URL):', '');
-  if (!assignee) return;
-  const note = window.prompt('Note (optional):', '') || '';
   const ids = collectSelectedIntentIds();
+  if (ids.length === 0) { flashToast('Select at least one row to hand off.'); return; }
+  const assignee = await openInputModal({
+    title: 'Hand off to', label: 'Assignee (acc:// URL)',
+    placeholder: 'acc://your-team.acme', confirmText: 'Continue',
+  });
+  if (!assignee) return;
+  const note = await openInputModal({
+    title: 'Handoff note', label: 'Optional note for the assignee',
+    placeholder: 'Context for the handoff…', multiline: true, required: false, confirmText: 'Hand off',
+  });
+  if (note === null) return; // cancelled at the note step
   const results = await Promise.allSettled(ids.map((intentId) =>
     rpcWithDisclosure('nexus.handoffCreate', { intentId, assignee, note })
   ));
   reportBulkOutcome(results, 'handoff');
   selection.clear();
   await refresh();
+}
+
+// Approval rows carry planId (openRow reads r.planId); only approval-lane rows
+// may flow into governed.approve.
+function collectSelectedApprovalRows() {
+  const out = [];
+  for (const key of selection) {
+    const row = findRowByKey(key);
+    if (row && row.lane === 'approvals') out.push(row);
+  }
+  return out;
 }
 
 function collectSelectedIntentIds() {
@@ -651,7 +692,10 @@ function onKey(ev) {
 
 async function onReply(row) {
   if (!row) return;
-  const body = window.prompt('Add a note (use @acc://… to mention):', '');
+  const body = await openInputModal({
+    title: 'Add a note', label: 'Use @acc://… to mention someone',
+    placeholder: 'Your note…', multiline: true, confirmText: 'Add note',
+  });
   if (!body) return;
   try {
     await rpcWithDisclosure('nexus.noteAdd', {
@@ -666,9 +710,16 @@ async function onReply(row) {
 
 async function onForward(row) {
   if (!row) return;
-  const assignee = window.prompt('Forward to (acc:// URL):', '');
+  const assignee = await openInputModal({
+    title: 'Forward to', label: 'Assignee (acc:// URL)',
+    placeholder: 'acc://your-team.acme', confirmText: 'Continue',
+  });
   if (!assignee) return;
-  const note = window.prompt('Note (optional):', '') || '';
+  const note = await openInputModal({
+    title: 'Handoff note', label: 'Optional note for the assignee',
+    placeholder: 'Context for the handoff…', multiline: true, required: false, confirmText: 'Forward',
+  });
+  if (note === null) return;
   try {
     await rpcWithDisclosure('nexus.handoffCreate', {
       intentId: row.intentId || row.id,

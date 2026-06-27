@@ -14,6 +14,92 @@
 
 export const MIN_RATIONALE_CHARS = 10;
 
+// RUNBOOK-04 Task 1 — a small generic input modal so the inbox never falls back
+// to window.prompt (assignee URLs, handoff/reply notes). Reuses the rationale
+// modal styling for visual consistency.
+//
+// API:
+//   openInputModal({ title, label, placeholder?, value?, multiline?, required? })
+//     → Promise<string|null>   (resolves to the trimmed value, or null on cancel)
+export function openInputModal({
+  title = 'Enter a value', label = '', placeholder = '', value = '',
+  multiline = false, required = true, confirmText = 'Confirm',
+} = {}) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'rationale-modal-overlay';
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) cancel(); });
+
+    const modal = document.createElement('div');
+    modal.className = 'rationale-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    overlay.appendChild(modal);
+
+    const h = document.createElement('h3');
+    h.className = 'rationale-modal-title';
+    h.textContent = title;
+    modal.appendChild(h);
+
+    if (label) {
+      const sub = document.createElement('p');
+      sub.className = 'rationale-modal-sub';
+      sub.textContent = label;
+      modal.appendChild(sub);
+    }
+
+    const input = document.createElement(multiline ? 'textarea' : 'input');
+    input.className = 'rationale-modal-textarea';
+    if (multiline) input.rows = 4; else input.type = 'text';
+    input.placeholder = placeholder;
+    input.value = value || '';
+    modal.appendChild(input);
+
+    const buttons = document.createElement('div');
+    buttons.className = 'rationale-modal-buttons';
+    modal.appendChild(buttons);
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'rationale-modal-btn rationale-modal-cancel';
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.addEventListener('click', () => cancel());
+    buttons.appendChild(cancelBtn);
+
+    const submitBtn = document.createElement('button');
+    submitBtn.type = 'button';
+    submitBtn.className = 'rationale-modal-btn rationale-modal-submit';
+    submitBtn.textContent = confirmText;
+    submitBtn.addEventListener('click', () => submit());
+    buttons.appendChild(submitBtn);
+
+    function refresh() {
+      const empty = required && input.value.trim().length === 0;
+      submitBtn.disabled = empty;
+      submitBtn.classList.toggle('is-disabled', empty);
+    }
+    input.addEventListener('input', refresh);
+    refresh();
+
+    function cleanup() { document.removeEventListener('keydown', onKey); overlay.remove(); }
+    function cancel() { cleanup(); resolve(null); }
+    function submit() {
+      const v = input.value.trim();
+      if (required && v.length === 0) return;
+      cleanup();
+      resolve(v);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') { cancel(); e.preventDefault(); }
+      else if (e.key === 'Enter' && (!multiline || e.ctrlKey || e.metaKey)) { submit(); e.preventDefault(); }
+    }
+    document.addEventListener('keydown', onKey);
+
+    document.body.appendChild(overlay);
+    setTimeout(() => input.focus(), 0);
+  });
+}
+
 export function openRationaleModal({ verb = 'sign', intentId = '', defaultValue = '' } = {}) {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');

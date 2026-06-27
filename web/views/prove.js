@@ -199,7 +199,10 @@ function renderDropZone() {
   const ta = document.createElement('textarea');
   ta.className = 'prove-paste-textarea';
   ta.spellcheck = false;
-  ta.placeholder = '{ "version": "3", "bundleData": "...", ... }';
+  // RUNBOOK-04 Task 6 (Gate 0) — advertise the version the verifier actually
+  // accepts (portableVerifier PORTABLE_VERSION === '4'). The old "3" placeholder
+  // produced an instant, confusing "version mismatch" for anyone who typed it.
+  ta.placeholder = '{ "version": "4", "bundleData": "...", ... }';
   pasteWrap.appendChild(ta);
   const pasteBtn = document.createElement('button');
   pasteBtn.type = 'button';
