@@ -10,6 +10,40 @@
   'use strict';
   const ns = (root.InfrixCinema = root.InfrixCinema || {});
 
+  // RUNBOOK-05 Task 6 — 16×16 polygon point sets matching the canvas shape
+  // builders, so each legend swatch is the SAME glyph the renderer draws (was a
+  // CSS border-radius fake that didn't match). circle/gauge handled inline.
+  const POINTS = {
+    diamond:  '8,1 15,8 8,15 1,8',
+    hexagon:  '14,8 11,13 5,13 2,8 5,3 11,3',
+    octagon:  '5,1 11,1 15,5 15,11 11,15 5,15 1,11 1,5',
+    pentagon: '8,1 15,6 12,15 4,15 1,6',
+    shield:   '8,1 14,4 14,9 8,15 2,9 2,4',
+    gate:     '2,15 2,7 8,1 14,7 14,15',
+    document: '3,1 11,1 14,4 14,15 3,15',
+    arrow:    '1,5 9,5 9,2 15,8 9,14 9,11 1,11',
+    star:     '8,1 10,6 15,6 11,9 13,15 8,11 3,15 5,9 1,6 6,6',
+    rectangle:'1,4 15,4 15,12 1,12',
+  };
+  function shapeSvg(shape, fill) {
+    if (typeof document === 'undefined' || !document.createElementNS) {
+      const span = document.createElement('span');   // graceful fallback
+      span.style.background = fill;
+      return span;
+    }
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 16 16');
+    svg.setAttribute('width', '14'); svg.setAttribute('height', '14');
+    const circular = (shape === 'circle' || shape === 'gauge');
+    const el = document.createElementNS(NS, circular ? 'circle' : 'polygon');
+    if (circular) { el.setAttribute('cx', '8'); el.setAttribute('cy', '8'); el.setAttribute('r', '6'); }
+    else el.setAttribute('points', POINTS[shape] || POINTS.rectangle);
+    el.setAttribute('fill', fill);
+    svg.appendChild(el);
+    return svg;
+  }
+
   // Curated legend rows: [label, colorKey, shape, note]. We surface the
   // semantically important states rather than all ~40 kinds, grouped by family.
   const LEGEND_ROWS = [
@@ -20,7 +54,7 @@
     ['Anomaly', 'Anomaly', 'circle', 'Anomalous activity'],
     ['Private (redacted)', 'Encrypted', 'circle', '🔒 hidden by disclosure policy'],
     ['Intent', 'Intent', 'arrow', 'Lifecycle: submitted intent'],
-    ['Outcome', 'Outcome', 'circle', 'Lifecycle: produced outcome'],
+    ['Outcome', 'Outcome', 'star', 'Lifecycle: produced outcome'],
     ['Approval pending', 'ApprovalPending', 'gate', 'Awaiting approvals'],
     ['Approval granted', 'ApprovalGranted', 'gate', 'Approval satisfied'],
     ['Policy allow', 'PolicyAllow', 'octagon', 'Policy permitted'],
@@ -51,10 +85,10 @@
       for (const [label, colorKey, shape, hint] of LEGEND_ROWS) {
         const row = document.createElement('div');
         row.className = 'cinema-legend-row';
-        const sw = document.createElement('span');
-        sw.className = 'cinema-legend-swatch cinema-shape-' + shape;
         const c = (ns.COLORS && ns.COLORS[colorKey]) || { r: 120, g: 140, b: 170, a: 255 };
-        sw.style.background = ns.colorCss ? ns.colorCss(c) : `rgb(${c.r},${c.g},${c.b})`;
+        const fill = ns.colorCss ? ns.colorCss(c) : `rgb(${c.r},${c.g},${c.b})`;
+        const sw = shapeSvg(shape, fill);   // real SVG glyph matching the canvas
+        sw.classList.add('cinema-legend-swatch');
         const lab = document.createElement('span'); lab.className = 'cinema-legend-label'; lab.textContent = label;
         const hi = document.createElement('span'); hi.className = 'cinema-legend-hint'; hi.textContent = hint;
         row.appendChild(sw); row.appendChild(lab); row.appendChild(hi);

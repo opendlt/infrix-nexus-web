@@ -7,15 +7,26 @@
  * own theme is never clobbered.
  */
 .cinema-root {
-  --cinema-bg: #0a0a1a;
-  --cinema-bg-2: #0e0e24;
-  --cinema-panel: #141821;
-  --cinema-panel-2: #1b2030;
-  --cinema-border: #232733;
-  --cinema-text: #d6daea;
-  --cinema-muted: #8b94bd;
-  --cinema-accent: #5cd4e4;
-  --cinema-accent-text: #07212a;
+  /* RUNBOOK-05 Task 5 — inherit the app theme (the host's :root[data-theme] tokens
+   * cascade in here), keeping the dark Cinema look only as a fallback. The teal
+   * --cinema-accent now follows the app's --accent so Cinema isn't a separate
+   * design island. */
+  --cinema-bg:   var(--bg-deep, #0a0a1a);
+  --cinema-bg-2: var(--bg-alt,  #0e0e24);
+  --cinema-panel:   var(--surface, #141821);
+  --cinema-panel-2: var(--surface-alt, #1b2030);
+  --cinema-border:  var(--border, #232733);
+  --cinema-text:    var(--text, #d6daea);
+  --cinema-muted:   var(--text-secondary, #8b94bd);
+  --cinema-accent:  var(--accent, #5cd4e4);
+  --cinema-accent-text: var(--bg, #07212a);
+
+  /* Canvas-only render tokens (read by renderer.js via getComputedStyle). */
+  --cinema-canvas-bg-top:    var(--bg-deep, #0a0a1a);
+  --cinema-canvas-bg-bottom: var(--bg-alt,  #0e0e24);
+  --cinema-edge-label: var(--text, #ffffff);
+  --cinema-gas-label:  var(--warn, #f0a030);
+  --cinema-node-label: var(--text-secondary, #cccccc);
 
   /* status hues (mirror scene Color* vars) */
   --cinema-normal: #4caf50;

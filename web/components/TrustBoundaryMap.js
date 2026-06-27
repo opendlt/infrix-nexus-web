@@ -60,14 +60,18 @@ export function buildTrustBoundaryMap(state, ctx = {}) {
     state: unverified.length ? 'open' : 'none',
   });
 
-  const dl = elt('dl', 'ux-trust-map-rows');
-  for (const r of rows) {
-    const dt = elt('dt', 'ux-trust-who', r.who);
-    setAttrs(dt, { 'data-state': r.state });
-    const dd = elt('dd', 'ux-trust-what', r.what);
+  // RUNBOOK-05 Task 7 — staged "proof builds up" reveal (Infrix → L0 → operator →
+  // you → remaining). Tag each row with a reveal class + stagger index; the DOM
+  // and the rows' truth content are UNCHANGED — only the entrance is sequenced.
+  const dl = elt('dl', 'ux-trust-map-rows ux-trust-reveal');
+  rows.forEach((r, i) => {
+    const dt = elt('dt', 'ux-trust-who ux-trust-row', r.who);
+    setAttrs(dt, { 'data-state': r.state, style: `--reveal-i:${i}` });
+    const dd = elt('dd', 'ux-trust-what ux-trust-row', r.what);
+    setAttrs(dd, { style: `--reveal-i:${i}` });
     dl.appendChild(dt);
     dl.appendChild(dd);
-  }
+  });
   map.appendChild(dl);
   return map;
 }
@@ -75,5 +79,15 @@ export function buildTrustBoundaryMap(state, ctx = {}) {
 export function mountTrustBoundaryMap(container, state, ctx = {}) {
   const el = buildTrustBoundaryMap(state, ctx);
   if (container) container.replaceChildren(el);
+  // RUNBOOK-05 Task 7 — JS half of the reduced-motion gate (CSS can't see the
+  // user setting at mount time without FOUC). Reduced-motion → render visible
+  // immediately (no stagger); otherwise trigger the staggered keyframes.
+  const reduce = (typeof matchMedia !== 'undefined') && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dl = el.querySelector ? el.querySelector('.ux-trust-reveal') : null;
+  if (dl) {
+    if (reduce) dl.classList.add('play', 'no-anim');
+    else if (typeof requestAnimationFrame !== 'undefined') requestAnimationFrame(() => dl.classList.add('play'));
+    else dl.classList.add('play');
+  }
   return el;
 }

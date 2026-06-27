@@ -123,10 +123,9 @@
 .cinema-legend h4 { margin: 0 0 4px; font-size: 13px; }
 .cinema-legend-note { margin: 0 0 8px; font-size: 11px; color: var(--cinema-muted); }
 .cinema-legend-row { display: grid; grid-template-columns: 16px 1fr; gap: 6px 8px; align-items: center; padding: 3px 0; font-size: 12px; }
-.cinema-legend-swatch { width: 14px; height: 14px; border-radius: 50%; }
-.cinema-shape-diamond { border-radius: 2px; transform: rotate(45deg); }
-.cinema-shape-rectangle, .cinema-shape-document, .cinema-shape-gate { border-radius: 2px; }
-.cinema-shape-hexagon, .cinema-shape-octagon, .cinema-shape-pentagon { border-radius: 3px; }
+/* RUNBOOK-05 Task 6 — swatches are real inline-SVG glyphs matching the canvas
+   (legend.js shapeSvg); the old .cinema-shape-* border-radius fakes are gone. */
+.cinema-legend-swatch { width: 14px; height: 14px; flex: 0 0 14px; }
 .cinema-legend-label { color: var(--cinema-text); }
 .cinema-legend-hint { grid-column: 2; font-size: 10px; color: var(--cinema-muted); }
 

@@ -132,7 +132,7 @@
 
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'cinema-narrative-card-btn';
+        btn.className = 'cinema-narrative-card-btn hover-lift';   // RUNBOOK-05 Task 7
         btn.setAttribute('aria-label', (STAGE_LABEL[e.stage] || e.stage) + ': ' + e.headline);
 
         const topRow = elt('div', 'cinema-narrative-card-top');

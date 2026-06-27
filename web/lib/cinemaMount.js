@@ -22,6 +22,8 @@ export function graphToScene(g, vocab) {
   const steps = (g && Array.isArray(g.nodes)) ? g.nodes : [];
   const edgesIn = (g && Array.isArray(g.edges)) ? g.edges : [];
   const COLORS = (vocab && vocab.COLORS) || {};
+  // RUNBOOK-05 Task 6 — emit the vocabulary shape per kind (was all-rectangles).
+  const shapeForKind = (vocab && vocab.shapeForKind) || ((k) => (k === 'outcome' ? 'star' : 'rectangle'));
 
   // Layer nodes by dependency depth for a readable left-to-right layout.
   const byId = Object.fromEntries(steps.map((s) => [s.id, s]));
@@ -44,14 +46,15 @@ export function graphToScene(g, vocab) {
     const row = (perLayer[depth] = (perLayer[depth] || 0)) ;
     perLayer[depth] = row + 1;
     const color = COLORS[colorKeyForStatus(s.status)] || COLORS.PlanStep || { r: 100, g: 181, b: 246, a: 180 };
+    const kind = s.kind || 'plan_step';
     return {
       id: s.id,
-      kind: 'plan_step',
+      kind,
       label: s.name || s.label || s.id,
       position: { x: depth * 140, y: row * 90 },
       size: 16,
       color,
-      shape: 'rectangle',
+      shape: shapeForKind(kind),    // was hardcoded 'rectangle'
       breakerState: undefined,
       createdAtEvent: s.startedAtBlock || 0,
       lastUpdated: s.completedAtBlock || 0,
@@ -80,7 +83,7 @@ export function graphToScene(g, vocab) {
       position: { x: (Object.keys(perLayer).length + 1) * 140, y: 0 },
       size: 18,
       color: ok ? (COLORS.Outcome || { r: 121, g: 134, b: 203, a: 220 }) : (COLORS.OutcomeFailed || { r: 239, g: 83, b: 80, a: 220 }),
-      shape: 'circle',
+      shape: shapeForKind('outcome'),   // 'star' — was 'circle'
       createdAtEvent: 0, lastUpdated: 0,
     });
   }

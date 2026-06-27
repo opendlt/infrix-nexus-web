@@ -231,6 +231,29 @@
     return 'core';
   }
 
+  // RUNBOOK-05 Task 6 — default shape per node kind (mirrors the Go SceneNode
+  // shape defaults). One source of truth used by cinemaMount (scene-building),
+  // the renderer (fallback), and the legend so all three agree.
+  const SHAPE_BY_KIND = {
+    contract: 'hexagon', account: 'circle', token_pool: 'circle',
+    invariant: 'shield', circuit_breaker: 'octagon', block: 'rectangle',
+    gas_meter: 'gauge',
+    plan_timeline: 'rectangle', plan_step: 'rectangle',
+    ghost_prediction: 'diamond', ghost_drift: 'diamond', ghost_actual: 'circle',
+    swarm_governance: 'pentagon', swarm_member_status: 'circle',
+    approver: 'pentagon', approval_gate: 'gate',
+    policy: 'octagon', policy_decision: 'octagon',
+    intent: 'arrow', outcome: 'star', evidence: 'document', evidence_link: 'document',
+    trust_profile: 'pentagon', trust_domain: 'pentagon', capability: 'shield',
+    trust_bridge: 'hexagon', trust_feed: 'circle', trust_credential: 'document',
+    trust_verifier: 'shield', trust_oracle: 'pentagon', trust_ml_model: 'pentagon',
+    trust_governance: 'pentagon',
+    role: 'pentagon', role_binding: 'pentagon',
+    settlement: 'circle', escrow: 'shield', reservation: 'circle', netting_group: 'circle',
+    disclosure_grant: 'diamond', anchor: 'diamond', l0_bridge: 'hexagon',
+  };
+  function shapeForKind(kind) { return SHAPE_BY_KIND[kind] || 'circle'; }
+
   // VOCABULARY_MANIFEST is the flat, machine-readable summary the parity test
   // and the export/share report read. Counts let a fence detect silent drift.
   const VOCABULARY_MANIFEST = {
@@ -245,6 +268,7 @@
   const api = {
     NODE_KINDS, EDGE_KINDS, SHAPES, COLORS, DISCLOSURE, ASSURANCE,
     ASSURANCE_ORDER, VOCABULARY_MANIFEST, colorCss, kindFamily,
+    SHAPE_BY_KIND, shapeForKind,
   };
 
   const ns = (root.InfrixCinema = root.InfrixCinema || {});

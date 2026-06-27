@@ -36,7 +36,7 @@ export function createSpineStrip({ onStageClick }) {
   STAGES.forEach((s, idx) => {
     const card = document.createElement('button');
     card.type = 'button';
-    card.className = 'strip-card';
+    card.className = 'strip-card hover-lift';   // RUNBOOK-05 Task 7 — elevation on hover
     card.dataset.stage = String(idx + 1);
     card.dataset.key = s.key;
     card.addEventListener('click', () => onStageClick && onStageClick(s.key, idx + 1));
@@ -138,6 +138,16 @@ export function createSpineStrip({ onStageClick }) {
       for (const k of Object.keys(stageCards)) {
         stageCards[k].classList.toggle('active-chapter', k === stageKey);
       }
+      // RUNBOOK-05 Task 7 — a stage-colored spotlight behind the strip grid
+      // tracks the focused stage (--spine-1…--spine-7). On the grid, not the
+      // strip root (which already owns a ::before tint).
+      const idx = KEY_INDEX[stageKey];
+      if (idx) {
+        grid.style.setProperty('--focus-stage', `var(--spine-${idx})`);
+        grid.classList.add('stage-spotlight', 'is-focused');
+      } else {
+        grid.classList.remove('is-focused');
+      }
     },
 
     /** Cleanup — call when the spine view unmounts. */
@@ -153,6 +163,9 @@ export function createSpineStrip({ onStageClick }) {
     p.className = 'strip-particle';
     p.style.background = `linear-gradient(90deg, var(--spine-${from}), var(--spine-${to}))`;
     conn.appendChild(p);
+    // RUNBOOK-05 Task 8 — drive travel via transform: set --travel from the
+    // connector width (one batched layout read before the .go write).
+    p.style.setProperty('--travel', (conn.offsetWidth || 200) + 'px');
     // eslint-disable-next-line no-unused-expressions
     p.offsetWidth;
     p.classList.add('go');
