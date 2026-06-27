@@ -20,6 +20,7 @@
 import { rpcWithDisclosure } from '/lib/spineCommon.js';
 import { subscribe } from '/lib/spineBus.js';
 import { onAtChange, isAtLive } from '/lib/timeContext.js';
+import { pushSample } from '/lib/pulseBuffer.js';
 import {
   OFFLINE_THRESHOLD, healthFromFailures, healthLabel, isStale, nextBackoff,
 } from '/lib/liveness.js';
@@ -155,6 +156,12 @@ export function refreshSlice(sliceKey) {
       const data = await fetcher();
       const next = normaliseSlice(sliceKey, data);
       setSlice(sliceKey, next);
+      // RUNBOOK-07 SP7 — accumulate runtimePulse samples into the shared ring
+      // buffer here (not in telemetry) so the trend history survives telemetry
+      // unmount/remount. Only live samples matter; pushSample ignores frozen/
+      // non-visible reads. Skip while the board is time-frozen so historical
+      // re-fetches don't pollute the live trend.
+      if (sliceKey === 'runtimePulse' && isAtLive()) pushSample(next);
       // RUNBOOK-03 Task 1 — only polled slices drive global health (a one-shot
       // narrative fetch failing must not paint the whole app offline).
       if (POLL_INTERVAL_MS[sliceKey]) { failures.set(sliceKey, 0); recomputeHealth(); }

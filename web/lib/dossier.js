@@ -20,6 +20,7 @@
 
 import { shortHash, formatTime, jsonBlock, hashChip, STAGE_KEYS } from '/lib/spineCommon.js';
 import { severityBadge, sortBySeverity } from '/lib/severity.js';
+import { renderConsequencePanel } from '/lib/consequencePanel.js';
 
 /**
  * Render a complete preview dossier into a DOM tree.
@@ -69,6 +70,20 @@ export function renderDossier(dossier, opts = {}) {
   const cryptoSection = makeSection('Technical & cryptographic detail', false);
   cryptoSection.body.appendChild(renderCryptographic(dossier));
   root.appendChild(cryptoSection.element);
+
+  // RUNBOOK-07 SP6 — the pre-action consequence panel, computed from the REAL
+  // preview dossier (never the identity fixture), sits directly above Submit so
+  // "what this does / irreversible / funds move / expected proof" is the last
+  // thing the operator reads. goalType comes from the caller (the preview
+  // dossier doesn't always carry it); consequenceFromDossier falls back to
+  // plan.goalType and fails closed to a "cannot preview" card. Shown whenever
+  // there is a real previewed plan (covers both the Studio and the rail flows).
+  if (dossier.plan || opts.goalType) {
+    try {
+      const forPanel = opts.goalType ? Object.assign({ goalType: opts.goalType }, dossier) : dossier;
+      root.appendChild(renderConsequencePanel(forPanel));
+    } catch (_) { /* never block the dossier on the panel */ }
+  }
 
   // Submit handoff. Disabled when the policy denied the preview or
   // there is no plan to submit.

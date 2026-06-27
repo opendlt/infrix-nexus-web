@@ -15,6 +15,8 @@
 
 import { subscribe2, subscribeTick } from '/lib/store.js';
 import { openOperateConsole } from '/lib/operateConsole.js';
+import { series, snapshot } from '/lib/pulseBuffer.js';
+import { detectAnomalies, renderSparkline, SPARK_LABELS } from '/lib/trendAlerts.js';
 
 export function createTelemetry() {
   const root = document.createElement('aside');
@@ -34,13 +36,15 @@ export function createTelemetry() {
   pulse.appendChild(pulseHead);
   const grid = document.createElement('div');
   grid.className = 'tele-grid';
+  // RUNBOOK-07 SP7 — `key` ties a tile to a trended series in the pulse buffer
+  // so it can carry a sparkline (drift / outcome-fail / comp-fail).
   for (const m of [
     { id: 'tele-block',   label: 'Infrix block' },
     { id: 'tele-anchor',  label: 'Anchor mode' },
     { id: 'tele-plugins', label: 'Plugins' },
-    { id: 'tele-trust',   label: 'Trust drift' },
-    { id: 'tele-outcome', label: 'Outc fail' },
-    { id: 'tele-comp',    label: 'Comp fail' },
+    { id: 'tele-trust',   label: 'Trust drift', key: 'driftingProfiles' },
+    { id: 'tele-outcome', label: 'Outc fail',   key: 'outcomeFail' },
+    { id: 'tele-comp',    label: 'Comp fail',    key: 'compFail' },
   ]) {
     const tile = document.createElement('div');
     tile.className = 'tele-tile';
@@ -54,10 +58,24 @@ export function createTelemetry() {
     v.id = m.id + '-v';
     v.textContent = '—';
     tile.appendChild(v);
+    if (m.key) {
+      const spark = document.createElement('div');
+      spark.className = 'tele-spark';
+      spark.id = m.id + '-spark';
+      spark.dataset.key = m.key;
+      tile.appendChild(spark);
+    }
     grid.appendChild(tile);
   }
   pulse.appendChild(grid);
   root.appendChild(pulse);
+
+  // RUNBOOK-07 SP7 — anomaly alerts strip between Pulse and the console trigger.
+  const alertsStrip = document.createElement('section');
+  alertsStrip.className = 'tele-alerts';
+  alertsStrip.id = 'tele-alerts';
+  alertsStrip.hidden = true;
+  root.appendChild(alertsStrip);
 
   // ── Console trigger ──
   const consoleBtn = document.createElement('button');
@@ -100,7 +118,38 @@ export function createTelemetry() {
       setVal('tele-comp-v', String(c));
       setKind('tele-comp', c > 0 ? 'alert' : 'ok');
     }
+    // RUNBOOK-07 SP7 — refresh the sparklines + anomaly alerts from the shared
+    // pulse buffer (the store pushes each live sample before publishing).
+    updateTrends();
   }));
+
+  // updateTrends — redraw each trended tile's sparkline and the alerts strip.
+  function updateTrends() {
+    for (const spark of grid.querySelectorAll('.tele-spark')) {
+      const key = spark.dataset.key;
+      const data = series(key);
+      spark.replaceChildren(renderSparkline(data, { label: (SPARK_LABELS[key] || key) + ' trend' }));
+    }
+    const alerts = detectAnomalies(snapshot());
+    const strip = document.getElementById('tele-alerts');
+    if (!strip) return;
+    strip.replaceChildren();
+    if (!alerts.length) { strip.hidden = true; return; }
+    strip.hidden = false;
+    for (const a of alerts) {
+      const row = document.createElement('a');
+      row.className = 'tele-alert tele-alert-' + a.level;
+      row.href = a.ref || '#';
+      const dot = document.createElement('span');
+      dot.className = 'tele-alert-dot';
+      row.appendChild(dot);
+      const txt = document.createElement('span');
+      txt.className = 'tele-alert-text';
+      txt.textContent = a.text;
+      row.appendChild(txt);
+      strip.appendChild(row);
+    }
+  }
 
   return {
     element: root,

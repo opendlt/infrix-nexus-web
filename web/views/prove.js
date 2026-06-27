@@ -20,8 +20,9 @@
 import { rpcWithDisclosure, errorStateNode, jsonBlock } from '/lib/spineCommon.js';
 import { renderEvidenceProof } from '/lib/evidenceProof.js';
 import { verifyPortablePackage } from '/lib/portableVerifier.js';
-import { buildReceiptFromVerifier } from '/lib/proofReceipt.js';
+import { buildReceiptFromVerifier, validateReceipt } from '/lib/proofReceipt.js';
 import { mountProofReceipt } from '/components/proofReceiptView.js';
+import { crossCheckL0 } from '/lib/l0CrossCheck.js';
 
 let rootEl = null;
 let bodyEl = null;
@@ -96,6 +97,15 @@ async function refreshProof() {
     bodyEl.replaceChildren(renderEvidenceProof(proof, {
       onExportPortable: () => exportPortable(currentEvidenceId),
       onDownloadReport: () => downloadReport(proof),
+      // RUNBOOK-07 SP8 — a real L0 confirmation from the anchor panel surfaces a
+      // banner. (The portable offline path is where the receipt upgrades to L4;
+      // here the proof is a node projection, so we confirm without re-badging.)
+      onL0Verified: (r) => {
+        const banner = document.createElement('div');
+        banner.className = 'verify-summary verify-pass evidence-action-status';
+        banner.textContent = `✓ Anchor confirmed directly on ${r.network} L0 — independent of the Infrix node.`;
+        bodyEl.prepend(banner);
+      },
     }));
   } catch (err) {
     bodyEl.replaceChildren(errorStateNode(err));
@@ -246,6 +256,28 @@ function renderDropZone() {
       receiptHost.className = 'prove-receipt-host';
       result.appendChild(receiptHost);
       mountProofReceipt(receiptHost, receipt);
+
+      // RUNBOOK-07 SP8 — when the bundle is anchored (tx + block on hand) and the
+      // offline verifier passed, offer a DIRECT L0 cross-check that upgrades the
+      // receipt to L4 — honestly. The upgrade is rebuilt and RE-VALIDATED; an L4
+      // receipt that fails validateReceipt is discarded and we keep L3.
+      const anchorTx = String(bundle.anchorTxHash || bundle.anchorTx || '');
+      const anchorBlock = Number(bundle.sealedBlockHeight || bundle.anchorBlockHeight || bundle.blockHeight || 0);
+      if (out.passed && anchorTx && anchorBlock > 0) {
+        mountL0Upgrade(result, receiptHost, {
+          out, baseOpts: {
+            subjectType: 'evidence',
+            subjectId: String(bundle.id || bundle.bundleId || ''),
+            evidenceId: String(bundle.id || bundle.bundleId || ''),
+            intentId: String(bundle.intentId || ''),
+            anchorTx,
+            verifier: 'Nexus offline verifier',
+            verifiedAt: new Date().toISOString(),
+          },
+          anchor: { status: 'anchored', txHash: anchorTx, blockHeight: anchorBlock },
+        });
+      }
+
       result.appendChild(renderPortableChecks(out.checks));
       // RUNBOOK-04 Task 6 — the offline path is where an external auditor (outside
       // the operator's trust boundary) most needs a durable artifact. Let them
@@ -290,6 +322,60 @@ function renderDropZone() {
     verify(text);
   });
   pasteBtn.addEventListener('click', () => verify(ta.value));
+}
+
+// RUNBOOK-07 SP8 — the "Cross-check against L0 now → L4" control for the offline
+// verifier. Runs a DIRECT L0 query; on confirmation it rebuilds the receipt with
+// l0Verified + network + command, RE-VALIDATES it, and only re-mounts as L4 when
+// validateReceipt returns clean. Fails closed to L3 with the reason otherwise —
+// it is impossible to render an L4 badge without a real, recorded confirmation.
+function mountL0Upgrade(result, receiptHost, { out, baseOpts, anchor }) {
+  const wrap = document.createElement('div');
+  wrap.className = 'prove-l0-upgrade';
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'verify-btn prove-l0-crosscheck';
+  btn.textContent = 'Cross-check against L0 now';
+  const status = document.createElement('p');
+  status.className = 'prove-l0-status';
+  status.hidden = true;
+  wrap.appendChild(btn);
+  wrap.appendChild(status);
+  result.appendChild(wrap);
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    status.hidden = false;
+    status.className = 'prove-l0-status is-checking';
+    status.textContent = 'Checking L0…';
+    const r = await crossCheckL0(anchor);
+    if (!r.ok || !r.l0Verified) {
+      status.className = 'prove-l0-status is-fail';
+      status.textContent = `✗ ${r.reason || 'L0 cross-check failed'} — receipt stays L3. Use the CLI command for a locked-down deployment.`;
+      btn.disabled = false;
+      return;
+    }
+    // Rebuild as L4 with the recorded confirmation, then RE-VALIDATE.
+    const l4 = buildReceiptFromVerifier(out, {
+      ...baseOpts,
+      l0Verified: true,
+      proofLevel: 'L4',
+      network: r.network,
+      command: r.command,
+    });
+    const violations = validateReceipt(l4);
+    if (violations.length) {
+      // Never show an unvalidated L4 — keep L3 and surface the violation.
+      status.className = 'prove-l0-status is-fail';
+      status.textContent = '✗ The upgraded receipt failed validation (' + violations[0] + ') — keeping L3.';
+      btn.disabled = false;
+      return;
+    }
+    mountProofReceipt(receiptHost, l4);
+    status.className = 'prove-l0-status is-ok';
+    status.textContent = `✓ Confirmed on ${r.network} at block ${anchor.blockHeight} — receipt upgraded to L4.`;
+    btn.remove();
+  });
 }
 
 function renderPortableChecks(checks) {

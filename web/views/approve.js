@@ -27,6 +27,7 @@ import { openRationaleModal, openConfirmModal } from '/lib/rationaleModal.js';
 import { mountCommentThread } from '/lib/commentThread.js';
 import { onAtChange, isAtLive } from '/lib/timeContext.js';
 import { explainSignature } from '/lib/identity.js';
+import { renderConsequencePanel } from '/lib/consequencePanel.js';
 
 const POLL_MS = 10000;
 
@@ -128,6 +129,12 @@ async function refreshDossier() {
         }
       },
     }));
+    // RUNBOOK-07 SP6 — the consequence panel, computed from the REAL approval
+    // dossier, pinned above the sign/reject CTA so the operator sees "what this
+    // does / irreversible / funds move / expected proof" before acting. (The
+    // same explanation also repeats in the sign confirm modal below.)
+    try { bodyEl.insertBefore(renderConsequencePanel(dossier), bodyEl.firstChild); }
+    catch (_) { /* never block the dossier on the panel */ }
     // Mount the comment thread below the dossier so approvers can
     // discuss the plan before they sign. The thread auto-polls every
     // 10s so other reviewers' notes show up in close to real time.

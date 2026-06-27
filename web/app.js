@@ -26,6 +26,7 @@ import { governView } from '/views/govern.js';
 import { operatePanelView } from '/views/operatePanel.js';
 import { inboxView } from '/views/inbox.js';
 import { verifyBatchView } from '/views/verifyBatch.js';
+import { diffView } from '/views/diff.js';
 import { initHeader } from '/lib/header.js';
 import { initTimeContext } from '/lib/timeContext.js';
 
@@ -205,6 +206,8 @@ const routes = {
   // #/verifyBatch              — empty launcher
   // #/verifyBatch/<jobId>      — poll an in-flight or completed job
   verifyBatch: verifyBatchView,
+  // RUNBOOK-07 SP2 — temporal diff. #/diff or #/diff/<A>/<B> to seed the pickers.
+  diff: diffView,
   // Phase 6 — every authority surface becomes a govern-atlas tab.
   approvals:    makeRedirect((s) => s.length > 0 ? '#/govern/approvals/' + encodeURIComponent(s[0]) : '#/govern/approvals'),
   policies:     makeRedirect((s) => s.length > 0 ? '#/govern/policies/' + encodeURIComponent(s[0])  : '#/govern/policies'),

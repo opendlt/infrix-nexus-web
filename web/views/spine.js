@@ -24,13 +24,15 @@ import { createNarrative } from '/lib/narrative.js';
 import { createTelemetry } from '/lib/telemetry.js';
 import { createSpineStrip } from '/lib/spineStrip.js';
 import { createApprovalQueue, createRiskRail, createVerificationRail, createDraftsRail } from '/lib/cockpitRails.js';
-import { ensureSlice } from '/lib/store.js';
+import { ensureSlice, getSlice } from '/lib/store.js';
+import { mountBoardScrubber } from '/lib/boardScrubber.js';
 
 let rootEl = null;
 let strip = null;
 let timeline = null;
 let narrative = null;
 let telemetry = null;
+let scrubber = null;
 let currentSubpath = [];
 
 export const spineView = {
@@ -41,6 +43,7 @@ export const spineView = {
     if (timeline) { timeline.destroy && timeline.destroy(); timeline = null; }
     if (narrative) { narrative.destroy && narrative.destroy(); narrative = null; }
     if (telemetry) { telemetry.destroy && telemetry.destroy(); telemetry = null; }
+    if (scrubber) { scrubber.destroy && scrubber.destroy(); scrubber = null; }
     rootEl.replaceChildren();
 
     const shell = document.createElement('div');
@@ -128,8 +131,19 @@ export const spineView = {
     }
     canvas.appendChild(rail);
 
+    // RUNBOOK-07 SP1 — the global time scrubber, docked at the foot of the
+    // cockpit. Dragging it sets the global `at` cursor; the store's onAtChange
+    // subscriber (RUNBOOK-03 T4) re-fetches every board slice at that block, so
+    // ALL panels above re-paint as of that block. getRange() reads the earliest
+    // visible block from recentIntents and the live head from #headerBlockHeight.
+    const dock = document.createElement('div');
+    dock.className = 'cockpit-scrubber-dock';
+    scrubber = mountBoardScrubber(dock, { getRange: cockpitBlockRange });
+    if (scrubber.element) { dock.appendChild(scrubber.element); shell.appendChild(dock); }
+
     // Kick off the cockpit slice immediately so first-paint sees real data.
     ensureSlice('cockpit').catch(() => {});
+    ensureSlice('recentIntents').catch(() => {});
 
     applySelection();
   },
@@ -139,6 +153,26 @@ export const spineView = {
     applySelection();
   },
 };
+
+// cockpitBlockRange — { min, max } for the board scrubber. max = the live head
+// (the header block-height badge telemetry already polls); min = the earliest
+// block visible in the recentIntents slice (fallback: head - 100).
+function cockpitBlockRange() {
+  let max = 1;
+  const el = typeof document !== 'undefined' && document.getElementById('headerBlockHeight');
+  const headVal = el ? Number(String(el.textContent).replace(/[^\d]/g, '')) : NaN;
+  if (Number.isFinite(headVal) && headVal > 0) max = headVal;
+
+  let min = max;
+  const slice = getSlice('recentIntents');
+  const rows = (slice && slice.data && (slice.data.intents || slice.data.Intents)) || [];
+  for (const r of rows) {
+    const b = Number(r.blockHeight ?? r.BlockHeight ?? r.block);
+    if (Number.isFinite(b) && b > 0 && b < min) min = b;
+  }
+  if (min >= max) min = Math.max(1, max - 100);
+  return { min, max };
+}
 
 function applySelection() {
   if (currentSubpath.length > 0) {

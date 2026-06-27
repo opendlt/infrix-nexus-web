@@ -26,6 +26,7 @@
 
 import { shortHash, formatTime, jsonBlock, hashChip, STAGE_KEYS } from '/lib/spineCommon.js';
 import { severityBadge, sortBySeverity } from '/lib/severity.js';
+import { crossCheckL0 } from '/lib/l0CrossCheck.js';
 
 const STATUS_LABEL = {
   pass:           'PASS',
@@ -94,8 +95,8 @@ export function renderEvidenceProof(proof, opts = {}) {
     root.appendChild(renderCrossBindings(proof.crossBindings));
   }
 
-  // 7. Anchor + L0 cross-check
-  if (proof.anchor) root.appendChild(renderAnchorPanel(proof.anchor));
+  // 7. Anchor + L0 cross-check (RUNBOOK-07 SP8 — onL0Verified upgrades the receipt)
+  if (proof.anchor) root.appendChild(renderAnchorPanel(proof.anchor, opts.onL0Verified));
 
   // 8. Chain walker
   if (Array.isArray(proof.chain) && proof.chain.length > 0) {
@@ -360,7 +361,7 @@ function renderCrossBindings(rows) {
 // =================================================================
 // Anchor panel
 // =================================================================
-function renderAnchorPanel(a) {
+function renderAnchorPanel(a, onL0Verified) {
   const sec = panelSection('Anchor & L0 cross-check');
   const grid = document.createElement('div');
   grid.className = 'dossier-summary-grid';
@@ -378,20 +379,43 @@ function renderAnchorPanel(a) {
       : 'L0 cross-check not yet available — anchor pending.';
     sec.body.appendChild(note);
   }
-  if (a.txHash) {
-    // RUNBOOK-04 Task 6 (G3.7) — the anchor coordinates (tx + block) are on
-    // screen, so the in-app L0 cross-check entry point belongs here. But the
-    // live cross-check needs a server RPC that does NOT exist yet (SP8 /
-    // RUNBOOK-07 delivers it), so the button is rendered DISABLED — it must
-    // never claim a cross-check it can't perform. The copy-paste "Verify
-    // independently (live L0)" command in this report is the working path.
+  if (a.txHash && a.blockHeight) {
+    // RUNBOOK-07 SP8 — the anchor coordinates (tx + block) are on screen, so the
+    // browser can confirm the anchor DIRECTLY against Accumulate L0 (not via the
+    // Infrix node). This is the working in-app cross-check. It fails closed when
+    // L0 isn't CORS-reachable; the copy-paste "Verify independently (live L0)"
+    // command above remains the fallback for locked-down deployments. On a
+    // confirmation it notifies onL0Verified so the caller can upgrade the receipt.
     const x = document.createElement('button');
     x.type = 'button';
     x.className = 'verify-btn evidence-l0-crosscheck';
     x.textContent = 'Cross-check against L0 now';
-    x.disabled = true;
-    x.title = 'In-app live L0 cross-check is coming (SP8). For now, run the "Verify independently (live L0)" command above.';
+    const status = document.createElement('p');
+    status.className = 'evidence-l0-status';
+    status.hidden = true;
+    x.addEventListener('click', async () => {
+      x.disabled = true;
+      status.hidden = false;
+      status.className = 'evidence-l0-status is-checking';
+      status.textContent = 'Checking L0…';
+      const r = await crossCheckL0(a);
+      if (r.ok && r.l0Verified) {
+        status.className = 'evidence-l0-status is-ok';
+        status.textContent = `✓ Confirmed on ${r.network} at block ${a.blockHeight} — anchor exists on L0.`;
+        if (typeof onL0Verified === 'function') { try { onL0Verified(r); } catch (_) {} }
+      } else {
+        status.className = 'evidence-l0-status is-fail';
+        status.textContent = `✗ ${r.reason || 'L0 cross-check failed'} — receipt stays L3; use the CLI command above.`;
+        x.disabled = false;
+      }
+    });
     sec.body.appendChild(x);
+    sec.body.appendChild(status);
+  } else if (a.txHash) {
+    const note = document.createElement('p');
+    note.className = 'evidence-anchor-note';
+    note.textContent = 'Anchor tx present but no block height yet — cross-check available once the anchor finalizes.';
+    sec.body.appendChild(note);
   }
   return sec.element;
 }

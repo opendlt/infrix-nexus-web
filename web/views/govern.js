@@ -15,6 +15,7 @@
 
 import { rpcWithDisclosure, errorStateNode } from '/lib/spineCommon.js';
 import { renderGovernAtlas, renderGovernNode } from '/lib/governAtlas.js';
+import { mountReverseQuery } from '/views/reverseQuery.js';
 
 const KIND_TO_NODE_KIND = {
   actors:        'actor',
@@ -51,6 +52,12 @@ export const governView = {
     sub.className = 'workspace-subtitle';
     sub.textContent = 'Who can do what — actors, roles, capabilities, policies, trust profiles, and plugins.';
     head.appendChild(sub);
+    // RUNBOOK-07 SP5 — discoverable entry to the reverse query.
+    const whoLink = document.createElement('a');
+    whoLink.className = 'govern-who-link';
+    whoLink.href = '#/govern/who-can-touch';
+    whoLink.textContent = 'Who can touch…? →';
+    head.appendChild(whoLink);
     shell.appendChild(head);
 
     const main = document.createElement('section');
@@ -84,6 +91,28 @@ export const governView = {
 
 async function refresh() {
   if (!atlasEl) return;
+
+  // RUNBOOK-07 SP5 — the reverse authority query is a govern subpath
+  // (#/govern/who-can-touch). It reuses the same governAtlas fetch and renders
+  // the "who can touch this?" panel in place of the atlas grid.
+  if (currentKind === 'who-can-touch') {
+    drawerEl.classList.remove('open');
+    drawerEl.replaceChildren();
+    atlasEl.replaceChildren(loadingNode('Loading the authority graph…'));
+    try {
+      const atlas = await rpcWithDisclosure('nexus.governAtlas', { limit: 500 });
+      const back = document.createElement('a');
+      back.className = 'reverse-query-back';
+      back.href = '#/govern';
+      back.textContent = '← Back to the atlas';
+      atlasEl.replaceChildren(back);
+      mountReverseQuery(atlasEl, { atlas, seedTarget: currentNodeId ? decodeURIComponent(currentNodeId) : '' });
+    } catch (err) {
+      atlasEl.replaceChildren(errorStateNode(err));
+    }
+    return;
+  }
+
   // Atlas
   try {
     const atlas = await rpcWithDisclosure('nexus.governAtlas', { limit: 500 });

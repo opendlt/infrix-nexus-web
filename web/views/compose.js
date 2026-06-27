@@ -29,6 +29,7 @@
 import { rpcWithDisclosure, errorStateNode, hashChip } from '/lib/spineCommon.js';
 import { renderDossier } from '/lib/dossier.js';
 import { openConfirmModal } from '/lib/rationaleModal.js';
+import { mountPolicyDelta } from '/lib/whatIfSimulator.js';
 
 let rootEl = null;
 let templates = [];
@@ -383,8 +384,14 @@ function renderMain(main) {
       });
       lastDossier = { goalType: tmpl.goalType, customParams: cp, response: dossier };
       out.replaceChildren(renderDossier(dossier, {
+        goalType: tmpl.goalType,                 // RUNBOOK-07 SP6 — feeds the consequence panel
         onSubmit: () => submitDossier(out),
       }));
+      // RUNBOOK-07 SP4 — for POLICY_* goals, show the allow/deny delta from
+      // policy.simulate and gate Submit on net-new denials.
+      if (String(tmpl.goalType || '').startsWith('POLICY_')) {
+        mountPolicyDelta(out, { goalType: tmpl.goalType, customParams: cp, dossier });
+      }
     } catch (err) {
       out.replaceChildren(errorStateNode(err));
     }

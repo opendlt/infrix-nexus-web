@@ -43,6 +43,7 @@ import {
   closeAllDrawers,
 } from '/lib/drawer.js';
 import { fetchNarrative } from '/lib/store.js';
+import { createCausalWalkPanel } from '/lib/causalWalkView.js';
 
 // One canonical STAGES source (RUNBOOK-02 Task 1): one narrative chapter per
 // spine stage, in canonical order. The extra `token` field on STAGES is ignored
@@ -582,6 +583,20 @@ export function createNarrative({ onClose, onChapterEnter }) {
     fin.appendChild(renderFinalityFlow(readField(outcome, 'Finality')));
     grid.appendChild(card('Finality state machine', fin));
     wrap.appendChild(grid);
+
+    // RUNBOOK-07 SP3 — when the outcome FAILED, assemble the cause chain
+    // (outcome → compensation → policy denial → trust drift → block) from the
+    // material the narrative already fetched, and mount it directly under the
+    // outcome chapter. Returns null (renders nothing) for non-failed outcomes.
+    const causal = createCausalWalkPanel({
+      intent: cache.intent,
+      intentId: cache.intentId,
+      outcome: cache.outcome,
+      policies: cache.policies,
+      anchorChain: cache.anchorChain,
+    });
+    if (causal) wrap.appendChild(causal);
+
     return wrap;
   }
 

@@ -24,6 +24,7 @@ import {
 import { subscribe2, refreshSlice } from '/lib/store.js';
 import { severityBadge, sortBySeverity, severityRank } from '/lib/severity.js';
 import { renderDossier } from '/lib/dossier.js';
+import { simulatePolicyDelta, renderPolicyDeltaTable, policyDeltaGatesSubmit } from '/lib/whatIfSimulator.js';
 import { onAtChange, isAtLive } from '/lib/timeContext.js';
 import { agoLabel } from '/lib/liveness.js';
 
@@ -465,7 +466,19 @@ export function createQuickComposeDock() {
       const policyDenied = dossier && dossier.policyDecision && dossier.policyDecision.allowed === false;
       const noPlan = !dossier || !dossier.plan;
       submitBtn.disabled = policyDenied || noPlan;
-      out.replaceChildren(renderDossier(dossier));
+      // RUNBOOK-07 SP6 — pass goalType so renderDossier mounts the consequence panel.
+      out.replaceChildren(renderDossier(dossier, { goalType: goalSelect.value }));
+      // RUNBOOK-07 SP4 — POLICY_* allow/deny delta; a net-new denial also gates
+      // this rail's Submit button until the operator acknowledges.
+      if (String(goalSelect.value || '').startsWith('POLICY_')) {
+        simulatePolicyDelta({
+          goalType: goalSelect.value, customParams: params,
+          currentDecisions: (dossier && dossier.policyDecision && dossier.policyDecision.decisions) || [],
+        }).then(({ flips }) => {
+          out.appendChild(renderPolicyDeltaTable(flips));
+          if (policyDeltaGatesSubmit(flips)) submitBtn.disabled = true;
+        }).catch(() => { /* policy.simulate unavailable → keep the existing gate */ });
+      }
     } catch (err) {
       out.replaceChildren(errorStateNode(err));
     }

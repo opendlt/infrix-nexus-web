@@ -20,6 +20,7 @@
 
 import { shortHash, formatTime, jsonBlock, hashChip } from '/lib/spineCommon.js';
 import { severityBadge } from '/lib/severity.js';
+import { mountWhatIf } from '/lib/whatIfSimulator.js';
 
 const KINDS = [
   { key: 'actors',         label: 'People & systems',  stage: 1 },
@@ -129,12 +130,25 @@ export function renderGovernAtlas(atlas, opts = {}) {
   return root;
 }
 
+// RUNBOOK-07 SP4 — light/clear the atlas cards in a blast-radius set. The grid
+// and the open drawer share the DOM, so this targets the live atlas cards by id.
+function highlightAtlasCards(ids) {
+  if (typeof document === 'undefined') return;
+  const set = ids ? new Set(ids.map(String)) : null;
+  document.querySelectorAll('.govern-node-card[data-node-id]').forEach((c) => {
+    c.classList.toggle('atlas-blast-hot', !!set && set.has(c.dataset.nodeId));
+  });
+}
+
 function renderNodeRow(kind, node, opts) {
   const card = document.createElement('button');
   card.type = 'button';
   card.className = 'govern-node-card';
   const nodeKind = KIND_TO_NODE_KIND[kind] || kind;
   card.dataset.kind = nodeKind;
+  // RUNBOOK-07 SP4 — id handle so the blast-radius "highlight on graph" toggle
+  // can light the affected atlas cards.
+  if (node.id) card.dataset.nodeId = String(node.id);
 
   card.addEventListener('click', () => {
     if (typeof opts.onNodeOpen === 'function') {
@@ -256,6 +270,13 @@ export function renderGovernNode(response) {
     case 'plugin': renderPluginPanel(root, data); break;
     case 'approval': renderApprovalPanel(root, data); break;
     default: root.appendChild(emptyText('Unknown kind.'));
+  }
+
+  // RUNBOOK-07 SP4 — the what-if blast-radius simulator on the authority drawers.
+  // Trust degrade is exact (server dependentApprovals); capability/role are
+  // derived from the atlas and badged "estimated".
+  if (kind === 'trust' || kind === 'capability' || kind === 'role') {
+    mountWhatIf(root, { kind, node: data, onHighlight: highlightAtlasCards });
   }
 
   // Raw JSON
