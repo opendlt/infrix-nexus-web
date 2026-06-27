@@ -48,7 +48,31 @@
     const canvas = document.createElement('canvas');
     canvas.id = 'cinema-canvas';
     canvas.className = 'cinema-canvas';
+    // RUNBOOK-06 Task 2 (WCAG 1.1.1 / 4.1.2 / 2.1.1) — a bare <canvas> is opaque
+    // to assistive tech. Expose it as a focusable application widget with a name
+    // and a roledescription, and back it with a real DOM mirror (#cinema-alt)
+    // plus a polite live region (#cinema-live) that narrates selection/focus.
+    canvas.setAttribute('role', 'application');
+    canvas.setAttribute('tabindex', '0');
+    canvas.setAttribute('aria-roledescription', 'Interactive proof graph');
+    canvas.setAttribute('aria-label', 'Proof graph — use arrow keys to move between nodes, Enter to open details');
     stage.appendChild(canvas);
+
+    // Off-screen polite live region: announces the focused/selected node without
+    // stealing focus. aria-atomic so the whole sentence is read each change.
+    const liveRegion = el('div', 'sr-only');
+    liveRegion.id = 'cinema-live';
+    liveRegion.setAttribute('aria-live', 'polite');
+    liveRegion.setAttribute('aria-atomic', 'true');
+    stage.appendChild(liveRegion);
+
+    // Parallel DOM: a keyboard- and screen-reader-navigable list of the same
+    // nodes and edges the canvas paints. Visually hidden but in the a11y tree,
+    // so the graph is operable even when the canvas pixels mean nothing.
+    const altDom = el('div', 'sr-only');
+    altDom.id = 'cinema-alt';
+    altDom.setAttribute('aria-label', 'Proof graph contents');
+    stage.appendChild(altDom);
 
     // Details panel (right).
     const detailsPanelEl = el('div', 'cinema-panel panel hidden');
@@ -86,8 +110,69 @@
     // ---- Details ----
     const details = new ns.DetailsPanel(detailsPanelEl, detailContent, detailClose);
     details.renderer = renderer;
-    renderer.on('nodeSelected', (n) => details.showNode(n));
+    renderer.on('nodeSelected', (n) => { details.showNode(n); announceNode(n, 'selected'); markAltSelected(n); });
     renderer.on('edgeHovered', (t) => details.showTraffic(t));
+    // RUNBOOK-06 Task 3 — keyboard focus moving across nodes narrates politely
+    // (without opening the details panel; Enter does that → nodeSelected above).
+    renderer.on('nodeFocused', (n) => { announceNode(n, 'focused'); markAltSelected(n); });
+
+    // RUNBOOK-06 Task 2 — describe a node as a short, screen-reader-friendly
+    // sentence. Mirrors the visual encoding (kind + status + label).
+    function describeNode(n) {
+      if (!n) return '';
+      const kind = String(n.kind || n.shape || 'node').replace(/_/g, ' ');
+      const status = n.status ? `, ${String(n.status).replace(/_/g, ' ')}` : '';
+      const label = n.label || n.title || n.id || '';
+      return `${kind}${status}: ${label}`.trim();
+    }
+    function announceNode(n, verb) {
+      if (!liveRegion) return;
+      const d = describeNode(n);
+      liveRegion.textContent = d ? `${d} — ${verb}` : '';
+    }
+    // Keep the parallel DOM's current item in sync with canvas focus/selection.
+    function markAltSelected(n) {
+      if (!altDom || !n) return;
+      const id = String(n.id != null ? n.id : '');
+      altDom.querySelectorAll('[data-node-id]').forEach((li) => {
+        li.setAttribute('aria-current', li.getAttribute('data-node-id') === id ? 'true' : 'false');
+      });
+    }
+    // Rebuild the parallel node/edge list from the current scene graph. Each
+    // node is a button that drives the SAME selection path as a canvas click,
+    // so a keyboard/AT user can open any node's details directly.
+    function renderCinemaAlt(g) {
+      if (!altDom) return;
+      altDom.replaceChildren();
+      if (!g) return;
+      const nodes = Array.isArray(g.nodes) ? g.nodes : Object.values(g.nodes || {});
+      const edges = Array.isArray(g.edges) ? g.edges : Object.values(g.edges || {});
+      const nodesHead = el('h3'); nodesHead.textContent = `Nodes (${nodes.length})`;
+      altDom.appendChild(nodesHead);
+      const nodeList = el('ul', 'cinema-alt-nodes');
+      for (const n of nodes) {
+        const li = document.createElement('li');
+        li.setAttribute('data-node-id', String(n.id != null ? n.id : ''));
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = describeNode(n);
+        b.addEventListener('click', () => { try { renderer.selectNodeById(n.id); } catch (e) {} });
+        li.appendChild(b);
+        nodeList.appendChild(li);
+      }
+      altDom.appendChild(nodeList);
+      const edgesHead = el('h3'); edgesHead.textContent = `Connections (${edges.length})`;
+      altDom.appendChild(edgesHead);
+      const edgeList = el('ul', 'cinema-alt-edges');
+      for (const e of edges) {
+        const li = document.createElement('li');
+        const from = e.from != null ? e.from : e.source;
+        const to = e.to != null ? e.to : e.target;
+        li.textContent = `${from} → ${to}`;
+        edgeList.appendChild(li);
+      }
+      altDom.appendChild(edgeList);
+    }
 
     // ---- Legend ----
     const legend = new ns.CinemaLegend(stage);
@@ -153,8 +238,13 @@
     // ---- Scene wiring ----
     let unsubscribe = () => {};
     function onScene(g) {
-      if (g && g.__update) { renderer.applyUpdate(g.__update); return; }
+      if (g && g.__update) {
+        renderer.applyUpdate(g.__update);
+        renderCinemaAlt(renderer.sceneGraph);   // keep the a11y mirror current after a delta
+        return;
+      }
       renderer.setSceneGraph(g || {});
+      renderCinemaAlt(g || {});                  // RUNBOOK-06 Task 2 — refresh the parallel DOM
       if (narrative) {
         try { narrative.setScene(g || {}, { proof: options.proof || (dataSource && dataSource.proof) || null }); } catch (e) {}
       }

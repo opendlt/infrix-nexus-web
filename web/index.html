@@ -12,6 +12,9 @@
 </head>
 <body>
 
+<!-- RUNBOOK-06 Task 1 (WCAG 2.4.1) — skip the repeated header on every view. -->
+<a class="skip-link" href="#view-container">Skip to content</a>
+
 <header>
   <div class="container">
     <div class="header-inner">
@@ -19,6 +22,15 @@
         <span class="logo-text">INFRIX</span>
         <span class="logo-sub">Nexus</span>
       </div>
+      <!-- RUNBOOK-06 Task 6 — phone-only nav disclosure. Hidden above the
+           breakpoint (CSS + hidden attr); mobileNav.js un-hides + wires it. -->
+      <button type="button" class="nav-toggle" id="navToggle"
+              aria-expanded="false" aria-controls="headerWorkspaces"
+              aria-label="Menu" hidden>
+        <span class="nav-toggle-bar" aria-hidden="true"></span>
+        <span class="nav-toggle-bar" aria-hidden="true"></span>
+        <span class="nav-toggle-bar" aria-hidden="true"></span>
+      </button>
       <!--
         RUNBOOK-01 IA consolidation — six canonical doors, in order:
         Start · Build · Verify · Cockpit · Govern · Inbox. The long tail
@@ -27,7 +39,7 @@
         surfaces above. Preserve data-workspace="inbox", #headerInboxBadge,
         and href="#/start" (asserted by the inbox + start fences).
       -->
-      <nav class="header-workspaces" aria-label="Workspaces">
+      <nav class="header-workspaces" id="headerWorkspaces" aria-label="Workspaces">
         <a class="workspace-link" data-workspace="start"   href="#/start"   title="Start — new here? Pick a task or learn the concepts"><span class="workspace-link-label">Start</span></a>
         <a class="workspace-link" data-workspace="compose" href="#/compose" title="Build — describe an intent, preview it, submit (g·b)"><span class="workspace-link-label">Build</span></a>
         <a class="workspace-link" data-workspace="prove"   href="#/prove"   title="Verify — drop a proof or open a bundle to verify it offline (g·p)"><span class="workspace-link-label">Verify</span></a>
@@ -74,11 +86,16 @@
         <!-- RUNBOOK-03 Task 1 — real connection status. The text starts at the
              honest "Connecting…" (never the hardcoded "Connected") and is driven
              by the store's health signal (header.js initConnectionStatus). -->
-        <div class="status-indicator" aria-live="polite">
-          <span class="status-dot" id="statusDot"></span>
+        <!-- RUNBOOK-06 Task 5 (WCAG 4.1.3) — announce connection-state changes
+             politely. aria-atomic reads the whole region; the dot is decorative
+             so it is hidden (the meaning is in #statusText). -->
+        <div class="status-indicator" aria-live="polite" aria-atomic="true">
+          <span class="status-dot" id="statusDot" aria-hidden="true"></span>
           <span id="statusText">Connecting…</span>
         </div>
-        <div class="block-height-display" id="blockHeightDisplay">
+        <!-- RUNBOOK-06 Task 5 — announce block-height changes (aria-atomic reads
+             "Block N"). Throttled by the 8s poll + change-guard in header.js. -->
+        <div class="block-height-display" id="blockHeightDisplay" aria-live="polite" aria-atomic="true">
           Block <span id="headerBlockHeight">-</span>
         </div>
         <div class="header-theme-wrap">
@@ -101,7 +118,9 @@
   collects everything awaiting action. The command palette (Cmd/Ctrl-K) holds
   the long tail — Console, Agent, Scenarios, Learn, Quests, Tutor.
 -->
-<div id="view-container"></div>
+<!-- tabindex=-1 so the skip link (and route-change focus, RUNBOOK-06 Task 8) can
+     move focus here even though a <div> isn't focusable by default. -->
+<div id="view-container" tabindex="-1"></div>
 
 <script type="module" src="/app.js"></script>
 

@@ -10,6 +10,7 @@ import { isAtLive } from '/lib/timeContext.js';
 import { toggleCommandPalette, toggleShortcutHelp } from '/lib/commandPalette.js';
 import { startHeaderInboxBadge } from '/lib/cockpitRails.js';
 import { mountTimeSelector, mountTimeBanner } from '/lib/timeSelector.js';
+import { initMobileNav } from '/lib/mobileNav.js';
 
 const THEME_KEY = 'nexus.theme';
 const THEMES = ['light', 'dark', 'contrast'];
@@ -27,6 +28,8 @@ export function initHeader() {
   initShortcuts();
   initWorkspaceNav();
   initBlockHeight();
+  // RUNBOOK-06 Task 6 — phone-only hamburger for the workspace nav.
+  initMobileNav();
   // Cinema-Inbox-Time E2C6 — Inbox unread badge in the workspace nav.
   startHeaderInboxBadge({ pollMs: 15000 });
   // Cinema-Inbox-Time E3C5 — time-travel cursor + non-live banner.
@@ -154,7 +157,13 @@ function initBlockHeight() {
     try {
       const h = await rpcWithDisclosure('nexus.operateHealth', {});
       const bh = h && h.network ? h.network.blockHeight : undefined;
-      if (bh !== undefined && bh !== null) el.textContent = String(bh);
+      // RUNBOOK-06 Task 5 — #blockHeightDisplay is aria-live; only touch the DOM
+      // when the value actually changes so we don't re-announce "Block N" on
+      // every 8s poll (and don't thrash the text node for nothing).
+      if (bh !== undefined && bh !== null) {
+        const next = String(bh);
+        if (el.textContent !== next) el.textContent = next;
+      }
     } catch (_) {
       // Keep the last painted value on a transient/denied read.
     }

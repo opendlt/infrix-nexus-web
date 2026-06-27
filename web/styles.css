@@ -145,7 +145,11 @@
   --border-strong:    #A8B0C4;
   --text:             #15192B;
   --text-secondary:   #5A6280;
-  --text-dim:         #9BA4C2;
+  /* WCAG AA (RUNBOOK-06 Task 7) — #9BA4C2 was ~2.5:1 as text on the Daylight
+     surfaces, far below 4.5. #636B86 clears 4.5:1 on every surface (worst case
+     ~4.66:1 on the tinted --surface-hover) while staying lighter than
+     --text-secondary so the de-emphasis is preserved. */
+  --text-dim:         #636B86;
   --accent:           #5B47E0;
   --accent-soft:      #EDEAFB;
   --accent-glow:      rgba(91, 71, 224, 0.18);
@@ -2299,7 +2303,10 @@ footer {
   --border-strong:    #4A8C58;
   --text:             #C8FFD9;
   --text-secondary:   #6FCC85;
-  --text-dim:         #3D7A4C;
+  /* WCAG AA (RUNBOOK-06 Task 7) — #3D7A4C was ~3.8-4.1:1 on the contrast-theme
+     surfaces (below 4.5). #5BA86E reaches ~5.9:1 on the lightest surface while
+     staying dimmer than --text-secondary. */
+  --text-dim:         #5BA86E;
   --accent:           #00FF88;
   --accent-soft:      #002818;
   --accent-glow:      rgba(0, 255, 136, 0.30);
@@ -7992,6 +7999,36 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
   border-radius: 2px;
 }
 
+/* RUNBOOK-06 Task 6 — the phone-only nav disclosure (hamburger).
+   Hidden above the breakpoint; mobileNav.js removes [hidden] at ≤480px so it
+   only ever appears when the collapsed nav is in play. */
+.nav-toggle {
+  display: none;
+  flex: 0 0 auto;
+  width: 40px; height: 40px;
+  padding: 0;
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 4px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.nav-toggle[hidden] { display: none; }
+.nav-toggle-bar {
+  display: block;
+  width: 18px; height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: transform 0.16s ease, opacity 0.16s ease;
+}
+/* Morph the three bars into an ✕ when the menu is open. */
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+.nav-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .nav-toggle-bar { transition: none; } }
+
 /* Mobile: stack to icon row, hide labels at very narrow widths */
 @media (max-width: 1280px) {
   .workspace-link {
@@ -8014,6 +8051,40 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
     font-size: 10px;
     letter-spacing: 0.04em;
   }
+
+  /* RUNBOOK-06 Task 6 — collapse the workspaces into a toggle-driven dropdown
+     so the header fits a phone. The toggle is shown (mobileNav.js clears its
+     [hidden]); the nav is a positioned sheet that is closed until .is-open. */
+  .nav-toggle { display: flex; }
+  .header-workspaces {
+    order: 0;                 /* override the ≤1024px full-width row */
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 12px;
+    left: 12px;
+    width: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 8px;
+    overflow: visible;
+    background: var(--surface);
+    border: 1px solid var(--border-bold);
+    border-top: 1px solid var(--border-bold);   /* override the ≤1024px hairline */
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    z-index: 90;
+  }
+  /* Closed by default on phones; .is-open (set by mobileNav.js) reveals it. */
+  .header-workspaces:not(.is-open) { display: none; }
+  .workspace-link {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .workspace-link.active::after { display: none; }   /* underline reads wrong when stacked */
 }
 
 /* adoption-02 — persona start page (#/start) */
@@ -9043,6 +9114,21 @@ svg.dag-edges .dag-arrow-fill-failed   { fill: var(--danger); }
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
+
+/* RUNBOOK-06 Task 1 (WCAG 2.4.1 Bypass Blocks) — a skip link that is the first
+   focusable thing on the page. Off-screen until focused, then it slides into the
+   top-left corner so keyboard users can jump past the repeated header. */
+.skip-link {
+  position: absolute; left: 8px; top: -48px; z-index: 1000;
+  padding: 10px 16px; background: var(--accent); color: var(--bg);
+  font-weight: 600; border-radius: 8px; text-decoration: none;
+  transition: top 0.12s ease-out;
+}
+.skip-link:focus {
+  top: 8px; outline: 2px solid var(--accent); outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+@media (prefers-reduced-motion: reduce) { .skip-link { transition: none; } }
 
 /* Copy-to-clipboard command block. */
 .copy-command { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0 0; min-width: 0; }

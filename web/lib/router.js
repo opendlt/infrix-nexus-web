@@ -44,11 +44,32 @@ export function createRouter(config) {
     frame.className = 'view-frame';
     frame.dataset.route = routeId;
     frame.hidden = true;
+    // RUNBOOK-06 Task 8 (WCAG 2.4.3 Focus Order) — make the frame programmatically
+    // focusable so a deliberate navigation can move focus into the new view.
+    frame.tabIndex = -1;
     container.appendChild(frame);
     frames.set(routeId, { frame, mounted: false });
   }
 
-  function activate(routeId, subpath) {
+  // RUNBOOK-06 Task 8 — on a user-initiated route change, move focus into the
+  // newly shown view (its first heading, else the frame) so keyboard and screen-
+  // reader users land in the new content instead of staying on the old control.
+  // Deferred to the next frame so the view has mounted/painted first. NOT called
+  // for popstate / hashchange / initial load (focus should not jump on those).
+  function moveFocusToView(frame) {
+    const focusFirst = () => {
+      if (!frame || frame.hidden) return;
+      const heading = frame.querySelector('h1, h2, [role="heading"], .view-title');
+      const target = heading || frame;
+      if (heading && !heading.hasAttribute('tabindex')) heading.tabIndex = -1;
+      try { target.focus({ preventScroll: false }); } catch (e) { /* focus is best-effort */ }
+    };
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(focusFirst);
+    else focusFirst();
+  }
+
+  function activate(routeId, subpath, opts) {
+    const moveFocus = !!(opts && opts.moveFocus);
     if (!routes[routeId]) routeId = defaultRoute;
     const sp = Array.isArray(subpath) ? subpath : [];
     const sameRoute = activeRoute === routeId;
@@ -89,6 +110,7 @@ export function createRouter(config) {
     }
     activeRoute = routeId;
     activeSubpath = sp;
+    if (moveFocus) moveFocusToView(entry.frame);
   }
 
   function parseHash() {
@@ -115,7 +137,8 @@ export function createRouter(config) {
       if (window.location.hash !== newHash) {
         window.history.pushState({ route }, '', newHash);
       }
-      activate(route, []);
+      // RUNBOOK-06 Task 8 — a click is a deliberate navigation → move focus.
+      activate(route, [], { moveFocus: true });
     });
   }
 
@@ -151,7 +174,8 @@ export function createRouter(config) {
       if (window.location.hash !== newHash) {
         window.history.pushState({ route, subpath: segs }, '', newHash);
       }
-      activate(route, segs);
+      // RUNBOOK-06 Task 8 — programmatic deep-link is deliberate → move focus.
+      activate(route, segs, { moveFocus: true });
     },
   };
 }

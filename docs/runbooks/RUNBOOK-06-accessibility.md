@@ -848,16 +848,20 @@ Run start-to-finish with the mouse unplugged:
 - [ ] Navigating to a new view, the SR reads the new view's heading. *(2.4.3)*
 - [ ] With OS "reduce motion" on, no audible/visible churn from the canvas; with it off, motion resumes. *(2.3.3)*
 
-### D. New `web/test/` additions (fence names)
+### D. New `web/test/` additions (as implemented)
 
-- **`a11y_axe_smoke.mjs`** — axe-core on the 6 surfaces × 3 themes (Test plan A).
-- **`cinema_keyboard_smoke.mjs`** — constructs a `CinemaRenderer` over a stub canvas + a 3-node scene; simulates `focus` then `ArrowRight`/`Enter`/`Escape`; asserts `focusedNodeIndex` advances, `nodeSelected` fires on Enter with the right node, and `selectedNode` clears on Escape. *(Task 3)*
-- **`cinema_reduced_motion_smoke.mjs`** — forces `renderer.reduceMotion = true`, runs one loop tick, asserts `particlePhase` is unchanged and entry/shake guards return static values; flips to false and asserts it advances. *(Task 4)*
-- **`contrast.mjs`** (under `web/test/tools/`) — the WCAG ratio assertion script from Task 7.
-- **`mobile_nav_smoke.mjs`** — jsdom: `initMobileNav()` then assert toggle click flips `aria-expanded` and `.nav-open`, link click + Escape close. *(Task 6)*
-- **`router_focus_smoke.mjs`** — assert `activate(route, [], {moveFocus:true})` focuses the frame heading, and `popstate`-path activation does not. *(Task 8)*
+> **Reconciliation note (do it right):** this repo has **no `package.json` / `node_modules`** — the SPA is a dependency-free ESM app served over `file://` and the Go embed. So axe-core/jsdom **cannot** be added without introducing a toolchain the project deliberately avoids. The `a11y_axe_smoke.mjs` fence is therefore **deferred to CI** (documented below), and its coverage is replaced by dependency-free structural/behavioral smokes plus a Go fence. Two other planned names were reconciled to the names that already exist in the code: the canvas reduced-motion flag is RUNBOOK-05's **`_reducedMotion`** (not a new `reduceMotion`), and the open-state class is **`.is-open`** (not `.nav-open`).
 
-All run under the existing CI command `node --test web/test/*.mjs` (`.github/workflows/ci.yml`).
+- **`cinema_keyboard_smoke.mjs`** — constructs a `CinemaRenderer` over a stub canvas + a 3-node scene; simulates `focus` then `ArrowRight`/`ArrowLeft`/`Home`/`End`/`Enter`/`Escape`; asserts `focusedNodeIndex` advances + wraps, `nodeFocused`/`nodeSelected` fire, `selectedNode` clears on Escape, and **Tab is not preventDefault-ed** (no keyboard trap). *(Task 3)*
+- **`cinema_reduced_motion_smoke.mjs`** — boots the renderer with `matchMedia` reporting `reduce:true`; asserts `_reducedMotion` seeds true, a would-animate (quarantined / freshly-entered) scene returns `needsContinuousAnimation() === false`, and the flag flips live on a media-query change. *(Task 4)*
+- **`mobile_nav_smoke.mjs`** — DOM shim: `initMobileNav()` un-hides the toggle, toggle click flips `aria-expanded` + `.is-open`, Escape closes **and restores focus to the toggle**, outside-pointerdown closes, link click closes, `destroy()` unbinds. *(Task 6)*
+- **`router_focus_smoke.mjs`** — DOM shim driving the real `createRouter`: frames get `tabindex=-1`; a nav click and `navigateTo()` focus the new view's heading; **initial load, `popstate`, and `hashchange` do not** move focus. *(Task 8)*
+- **`contrast_smoke.mjs`** + **`tools/contrast.mjs`** — the WCAG ratio math + token parser (Task 7). The smoke asserts **zero** sub-4.5:1 text/surface pairs across all three themes; the tool also runs standalone (`node web/test/tools/contrast.mjs`) for a printed report and exits non-zero on any failure.
+- **`accessibility_fence_test.go`** — Go structural fence (mirrors the other `*_fence_test.go`): locks the skip link + `#view-container` tabindex, status/block-height `aria-live`, canvas `role="application"` + `#cinema-live`/`#cinema-alt` + `renderCinemaAlt`/`selectNodeById`, renderer keyboard state + the `_reducedMotion ? 1` entry-scale gate + the "Tab unhandled" no-trap guard, the mobile-nav markup + `initMobileNav` wiring + `.nav-toggle` CSS, the router `moveFocus`/`moveFocusToView`/`tabIndex`, and the contrast tool's exports.
+
+The `.mjs` smokes run under the existing CI command `node --test web/test/*.mjs`; the Go fence under `go test ./...` (`.github/workflows/ci.yml`).
+
+**Deferred — `a11y_axe_smoke.mjs` (for when a JS toolchain is introduced):** if/when a `package.json` is added, install `@axe-core/cli` (or `axe-core` + `jsdom`) as a **devDependency only** and add `web/test/a11y_axe_smoke.mjs` running axe over the 6 surfaces × 3 themes (Test plan A), asserting zero violations of `bypass`, `color-contrast`, `aria-allowed-attr`, `aria-required-attr`, `aria-valid-attr-value`, `button-name`, `link-name`, `label`, `aria-hidden-focus`, `landmark-unique`. Until then, run `@axe-core/cli` manually against the served app as the release-gate check. axe in jsdom cannot evaluate canvas pixels — canvas keyboard/motion behavior stays covered by the renderer smokes + the manual walk-through.
 
 ---
 
@@ -871,12 +875,12 @@ All run under the existing CI command `node --test web/test/*.mjs` (`.github/wor
 | **1.1.1** | Non-text Content | Task 2 (canvas ARIA + text-alternative list) | SR reads `#cinema-alt`; DOM inspection |
 | **2.3.3** | Animation from Interactions | Task 4 (JS `matchMedia` reduced-motion) | `cinema_reduced_motion_smoke.mjs`; emulation toggle |
 | **4.1.3** | Status Messages | Task 5 (`aria-live` on status + block height) | SR checklist; axe valid-aria |
-| **1.4.3** | Contrast (Minimum) | Task 7 (dim-text re-audit) | `contrast.mjs` exits 0; axe `color-contrast` green ×3 themes |
+| **1.4.3** | Contrast (Minimum) | Task 7 (dim-text re-audit) | `contrast_smoke.mjs` / `tools/contrast.mjs` exits 0 across 3 themes; axe `color-contrast` (deferred CI) |
 | **2.4.3** | Focus Order | Task 8 (focus to view on nav) | `router_focus_smoke.mjs`; manual step 5 |
 | **2.4.7** | Focus Visible | Task 3 (canvas focus ring) + existing `:focus-visible` (`styles.css:7582-7593`) | manual ring check |
 | **4.1.2** | Name, Role, Value | Tasks 2, 6 (`role`/`aria-label`/`aria-expanded`) | axe `aria-*` rules green; SR checklist |
 
-**Exit-gate-2 accessibility clause is met when:** axe-core is clean on the 6 surfaces × 3 themes; the manual keyboard walk-through completes mouse-free including full canvas operation; the SR checklist passes on NVDA and VoiceOver; and all six new test fences are green in CI.
+**Exit-gate-2 accessibility clause is met when:** the dependency-free fences (`cinema_keyboard_smoke.mjs`, `cinema_reduced_motion_smoke.mjs`, `mobile_nav_smoke.mjs`, `router_focus_smoke.mjs`, `contrast_smoke.mjs`, and `accessibility_fence_test.go`) are green in CI; the manual keyboard walk-through completes mouse-free including full canvas operation; the SR checklist passes on NVDA and VoiceOver; and `@axe-core/cli` is clean on the 6 surfaces × 3 themes when run as the release-gate check (axe automation lands in CI once a JS toolchain is introduced — see Test plan D).
 
 ---
 

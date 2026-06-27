@@ -24,6 +24,11 @@ class CinemaRenderer {
         this.selectedNode = null;
         this.hoveredNode = null;
         this.hoveredEdge = null;
+        // RUNBOOK-06 Task 3 — keyboard focus across nodes. focusedNodeIndex is an
+        // index into orderedNodes(); focusVisible gates the focus ring so it only
+        // shows for keyboard users (not on a pointer click).
+        this.focusedNodeIndex = -1;
+        this.focusVisible = false;
         this.animationFrame = null;
         this.ghostGraph = null;
         this.isDragging = false;
@@ -159,6 +164,10 @@ class CinemaRenderer {
         }
 
         this.sceneGraph = graph;
+        // RUNBOOK-06 Task 3 — keep keyboard focus in range as the scene changes.
+        const orderedLen = this.orderedNodes().length;
+        if (orderedLen === 0) this.focusedNodeIndex = -1;
+        else if (this.focusedNodeIndex >= orderedLen) this.focusedNodeIndex = orderedLen - 1;
         if (isFirst) this.fitToView();
         this.requestRender();
     }
@@ -448,17 +457,26 @@ class CinemaRenderer {
 
         // Draw nodes
         const now = performance.now();
+        // RUNBOOK-06 Task 3 — id of the keyboard-focused node (only when the ring
+        // should show). Resolved once per frame, not per node.
+        const focusedNode = (!isGhost && this.focusVisible) ? this.orderedNodes()[this.focusedNodeIndex] : null;
+        const focusedId = focusedNode ? focusedNode.id : null;
         nodes.forEach(node => {
             if (!node.position) return;
             const activity = nodeActivity[node.id] || 0;
 
-            // Entry animation (500ms scale-up + fade-in)
+            // Entry animation (500ms scale-up + fade-in). RUNBOOK-06 Task 4
+            // (WCAG 2.3.3 Animation from Interactions) — under prefers-reduced-
+            // motion the node appears at its final scale/opacity immediately (no
+            // overshoot bounce, no fade), matching the CSS-side reduced-motion
+            // rules so canvas and DOM agree.
             const entryTime = this.nodeEntryTimes.get(node.id) || 0;
             const entryAge = now - entryTime;
             const entryT = Math.min(1, entryAge / 500);
             // Ease-out-back for overshoot bounce: t * (2.7*t - 1.7)
-            const entryScale = entryT < 1 ? entryT * (2.7 * entryT * entryT - 1.7 * entryT + 1) : 1;
-            const entryAlpha = Math.min(1, entryT * 2);
+            const entryScale = this._reducedMotion ? 1
+                : (entryT < 1 ? entryT * (2.7 * entryT * entryT - 1.7 * entryT + 1) : 1);
+            const entryAlpha = this._reducedMotion ? 1 : Math.min(1, entryT * 2);
 
             // Pulse effect: size oscillates based on activity + time (frozen under reduced-motion)
             const pulseAmount = (activity > 0 && !this._reducedMotion) ? Math.sin(this.particlePhase * 3) * (2 + activity * 0.5) : 0;
@@ -534,6 +552,24 @@ class CinemaRenderer {
                 ctx.arc(nx, ny, radius + 6, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},0.2)`;
                 ctx.fill();
+            }
+
+            // RUNBOOK-06 Task 3 (WCAG 2.4.7 Focus Visible) — a high-contrast,
+            // theme-accent focus ring around the keyboard-focused node.
+            if (focusedId != null && node.id === focusedId) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(nx, ny, radius + 9, 0, Math.PI * 2);
+                ctx.strokeStyle = this.theme.accent || '#5cd4e4';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                // A thin dark inner stroke keeps the ring visible on light nodes too.
+                ctx.beginPath();
+                ctx.arc(nx, ny, radius + 6, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.restore();
             }
 
             // Node shape — full 12-shape vocabulary (RUNBOOK-05 Task 6)
@@ -799,6 +835,103 @@ class CinemaRenderer {
         c.addEventListener('pointerup', endPointer);
         c.addEventListener('pointercancel', endPointer);
         c.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') this.isDragging = false; });
+
+        // RUNBOOK-06 Task 3 (WCAG 2.1.1 Keyboard) — the canvas is focusable
+        // (tabindex set by the host). Arrow keys walk the node order, Enter/Space
+        // open details, Escape clears, and the focus ring only shows for keyboard
+        // users. Tab is never intercepted, so there is no keyboard trap (2.1.2).
+        c.addEventListener('focus', () => {
+            this.focusVisible = true;
+            if (this.focusedNodeIndex < 0 && this.orderedNodes().length > 0) {
+                this.focusedNodeIndex = 0;
+                this.centerOnFocusedNode();
+            } else {
+                this.requestRender();
+            }
+        });
+        c.addEventListener('blur', () => {
+            this.focusVisible = false;
+            this.requestRender();
+        });
+        c.addEventListener('keydown', (e) => {
+            const ordered = this.orderedNodes();
+            if (ordered.length === 0) return;
+            let handled = true;
+            switch (e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                    this.focusVisible = true;
+                    this.focusedNodeIndex = (this.focusedNodeIndex + 1 + ordered.length) % ordered.length;
+                    this.centerOnFocusedNode();
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    this.focusVisible = true;
+                    this.focusedNodeIndex = (this.focusedNodeIndex - 1 + ordered.length) % ordered.length;
+                    this.centerOnFocusedNode();
+                    break;
+                case 'Home':
+                    this.focusVisible = true;
+                    this.focusedNodeIndex = 0;
+                    this.centerOnFocusedNode();
+                    break;
+                case 'End':
+                    this.focusVisible = true;
+                    this.focusedNodeIndex = ordered.length - 1;
+                    this.centerOnFocusedNode();
+                    break;
+                case 'Enter':
+                case ' ':
+                case 'Spacebar': {   // 'Spacebar' = legacy Edge key name
+                    const node = ordered[this.focusedNodeIndex];
+                    if (node) { this.selectedNode = node.id; this.emit('nodeSelected', node); this.requestRender(); }
+                    break;
+                }
+                case 'Escape':
+                    if (this.selectedNode != null) { this.selectedNode = null; this.requestRender(); }
+                    else handled = false;
+                    break;
+                default:
+                    handled = false;   // let Tab and everything else through (no trap)
+            }
+            if (handled) e.preventDefault();
+        });
+    }
+
+    // RUNBOOK-06 Task 3 — a stable node order for keyboard traversal. Arrays keep
+    // their order; object maps are walked by value. Nodes without a position are
+    // excluded (they can't be focused/centered on the canvas).
+    orderedNodes() {
+        if (!this.sceneGraph) return [];
+        let nodes = this.sceneGraph.nodes || this.sceneGraph.Nodes || [];
+        if (!Array.isArray(nodes)) nodes = Object.values(nodes);
+        return nodes.filter((n) => n && n.position);
+    }
+
+    // Pan the camera so the focused node is centered, mark it selected-for-focus,
+    // and announce it (the host wires 'nodeFocused' to the live region + alt DOM).
+    centerOnFocusedNode() {
+        const ordered = this.orderedNodes();
+        const node = ordered[this.focusedNodeIndex];
+        if (!node || !node.position) { this.requestRender(); return; }
+        this.camera.x = -node.position.x * this.camera.zoom;
+        this.camera.y = -node.position.y * this.camera.zoom;
+        this.emit('nodeFocused', node);
+        this.requestRender();
+    }
+
+    // RUNBOOK-06 Task 2 — select a node by id (the parallel-DOM buttons call this
+    // so an AT user opens the SAME details a canvas click would). Keeps keyboard
+    // focus in sync so a subsequent arrow press continues from here.
+    selectNodeById(id) {
+        const ordered = this.orderedNodes();
+        const idx = ordered.findIndex((n) => String(n.id) === String(id));
+        if (idx < 0) return;
+        this.focusedNodeIndex = idx;
+        const node = ordered[idx];
+        this.selectedNode = node.id;
+        this.emit('nodeSelected', node);
+        this.requestRender();
     }
 
     _twoPointerDist() {
