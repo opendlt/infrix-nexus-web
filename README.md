@@ -1,6 +1,6 @@
 # infrix-nexus-web
 
-The **Nexus SPA** for [Infrix](https://github.com/opendlt/infrix-accumen) — the
+The **Nexus SPA** for [Infrix](https://github.com/opendlt) — the
 governance-first explorer/cockpit — packaged as a stdlib-only Go module that
 **owns the `//go:embed` of the SPA** and serves it over HTTP. The Infrix core
 imports this module so its binary stays self-contained (the assets are embedded
