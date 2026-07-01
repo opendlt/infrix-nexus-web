@@ -1,5 +1,9 @@
 # infrix-nexus-web
 
+> **Infrix — governed, verifiable execution on Accumulate.** New here? Start at
+> [infrix.opendlt.org](https://infrix.opendlt.org) · try it live at
+> [play.infrix.opendlt.org](https://play.infrix.opendlt.org).
+
 The **Nexus SPA** for [Infrix](https://github.com/opendlt) — the
 governance-first explorer/cockpit — packaged as a stdlib-only Go module that
 **owns the `//go:embed` of the SPA** and serves it over HTTP. The Infrix core
