@@ -89,7 +89,13 @@ const lp = await import(pathToFileURL(copyTree('lib/learnPanels.js')).href);
   assert.equal(panel.dataset.concept, 'proof');
   assert.match(panel.allText(), /What is this\? — Proof/);
   assert.ok(panel.collect('learn-panel-link').length === 1, 'has a docs link');
-  console.log('✓ a learn panel renders as a collapsible with a docs link');
+  // The "Read more" link must resolve to REAL content (an absolute URL), never a
+  // dead SPA-relative path that silently reloads the shell (DX P3-4).
+  const docLink = panel.collect('learn-panel-link')[0];
+  assert.match(docLink.attributes.href, /^https:\/\/.+\/docs\/learn\/.+\.md$/,
+    'docs link is an absolute, resolvable URL');
+  assert.equal(docLink.attributes.target, '_blank', 'docs link opens in a new tab');
+  console.log('✓ a learn panel renders as a collapsible with a resolvable docs link');
 }
 
 {

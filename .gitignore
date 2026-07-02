@@ -3,3 +3,7 @@ node_modules/
 **/node_modules/
 *.log
 .DS_Store
+
+# Compiled dev-server binaries (e.g. `go build ./cmd/serve` → serve.exe) are
+# build output, never committed. The source (cmd/serve) is tracked.
+*.exe

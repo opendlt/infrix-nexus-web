@@ -6,7 +6,7 @@
 // are dismissible and remembered. It is the front door for "I'm new — explain
 // Infrix" and links to the deeper docs/learn pages.
 
-import { CONCEPTS, LADDER, buildLearnPanel, resetDismissed } from '/lib/learnPanels.js';
+import { CONCEPTS, LADDER, buildLearnPanel, resetDismissed, learnDocURL } from '/lib/learnPanels.js';
 
 function el(tag, cls, text) {
   const n = document.createElement(tag);
@@ -51,7 +51,9 @@ export const learnView = {
     // Footer: deep docs + a reset for the "don't show again" state.
     const footer = el('div', 'learn-view-footer');
     const docs = el('a', 'learn-view-docs-link');
-    docs.setAttribute('href', 'docs/learn/00-start.md');
+    docs.setAttribute('href', learnDocURL('docs/learn/00-start.md'));
+    docs.setAttribute('target', '_blank');
+    docs.setAttribute('rel', 'noopener');
     docs.textContent = 'Full lessons, glossary, and exercises in docs/learn';
     footer.appendChild(docs);
 

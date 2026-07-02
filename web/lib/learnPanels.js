@@ -96,6 +96,19 @@ export const CONCEPTS = Object.freeze({
 /** The ladder order (for the #/learn view). */
 export const LADDER = ['intent', 'policy', 'outcome', 'proof', 'anchor', 'spine'];
 
+// LEARN_DOCS_BASE is the canonical, always-resolvable home of the learning
+// ladder. The lessons live in infrix-core (docs/learn/*.md); Nexus links to them
+// there so "Read more" resolves to REAL content instead of silently reloading
+// the SPA shell (the paths are not in this repo's embedded web/ tree). A single
+// base keeps every learn link in lockstep; repoint here if the docs move.
+export const LEARN_DOCS_BASE = 'https://github.com/opendlt/infrix-core/blob/main/';
+
+// learnDocURL resolves a docs/learn/*.md reference to its absolute, resolvable
+// URL. Exported so views and the smoke fence build the same link.
+export function learnDocURL(doc) {
+  return LEARN_DOCS_BASE + doc;
+}
+
 function el(tag, cls, text) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
@@ -121,7 +134,9 @@ export function buildLearnPanel(conceptKey, opts = {}) {
   body.appendChild(el('p', 'learn-panel-plain', c.plain));
 
   const link = el('a', 'learn-panel-link');
-  link.setAttribute('href', c.doc);
+  link.setAttribute('href', learnDocURL(c.doc));
+  link.setAttribute('target', '_blank');
+  link.setAttribute('rel', 'noopener');
   link.textContent = 'Read more in ' + c.doc;
   body.appendChild(link);
 

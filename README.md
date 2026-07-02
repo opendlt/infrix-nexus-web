@@ -23,6 +23,34 @@ fsys := nexusweb.Root()                          // the embedded web/ tree as an
 The SPA imports its modules by absolute path (`/lib/...`), so it must be mounted
 at the server root.
 
+## Try it (DX P3-4)
+
+Preview the SPA locally straight from a clone — no browser build step:
+
+```bash
+go run ./cmd/serve            # serves the embedded SPA on http://localhost:8099
+go run ./cmd/serve -addr :9000
+```
+
+This serves the **UI only**: the SPA's governed reads call an Infrix node's
+`/rpc`, which lives in the Infrix binary. Without it, the data panels render their
+honest "unavailable" states, but every route, learn panel, and superpower control
+is fully navigable, and the offline proof verifier + Cinema replay work standalone.
+
+For a **live, hosted** Nexus (learn/guided/tutor/cinema wired to a node), the same
+`cmd/serve` binary ships as a container (`docker` workflow → `ghcr.io/opendlt/infrix-nexus-web`):
+
+```bash
+docker run --rm -p 8099:8099 ghcr.io/opendlt/infrix-nexus-web:latest
+# then reverse-proxy /rpc to a live Infrix node so the guided flows are live
+```
+
+Because the Infrix node already `//go:embed`s this module, the production node
+serves the same Nexus at its own root with `/rpc` attached — that is the
+canonical hosted, try-able Nexus. The "learn more" links resolve to the published
+[learning ladder](https://github.com/opendlt/infrix-core/blob/main/docs/learn/00-start.md)
+in `infrix-core`.
+
 ## Layout
 
 ```
