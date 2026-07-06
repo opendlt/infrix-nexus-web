@@ -86,7 +86,11 @@ function renderPortableVerify() {
 
   const ta = document.createElement('textarea');
   ta.className = 'verify-textarea';
-  ta.placeholder = '{ "version":"3", "bundleData":..., "exportHash":[...], ... }';
+  // Advertise the version the verifier actually accepts. Pass-17 audit P1-6:
+  // this nested Operate-console Verify tab still showed the legacy "version":"3"
+  // placeholder (fixed on the main #/prove surface to "4"), guiding console
+  // users into an instant version mismatch. Keep it in lock-step with prove.js.
+  ta.placeholder = '{ "version": "4", "bundleData": "...", "exportHash": [...], ... }';
   ta.spellcheck = false;
   rootEl.appendChild(ta);
 
