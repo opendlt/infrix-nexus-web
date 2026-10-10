@@ -26,7 +26,7 @@
 //   - OR uses a dedicated function-based renderer (Immune, Mission,
 //     Awareness, Ghost, Replay, Temporal — these subsystems already
 //     have rich JSON-RPC entry points like immune.alerts /
-//     mission.getMetrics / temporal.simulate)
+//     mission.getMetrics / ghost.simulate)
 
 import {
   rpcWithDisclosure,
@@ -187,7 +187,7 @@ const SHAPESHIFT = buildObjectBrowse({
 // ---------------------------------------------------------------
 // Function-based subsystems (no typed-object table — they call
 // already-rich JSON-RPC entry points like immune.alerts /
-// mission.getMetrics / temporal.simulate)
+// mission.getMetrics / ghost.simulate)
 // ---------------------------------------------------------------
 
 const IMMUNE = {
@@ -360,7 +360,7 @@ const GHOST = {
     ctxInput.style.minWidth = '480px';
     ctxInput.style.minHeight = '120px';
     ctxInput.style.fontFamily = 'var(--mono)';
-    ctxInput.value = '{ "contract": "acc://test.acme/counter", "function": "increment" }';
+    ctxInput.value = '{ "contractUrl": "acc://test.acme/counter", "function": "increment" }';
     ctxWrap.appendChild(ctxInput);
     form.appendChild(ctxWrap);
 
@@ -582,7 +582,10 @@ const TEMPORAL = {
     simInput.style.minWidth = '380px';
     simInput.style.minHeight = '100px';
     simInput.style.fontFamily = 'var(--mono)';
-    simInput.value = '{ "contract": "acc://test.acme/counter" }';
+    // ghost.simulate's request shape (infrix-core pkg/devnet ghostSimulateParams):
+    // contractUrl + function required; arguments is HEX; stateOverrides maps a
+    // STORAGE KEY to a HEX value. temporal.simulate was removed (core §8 item 16).
+    simInput.value = '{ "contractUrl": "acc://test.acme/counter", "function": "increment", "arguments": "", "stateOverrides": {}, "gasLimit": 1000000 }';
     simWrap.appendChild(simInput);
     simForm.appendChild(simWrap);
     const simBtn = document.createElement('button');
@@ -600,7 +603,7 @@ const TEMPORAL = {
       try { params = JSON.parse(simInput.value || '{}'); }
       catch (err) { simOut.replaceChildren(errorNode(new Error('JSON parse: ' + err.message))); simBtn.disabled = false; return; }
       try {
-        const r = await rpcWithDisclosure('temporal.simulate', params);
+        const r = await rpcWithDisclosure('ghost.simulate', params);
         simOut.replaceChildren(jsonBlock(r));
       } catch (err) {
         simOut.replaceChildren(errorNode(err));
@@ -608,7 +611,7 @@ const TEMPORAL = {
         simBtn.disabled = false;
       }
     });
-    grid.appendChild(card('Counterfactual simulate', simBody));
+    grid.appendChild(card('Counterfactual simulate (governed ghost.simulate)', simBody));
   },
 };
 
