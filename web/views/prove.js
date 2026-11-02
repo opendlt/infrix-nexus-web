@@ -19,7 +19,7 @@
 
 import { rpcWithDisclosure, errorStateNode, jsonBlock } from '/lib/spineCommon.js';
 import { renderEvidenceProof } from '/lib/evidenceProof.js';
-import { verifyPortablePackage } from '/lib/portableVerifier.js';
+import { verifyExportedFile } from '/lib/verifyExport.js';
 import { buildReceiptFromVerifier, validateReceipt } from '/lib/proofReceipt.js';
 import { mountProofReceipt } from '/components/proofReceiptView.js';
 import { crossCheckL0 } from '/lib/l0CrossCheck.js';
@@ -235,7 +235,7 @@ function renderDropZone() {
     banner.textContent = 'Running 10-check verifier…';
     result.appendChild(banner);
     try {
-      const out = await verifyPortablePackage(parsed);
+      const out = await verifyExportedFile(parsed);
       banner.classList.remove('verify-warn');
       banner.classList.add(out.passed ? 'verify-pass' : 'verify-fail');
       banner.textContent = out.passed

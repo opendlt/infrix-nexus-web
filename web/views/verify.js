@@ -31,7 +31,7 @@ import {
   rpcWithDisclosure,
   deeplinkButton,
 } from '/lib/spineCommon.js';
-import { verifyPortablePackage } from '/lib/portableVerifier.js';
+import { verifyExportedFile } from '/lib/verifyExport.js';
 
 let rootEl = null;
 let currentSubpath = [];
@@ -177,7 +177,7 @@ async function runVerification(text, out, btn) {
   btn.disabled = true;
   out.replaceChildren(loadingNode('Running 10-check verifier…'));
   try {
-    const result = await verifyPortablePackage(pkg);
+    const result = await verifyExportedFile(pkg);
     out.replaceChildren(renderVerifyResult(result, pkg));
   } catch (err) {
     out.replaceChildren(errorNode(err));
