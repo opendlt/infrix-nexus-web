@@ -17,7 +17,7 @@
 // guidedAssurance + portableVerifier helpers) so it builds its DOM shells
 // synchronously and stays import-safe under the node smoke tests.
 
-import { verifyPortablePackage } from '/lib/portableVerifier.js';
+import { verifyExportedFile } from '/lib/verifyExport.js';
 import { assuranceSummary, PLAIN } from '/lib/guidedAssurance.js';
 import { mountLearnPanel } from '/lib/learnPanels.js';
 
@@ -258,7 +258,7 @@ function renderVerify(shell) {
       return;
     }
     result.replaceChildren(el('p', 'guided-loading', 'Verifying…'));
-    Promise.resolve(verifyPortablePackage(pkg)).then((r) => {
+    Promise.resolve(verifyExportedFile(pkg)).then((r) => {
       renderVerifyResult(result, r);
     }).catch((err) => {
       result.replaceChildren(el('p', 'guided-error', 'Verification error: ' + err.message));
