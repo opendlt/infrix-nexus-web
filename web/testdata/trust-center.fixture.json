@@ -32,8 +32,8 @@
       {
         "id": "human-study",
         "title": "User \u0026 agent proof study",
-        "status": "AI-agent program complete; human cohort gated on real participants",
-        "detail": "Each study bundle is independently re-verified and the cohort composition is enforced. The AI-agent program is sealed; the human program harness is ready and gated until the required participants run it.",
+        "status": "AI-agent program complete; human cohort * required for mainnet production only",
+        "detail": "Each study bundle is independently re-verified and the cohort composition is enforced. The AI-agent program is sealed; the human program harness is ready. The human cohort is required for mainnet production only (operator decision 2026-11-07) and is not run for the public testnet, so no human-proven UX is claimed.",
         "command": "infrix study aggregate docs/audit/user-proof-study --require human --require-agent",
         "link": "docs/audit/user-proof-study/REPORT.md"
       },
