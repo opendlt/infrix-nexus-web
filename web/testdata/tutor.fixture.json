@@ -154,8 +154,8 @@
       "id": "witness-quorum",
       "topic": "witness-quorum",
       "title": "What is a witness quorum?",
-      "explanation": "A witness quorum is a set of independent witnesses who each re-verify a result and sign an attestation. Reaching the quorum threshold means enough distinct, independent parties — not the producer — agree the outcome is valid. It sits above a live L0 confirmation on the ladder: it adds independent corroboration on top of the anchored proof. It can never be claimed without the L0 confirmation beneath it.",
-      "example": "A receipt with witnessQuorumVerified=true and l0Verified=true had independent witnesses corroborate an already-anchored result.",
+      "explanation": "A witness quorum is a set of witnesses who each re-verify a result and sign an attestation. Reaching the quorum threshold means enough distinct witnesses agree the outcome is valid. Whether they are SEPARATE organisations, not the producer, is a second question the evidence answers (the distinct operators check): a witness set the producer runs itself is labelled self-witnessed, and independent witnesses are required for mainnet production. It sits above a live L0 confirmation on the ladder: it adds corroboration on top of the anchored proof. It can never be claimed without the L0 confirmation beneath it.",
+      "example": "A receipt with witnessQuorumVerified=true and l0Verified=true had witnesses corroborate an already-anchored result; its operators say whether they were independent.",
       "tryIt": "infrix tutor teach accumulate-l0   # the L0 confirmation a witness quorum sits on top of",
       "quiz": {
         "topic": "witness-quorum",
