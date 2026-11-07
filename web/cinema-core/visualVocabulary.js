@@ -149,6 +149,7 @@
     ApprovalGranted: { r: 76, g: 175, b: 80, a: 240 },
     ApprovalDenied: { r: 244, g: 67, b: 54, a: 240 },
     ApprovalExpired: { r: 158, g: 158, b: 158, a: 180 },
+    Unresolved: { r: 236, g: 64, b: 122, a: 200 },
     Intent: { r: 63, g: 81, b: 181, a: 220 },
     IntentActive: { r: 92, g: 107, b: 192, a: 255 },
     IntentFailed: { r: 239, g: 83, b: 80, a: 220 },
