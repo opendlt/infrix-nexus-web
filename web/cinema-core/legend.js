@@ -57,6 +57,7 @@
     ['Outcome', 'Outcome', 'star', 'Lifecycle: produced outcome'],
     ['Approval pending', 'ApprovalPending', 'gate', 'Awaiting approvals'],
     ['Approval granted', 'ApprovalGranted', 'gate', 'Approval satisfied'],
+    ['Outcome unresolved', 'Unresolved', 'gate', 'Waiting to learn whether a write landed'],
     ['Policy allow', 'PolicyAllow', 'octagon', 'Policy permitted'],
     ['Policy deny', 'PolicyDeny', 'octagon', 'Policy denied'],
     ['Evidence', 'Evidence', 'document', 'Evidence bundle'],
