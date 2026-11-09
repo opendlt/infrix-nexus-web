@@ -561,3 +561,90 @@ test('over a file, a false checkpoint fails the verification and a true one leav
   assert.equal(offline.passed, true);
   assert.match(offline.checks[1].detail, /^unchecked: .*no L0 endpoint was supplied/);
 });
+
+// ---- every hex field is exactly 32 bytes of hex, and a leaf number is a place in its tree (found by the planted cuts of part 25d) ----
+
+const BAD_HEX = [
+  ['not hex', 'zz'.repeat(32)],
+  ['not hex', '0'.repeat(63)],
+  ['not hex', '0'.repeat(65)],
+  ['31 bytes, want 32', '00'.repeat(31)],
+  ['33 bytes, want 32', '00'.repeat(33)],
+  ['0 bytes, want 32', ''],
+  // a value that is not a string is never read through its own toString: only a string of hex is hex
+  ['not hex', { toString: () => '00'.repeat(32), length: 64 }],
+  ['not hex', 12345],
+  ['not hex', null],
+];
+
+test('a hex field of a proven document is exactly 32 bytes of hex: anything else is refused naming the field and what is wrong with it', async () => {
+  const c = passing();
+  const reader = readerFor(c);
+  const mutate = (edit) => {
+    const d = JSON.parse(JSON.stringify(c.document));
+    edit(d);
+    return d;
+  };
+  const refusedWith = async (edit, detail) => {
+    const res = await check(c, mutate(edit), reader);
+    assert.equal(res.verdict, 'fail', detail);
+    assert.equal(res.detail, detail);
+  };
+  for (const [why, bad] of BAD_HEX) {
+    await refusedWith((d) => { d.stateRoot = bad; }, `the attached state root proof is malformed: stateRoot: ${why}`);
+    await refusedWith((d) => { d.path[1] = bad; }, `the attached state root proof is malformed: path[1]: ${why}`);
+    await refusedWith((d) => { d.accumulatorRoot = bad; }, `the attached state root proof names a malformed accumulator root: ${why}`);
+    await refusedWith((d) => { d.prior.accumulatorRoot = bad; }, `the prior anchor names a malformed accumulator root: ${why}`);
+    await refusedWith((d) => { d.prior.mth = bad; }, `the prior anchor names a malformed tree hash: ${why}`);
+    await refusedWith((d) => { d.prior.consistency[0] = bad; }, `the prior anchor's consistency proof is malformed: [0]: ${why}`);
+  }
+});
+
+test('sealedRootOf refuses a leaf number outside its tree, a negative one, and a path of the wrong length, at the call itself', async () => {
+  const vf = loadVectors();
+  const at = (size, index) => {
+    const leaf = vf.leaves[index];
+    return [index, size, leaf.height, hex(leaf.root), leaf.consumer ?? '', paths(vf.trees[size - 1].proofs[index].path)];
+  };
+  const refusedCall = (args, what) => assert.rejects(() => sealedRootOf(...args), /^Error: the proof does not prove inclusion$/, what);
+  const ok = at(21, 13);
+  assert.equal(toHex(await sealedRootOf(...ok)), vf.trees[20].sealed, 'premise');
+  const withIndexAndSize = (index, size) => [index, size, ...ok.slice(2)];
+  for (const [index, size] of [[21, 21], [22, 21], [13, 0], [0, 0], [-1, 21], [-8, 21], [13, -21], [-13, -21]]) {
+    await refusedCall(withIndexAndSize(index, size), `leaf ${index} of ${size}`);
+  }
+  // the one leaf of a tree of one is leaf 0 only, and the last leaf of a tree of two is leaf 1 only: no other number proves the same seal
+  await refusedCall([1, 1, ...at(1, 0).slice(2)], 'leaf 1 of a tree of one');
+  await refusedCall([-1, 2, ...at(2, 1).slice(2)], 'leaf -1 of a tree of two reads as its last leaf');
+  assert.equal(toHex(await sealedRootOf(...at(2, 1))), vf.trees[1].sealed, 'premise: leaf 1 of two');
+  // a path with a node too many or too few, for every leaf of every size
+  for (const tree of vf.trees) {
+    for (const p of tree.proofs) {
+      const leaf = vf.leaves[p.index];
+      const base = [p.index, tree.size, leaf.height, hex(leaf.root), leaf.consumer ?? ''];
+      const path = paths(p.path);
+      await refusedCall([...base, [...path, new Uint8Array(32)]], `size ${tree.size} leaf ${p.index}: a node too many`);
+      if (path.length > 0) {
+        await refusedCall([...base, path.slice(0, -1)], `size ${tree.size} leaf ${p.index}: the last node dropped`);
+        await refusedCall([...base, path.slice(1)], `size ${tree.size} leaf ${p.index}: the first node dropped`);
+      }
+    }
+  }
+});
+
+test('verifyConsistency refuses an empty, a negative or a larger first tree', async () => {
+  const h = new Uint8Array(32).fill(1);
+  for (const [first, second] of [[-1, 4], [0, 4], [1, -4], [-4, -1], [-2, 3], [5, 4]]) {
+    await assert.rejects(() => verifyConsistency(first, second, h, []), /^Error: the proof does not prove inclusion$/, `(${first},${second})`);
+  }
+});
+
+test('a hash is shortened in a detail only when it is longer than 16 characters', async () => {
+  const c = confirmedCase();
+  for (const [tx, shown] of [['a'.repeat(15), 'a'.repeat(15)], ['b'.repeat(16), 'b'.repeat(16)], ['c'.repeat(17), `${'c'.repeat(16)}...`]]) {
+    const doc = withCheckpoint(c, (k) => { k.anchor.txHash = tx; });
+    const res = await check(c, doc, readerFor({ anchors: { [tx]: c.anchors.cc33 } }));
+    assert.equal(res.verdict, 'skip', res.detail);
+    assert.ok(res.detail.endsWith(`in anchor transaction ${shown}`), res.detail);
+  }
+});

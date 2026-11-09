@@ -116,20 +116,25 @@ function decodePath(list) {
 
 const short = (h) => (h.length > 16 ? `${h.slice(0, 16)}...` : h);
 
+// RFC 9162 stops the right-shift "until LSB(fn) is set or fn is 0". The second clause is written neither here nor in verifyConsistency because it cannot be reached: the shift runs only when fn equals sn, and sn is at least 1 there
+// (a proof that has a node left while sn is 0 was refused one line before), so fn is at least 1 and a non-zero number always has a set bit to stop on.
 /**
  * The sealed root an inclusion proof commits to, recomputed from its leaf and audit path alone (RFC 9162 section 2.1.3.2), for leaf number `index` of a tree of
  * `size` leaves. `consumer` is '' (or absent) for a root-change leaf. Throws for a path of the wrong length for that index and size.
  */
 export async function sealedRootOf(index, size, height, root, consumer, path) {
-  let fn = BigInt(index);
-  let sn = BigInt(size) - 1n;
-  if (BigInt(size) === 0n || BigInt(index) >= BigInt(size)) throw new Error(BAD_PROOF);
+  const i = BigInt(index);
+  const n = BigInt(size);
+  // a leaf number is in [0, size): a negative one would read as the leaf that many places from the right and prove the same seal as that leaf
+  if (i < 0n || i >= n) throw new Error(BAD_PROOF);
+  let fn = i;
+  let sn = n - 1n;
   let acc = await stateRootLeafHash(height, root, consumer);
   for (const sibling of path) {
     if (sn === 0n) throw new Error(BAD_PROOF);
     if ((fn & 1n) === 1n || fn === sn) {
       acc = await nodeHash(sibling, acc);
-      while ((fn & 1n) === 0n && fn !== 0n) {
+      while ((fn & 1n) === 0n) {
         fn >>= 1n;
         sn >>= 1n;
       }
@@ -151,7 +156,7 @@ export async function sealedRootOf(index, size, height, root, consumer, path) {
 export async function verifyConsistency(first, second, firstHash, path) {
   const f = BigInt(first);
   const s = BigInt(second);
-  if (f === 0n || f > s) throw new Error(BAD_PROOF);
+  if (f < 1n || f > s) throw new Error(BAD_PROOF); // a first tree has at least one leaf and is no larger than the second
   if (f === s) {
     if (path.length !== 0) throw new Error(BAD_PROOF);
     return firstHash;
@@ -173,7 +178,7 @@ export async function verifyConsistency(first, second, firstHash, path) {
       fr = await nodeHash(c, fr);
       sr = await nodeHash(c, sr);
       if ((fn & 1n) === 0n) {
-        while ((fn & 1n) === 0n && fn !== 0n) {
+        while ((fn & 1n) === 0n) {
           fn >>= 1n;
           sn >>= 1n;
         }
