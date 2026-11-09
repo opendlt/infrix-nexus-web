@@ -606,7 +606,9 @@ test('sealedRootOf refuses a leaf number outside its tree, a negative one, and a
     const leaf = vf.leaves[index];
     return [index, size, leaf.height, hex(leaf.root), leaf.consumer ?? '', paths(vf.trees[size - 1].proofs[index].path)];
   };
-  const refusedCall = (args, what) => assert.rejects(() => sealedRootOf(...args), /^Error: the proof does not prove inclusion$/, what);
+  const refusedCall = (args, what, message = /^Error: the proof does not prove inclusion$/) => assert.rejects(() => sealedRootOf(...args), message, what);
+  const tooMany = /^Error: the proof does not prove inclusion: it names more nodes than a tree of that size has on the way to the root$/;
+  const tooFew = /^Error: the proof does not prove inclusion: it names fewer nodes than a tree of that size has on the way to the root$/;
   const ok = at(21, 13);
   assert.equal(toHex(await sealedRootOf(...ok)), vf.trees[20].sealed, 'premise');
   const withIndexAndSize = (index, size) => [index, size, ...ok.slice(2)];
@@ -623,10 +625,10 @@ test('sealedRootOf refuses a leaf number outside its tree, a negative one, and a
       const leaf = vf.leaves[p.index];
       const base = [p.index, tree.size, leaf.height, hex(leaf.root), leaf.consumer ?? ''];
       const path = paths(p.path);
-      await refusedCall([...base, [...path, new Uint8Array(32)]], `size ${tree.size} leaf ${p.index}: a node too many`);
+      await refusedCall([...base, [...path, new Uint8Array(32)]], `size ${tree.size} leaf ${p.index}: a node too many`, tooMany);
       if (path.length > 0) {
-        await refusedCall([...base, path.slice(0, -1)], `size ${tree.size} leaf ${p.index}: the last node dropped`);
-        await refusedCall([...base, path.slice(1)], `size ${tree.size} leaf ${p.index}: the first node dropped`);
+        await refusedCall([...base, path.slice(0, -1)], `size ${tree.size} leaf ${p.index}: the last node dropped`, tooFew);
+        await refusedCall([...base, path.slice(1)], `size ${tree.size} leaf ${p.index}: the first node dropped`, tooFew);
       }
     }
   }
@@ -646,5 +648,157 @@ test('a hash is shortened in a detail only when it is longer than 16 characters'
     const res = await check(c, doc, readerFor({ anchors: { [tx]: c.anchors.cc33 } }));
     assert.equal(res.verdict, 'skip', res.detail);
     assert.ok(res.detail.endsWith(`in anchor transaction ${shown}`), res.detail);
+  }
+});
+
+// ---- the second round of planted cuts: the length of a proof, a half-dated entry, the edge of a prior, and the shape of a file ----
+
+test('a proof with a node too many or too few, a missing anchor, and a message that says which, are refused as such', async () => {
+  const vf = loadVectors();
+  const tooMany = /^Error: the proof does not prove inclusion: it names more nodes than a tree of that size has on the way to the root$/;
+  const tooFew = /^Error: the proof does not prove inclusion: it names fewer nodes than a tree of that size has on the way to the root$/;
+  const none = /^Error: the proof does not prove inclusion: it names no nodes$/;
+  const h = new Uint8Array(32).fill(1);
+  // the consistency proof of every pair: a node too many, a node too few, and no node at all
+  for (const c of vf.consistency) {
+    if (c.first === c.second) {
+      await assert.rejects(() => verifyConsistency(c.first, c.second, hex(c.firstMth), [h]), tooMany, `(${c.first},${c.second}) with a node it does not need`);
+      continue;
+    }
+    const path = paths(c.path);
+    await assert.rejects(() => verifyConsistency(c.first, c.second, hex(c.firstMth), [...path, h]), tooMany, `(${c.first},${c.second}) a node too many`);
+    if (path.length > 0) {
+      await assert.rejects(() => verifyConsistency(c.first, c.second, hex(c.firstMth), path.slice(0, -1)), /^Error: the proof does not prove inclusion: it names (fewer|no) nodes/, `(${c.first},${c.second}) the last node dropped`);
+    }
+  }
+  await assert.rejects(() => verifyConsistency(3, 4, h, []), none, 'a first tree that is not a power of two and no node at all');
+  await assert.rejects(() => verifyConsistency(6, 7, h, []), none, 'another');
+  await assert.rejects(() => verifyConsistency(1, 3, h, []), tooFew, 'the first tree alone is not the way to the second');
+  // a flipped node, at every position, never proves the covering tree's seal: the nodes only the second tree uses change its hash and nothing else
+  const c = passing();
+  for (let j = 0; j < c.document.prior.consistency.length; j++) {
+    const flippedAt = JSON.parse(JSON.stringify(c.document));
+    flippedAt.prior.consistency[j] = flip(flippedAt.prior.consistency[j]);
+    const res = await check(c, flippedAt, readerFor(c));
+    assert.equal(res.verdict, 'fail', `consistency node ${j} flipped`);
+    assert.match(res.detail, /not shown to be a prefix of the covering tree/);
+  }
+  // a document that names no anchor at all, for the covering seal and for the prior
+  const noAnchor = JSON.parse(JSON.stringify(c.document));
+  delete noAnchor.anchor;
+  assert.match((await check(c, noAnchor, readerFor(c))).detail, /^the attached state root proof names no L0 anchor transaction for its accumulator root$/);
+  const noPriorAnchor = JSON.parse(JSON.stringify(c.document));
+  delete noPriorAnchor.prior.anchor;
+  const res = await check(c, noPriorAnchor, readerFor(c));
+  assert.equal(res.verdict, 'fail');
+  assert.match(res.detail, /^the prior anchor names no L0 anchor transaction/);
+  // a seal that does not prove says why, to the word
+  const rootBad = JSON.parse(JSON.stringify(c.document));
+  rootBad.accumulatorRoot = '09'.repeat(32);
+  const bad = await check(c, rootBad, readerFor(c));
+  assert.equal(bad.detail, `the bundle's state root does not prove into the accumulator root the document names (${'09'.repeat(32)}): the proof does not prove inclusion`);
+  const sizeBad = JSON.parse(JSON.stringify(c.document));
+  sizeBad.treeSize = 0;
+  assert.match((await check(c, sizeBad, readerFor(c))).detail, /: the proof does not prove inclusion$/);
+  const extra = JSON.parse(JSON.stringify(c.document));
+  extra.path.push('00'.repeat(32));
+  assert.match((await check(c, extra, readerFor(c))).detail, /: the proof does not prove inclusion: it names more nodes/);
+  const short = JSON.parse(JSON.stringify(c.document));
+  short.path.pop();
+  assert.match((await check(c, short, readerFor(c))).detail, /: the proof does not prove inclusion: it names fewer nodes/);
+});
+
+test('an anchor entry that carries only one of its two heights is dated by the one it carries, and the edge of a prior is exact', async () => {
+  const c = passing();
+  const doc = c.document;
+  const entry = (firstHeight, lastHeight, roots) => ({ roots, firstHeight, lastHeight });
+  const coverRoots = c.anchors.aa11.roots;
+  const priorRoots = c.anchors.bb22.roots;
+  const run = (cover, prior) => check(c, doc, readerFor({ anchors: { aa11: cover, bb22: prior } }));
+  // the covering entry: a window that has only its first height (last 0) puts the leaf (139) after the last height; one with only its last height dates it fine
+  const onlyFirst = await run(entry(150, 0, coverRoots), entry(120, 124, priorRoots));
+  assert.equal(onlyFirst.verdict, 'fail');
+  assert.match(onlyFirst.detail, /after the last height 0 /);
+  const onlyLast = await run(entry(0, 160, coverRoots), entry(120, 124, priorRoots));
+  assert.equal(onlyLast.verdict, 'pass', onlyLast.detail);
+  // the prior entry: only its first height, only its last height
+  assert.equal((await run(entry(150, 160, coverRoots), entry(120, 0, priorRoots))).verdict, 'pass');
+  assert.equal((await run(entry(150, 160, coverRoots), entry(0, 124, priorRoots))).verdict, 'pass');
+  const priorOnlyLateFirst = await run(entry(150, 160, coverRoots), entry(140, 0, priorRoots));
+  assert.equal(priorOnlyLateFirst.verdict, 'fail');
+  assert.match(priorOnlyLateFirst.detail, /before the first height 140/);
+  assert.equal((await run(entry(150, 160, coverRoots), entry(0, 0, priorRoots))).verdict, 'skip');
+
+  // a leaf appended right after the prior anchor: leaf 9 of a tree of 21, the prior tree being the first 9 leaves, is inside no prior and passes; with a prior of 10 it is inside
+  const vf = loadVectors();
+  const leaf = vf.leaves[9];
+  const tree = vf.trees[20];
+  const consistency = (first) => vf.consistency.find((x) => x.first === first && x.second === 21);
+  const docFor = (priorSize) => {
+    const cc = consistency(priorSize);
+    return {
+      version: STATE_ROOT_DOCUMENT_VERSION,
+      status: 'proven',
+      stateRoot: leaf.root,
+      consumer: leaf.consumer,
+      leafHeight: leaf.height,
+      leafIndex: 9,
+      treeSize: 21,
+      path: tree.proofs[9].path,
+      accumulatorRoot: tree.sealed,
+      anchor: { txHash: 'aa11' },
+      prior: { anchor: { txHash: 'bb22' }, accumulatorRoot: vf.trees[priorSize - 1].sealed, treeSize: priorSize, mth: cc.firstMth, consistency: cc.path },
+    };
+  };
+  const l0 = (priorSize) => ({ anchors: { aa11: entry(150, 160, [tree.sealed]), bb22: entry(100, 126, [vf.trees[priorSize - 1].sealed]) } });
+  const edge = await checkStateRootProof(docFor(9), hex(leaf.root), leaf.consumer, readerFor(l0(9)));
+  assert.equal(edge.verdict, 'pass', edge.detail);
+  const inside = await checkStateRootProof(docFor(10), hex(leaf.root), leaf.consumer, readerFor(l0(10)));
+  assert.equal(inside.verdict, 'fail');
+  assert.match(inside.detail, /^the leaf \(number 9\) is inside the prior anchor's tree of 10 leaves/);
+});
+
+test('every status and every version a document can carry is read in the runtime\'s order: the version first, then the status', async () => {
+  const c = confirmedCase();
+  const p = passing();
+  const v1 = 'infrix-state-root-proof-v1';
+  for (const status of ['proven', 'awaiting_anchor', 'unavailable', 'bogus']) {
+    for (const [version, want] of [[v1, /version 1/], ['infrix-state-root-proof-v9', /does not read/], [undefined, /does not read/]]) {
+      const base = status === 'proven' ? p : c;
+      const doc = JSON.parse(JSON.stringify(base.document));
+      doc.status = status;
+      if (version === undefined) delete doc.version;
+      else doc.version = version;
+      const res = await check(base, doc, readerFor(base));
+      assert.equal(res.verdict, 'skip', `${status} ${String(version)}`);
+      assert.match(res.detail, want, `${status} ${String(version)}`);
+    }
+  }
+});
+
+test('over a file: a proof that passes still passes when a proven root is required, a bundle may carry its data as an object, and a bundle that cannot be read fails', async () => {
+  const c = passing();
+  const root = hex(c.bundleRoot);
+  const file = { ...pkgOf(root, c.consumerId), [STATE_ROOT_DOCUMENT_KEY]: c.document };
+  const required = await verifyStateRootOfExport(file, readerFor(c), { require: true });
+  assert.equal(required.verdict, 'pass', required.detail);
+  // bundleData as an object (the package encodes it either way)
+  const asObject = { version: '1', bundleData: { stateRoot: Array.from(root), outcomeId: c.consumerId }, [STATE_ROOT_DOCUMENT_KEY]: c.document };
+  assert.equal(bundleConsumerId(asObject), c.consumerId);
+  assert.deepEqual(Array.from(bundleStateRoot(asObject)), Array.from(root));
+  assert.equal((await verifyStateRootOfExport(asObject, readerFor(c))).verdict, 'pass');
+  // an outcome id that is not a string names no consumer
+  for (const outcomeId of [undefined, 123, null, {}, ['x']]) {
+    const pkg = { version: '1', bundleData: JSON.stringify({ stateRoot: Array.from(root), outcomeId }) };
+    assert.equal(bundleConsumerId(pkg), '', `outcomeId ${JSON.stringify(outcomeId)}`);
+  }
+  const anonymous = await verifyStateRootOfExport({ version: '1', bundleData: JSON.stringify({ stateRoot: Array.from(root), outcomeId: 123 }), [STATE_ROOT_DOCUMENT_KEY]: c.document }, readerFor(c));
+  assert.equal(anonymous.verdict, 'skip');
+  assert.match(anonymous.detail, /no consumer to bind/);
+  // a file whose bundle cannot be read
+  for (const broken of [{ version: '1', bundleData: 'not json', [STATE_ROOT_DOCUMENT_KEY]: c.document }, { bundle: { version: '1', bundleData: '{' }, [STATE_ROOT_DOCUMENT_KEY]: c.document }]) {
+    const res = await verifyStateRootOfExport(broken, readerFor(c));
+    assert.equal(res.verdict, 'fail');
+    assert.match(res.detail, /^the bundle's state root could not be read: /);
   }
 });

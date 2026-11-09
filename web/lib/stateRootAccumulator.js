@@ -61,6 +61,9 @@ export const STATE_ROOT_DOCUMENT_KEY = 'stateRootProof';
 export const STATE_ROOT_CHECK_NAME = 'state_root_accumulator';
 
 const BAD_PROOF = 'the proof does not prove inclusion';
+const TOO_LONG = `${BAD_PROOF}: it names more nodes than a tree of that size has on the way to the root`;
+const TOO_SHORT = `${BAD_PROOF}: it names fewer nodes than a tree of that size has on the way to the root`;
+const NO_NODES = `${BAD_PROOF}: it names no nodes`;
 const enc = new TextEncoder();
 
 function be64(n) {
@@ -131,7 +134,7 @@ export async function sealedRootOf(index, size, height, root, consumer, path) {
   let sn = n - 1n;
   let acc = await stateRootLeafHash(height, root, consumer);
   for (const sibling of path) {
-    if (sn === 0n) throw new Error(BAD_PROOF);
+    if (sn === 0n) throw new Error(TOO_LONG);
     if ((fn & 1n) === 1n || fn === sn) {
       acc = await nodeHash(sibling, acc);
       while ((fn & 1n) === 0n) {
@@ -144,7 +147,7 @@ export async function sealedRootOf(index, size, height, root, consumer, path) {
     fn >>= 1n;
     sn >>= 1n;
   }
-  if (sn !== 0n) throw new Error(BAD_PROOF);
+  if (sn !== 0n) throw new Error(TOO_SHORT);
   return seal(size, acc);
 }
 
@@ -158,12 +161,12 @@ export async function verifyConsistency(first, second, firstHash, path) {
   const s = BigInt(second);
   if (f < 1n || f > s) throw new Error(BAD_PROOF); // a first tree has at least one leaf and is no larger than the second
   if (f === s) {
-    if (path.length !== 0) throw new Error(BAD_PROOF);
+    if (path.length !== 0) throw new Error(TOO_LONG);
     return firstHash;
   }
   let nodes = path;
   if ((f & (f - 1n)) === 0n) nodes = [firstHash, ...path]; // an exact power of two: the first tree's hash is the first node of the path
-  if (nodes.length === 0) throw new Error(BAD_PROOF);
+  if (nodes.length === 0) throw new Error(NO_NODES);
   let fn = f - 1n;
   let sn = s - 1n;
   while ((fn & 1n) === 1n) {
@@ -173,15 +176,13 @@ export async function verifyConsistency(first, second, firstHash, path) {
   let fr = nodes[0];
   let sr = nodes[0];
   for (const c of nodes.slice(1)) {
-    if (sn === 0n) throw new Error(BAD_PROOF);
+    if (sn === 0n) throw new Error(TOO_LONG);
     if ((fn & 1n) === 1n || fn === sn) {
       fr = await nodeHash(c, fr);
       sr = await nodeHash(c, sr);
-      if ((fn & 1n) === 0n) {
-        while ((fn & 1n) === 0n) {
-          fn >>= 1n;
-          sn >>= 1n;
-        }
+      while ((fn & 1n) === 0n) {
+        fn >>= 1n;
+        sn >>= 1n;
       }
     } else {
       sr = await nodeHash(sr, c);
@@ -189,7 +190,8 @@ export async function verifyConsistency(first, second, firstHash, path) {
     fn >>= 1n;
     sn >>= 1n;
   }
-  if (sn !== 0n || !bytesEqual(fr, firstHash)) throw new Error(BAD_PROOF);
+  if (sn !== 0n) throw new Error(TOO_SHORT);
+  if (!bytesEqual(fr, firstHash)) throw new Error(BAD_PROOF);
   return sr;
 }
 
@@ -357,7 +359,7 @@ export async function checkStateRootProof(doc, bundleRoot, consumerId, reader) {
   } catch (e) {
     why = e.message;
   }
-  if (computed === null || !bytesEqual(computed, named)) {
+  if (!bytesEqual(computed, named)) {
     return fail(`the bundle's state root does not prove into the accumulator root the document names (${doc.accumulatorRoot}): ${why}`);
   }
   if (!reader) {
