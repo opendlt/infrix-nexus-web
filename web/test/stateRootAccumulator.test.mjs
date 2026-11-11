@@ -22,6 +22,7 @@ const {
   consumerDigest,
   stateRootLeafHash,
   stateRootSeal,
+  verifyStateRootCheckpoint,
   verifyStateRootOfExport,
   appendStateRootCheck,
   bundleStateRoot,
@@ -38,7 +39,7 @@ const {
 // deliberately, in the same commit as whatever makes this implementation agree with it.
 //
 // VECTORS_SHA256 is over the file with line endings normalised to LF (a Windows checkout may rewrite them).
-const VECTORS_SHA256 = 'e1c5b1b073a3cbf8608913c1a21e33929d686330e95d9329037bdfcdf2bf4a07';
+const VECTORS_SHA256 = 'd978b0eb62bdcfa38963fa93df00b192431766b72d7735ae3ca435eab2901ef9';
 
 function loadVectors() {
   const raw = readFileSync(path.join(here, '..', '..', 'testdata', 'state-root-vectors.json'), 'utf8');
@@ -310,4 +311,494 @@ test('the Verify view appends the check: a failure fails the verification, a ski
   assert.equal(required.passed, false, 'a required proof that is absent fails');
   // the input result is not mutated
   assert.equal(base.checks.length, 1);
+});
+
+// ---- the checkpoint statement (ledger L1647) ----
+//
+// An unavailable document may carry the node's statement that it checkpointed its root history. The statement proves nothing about the bundle (a skip at best, never a
+// pass); it can be FALSE, and a false one is refused. Every vector of the file's `checkpoints` section and every field of the statement is held here.
+
+const popcount = (n) => n.toString(2).replace(/0/g, '').length;
+const flip = (h) => `${h.slice(0, 1) === '0' ? '1' : '0'}${h.slice(1)}`;
+const ck = (c) => ({ size: c.size, sealedRoot: c.sealed, compact: [...c.compact] });
+const refused = async (statement, what, pattern) => {
+  await assert.rejects(() => verifyStateRootCheckpoint(statement), pattern ?? /./, what);
+};
+
+test('every checkpoint of the vectors folds to the seal the vectors name, and a range for another tree or a seal for another size is refused', async () => {
+  const vf = loadVectors();
+  assert.equal(vf.checkpoints.length, 40, 'one checkpoint per tree size 1..40');
+  for (const c of vf.checkpoints) {
+    assert.equal(c.compact.length, popcount(c.size), `size ${c.size}: one subtree per one bit of the size`);
+    assert.equal(c.sealed, vf.trees[c.size - 1].sealed, `size ${c.size}: the checkpoint names the seal of the tree of that size`);
+    await verifyStateRootCheckpoint(ck(c));
+    // the same statement over a number that is not an integer
+    await refused({ ...ck(c), size: c.size + 1 }, `size ${c.size}: a range for the next larger size`);
+    await refused({ ...ck(c), size: c.size - 1 }, `size ${c.size}: a range for the next smaller size`);
+    await refused({ ...ck(c), sealedRoot: flip(c.sealed) }, `size ${c.size}: another sealed root`, /does not fold to the sealed root/);
+    for (let i = 0; i < c.compact.length; i++) {
+      const flipped = [...c.compact];
+      flipped[i] = flip(flipped[i]);
+      await refused({ ...ck(c), compact: flipped }, `size ${c.size}: entry ${i} flipped`, /does not fold to the sealed root/);
+      await refused({ ...ck(c), compact: c.compact.filter((_, j) => j !== i) }, `size ${c.size}: entry ${i} dropped`, /compact range of \d+ subtrees, not \d+/);
+      const bad = [...c.compact];
+      bad[i] = 'not-hex';
+      await refused({ ...ck(c), compact: bad }, `size ${c.size}: entry ${i} malformed`, new RegExp(`compact\\[${i}\\]`));
+    }
+    await refused({ ...ck(c), compact: [...c.compact, '09'.repeat(32)] }, `size ${c.size}: an extra entry`, /more entries than the \d+ leaves it covers/);
+    await refused({ ...ck(c), compact: [] }, `size ${c.size}: no entries`, /compact range of \d+ subtrees, not 0/);
+    if (c.compact.length >= 2 && c.compact[0] !== c.compact[1]) {
+      await refused({ ...ck(c), compact: [c.compact[1], c.compact[0], ...c.compact.slice(2)] }, `size ${c.size}: the two largest subtrees swapped`, /does not fold to the sealed root/);
+    }
+  }
+  // a range that has the right number of entries for ANOTHER size is not this size's: sizes 3 and 5 both have two subtrees
+  const three = vf.checkpoints.find((c) => c.size === 3);
+  const five = vf.checkpoints.find((c) => c.size === 5);
+  await refused({ size: 5, sealedRoot: five.sealed, compact: three.compact }, 'the range of 3 offered for 5', /does not fold to the sealed root/);
+  await refused({ size: 3, sealedRoot: three.sealed, compact: five.compact }, 'the range of 5 offered for 3', /does not fold to the sealed root/);
+});
+
+test('a checkpoint statement whose size is not a whole number, or whose sealed root or compact range is not what it says, is refused by name', async () => {
+  const vf = loadVectors();
+  const c = ck(vf.checkpoints.find((x) => x.size === 21));
+  await verifyStateRootCheckpoint(c);
+  for (const size of [-1, 1.5, '21', null, undefined, Number.MAX_SAFE_INTEGER + 2, {}, 21.0000001, -21n, NaN, Infinity]) {
+    await refused({ ...c, size }, `size ${String(size)}`, /^Error: size: not a whole number$/);
+  }
+  for (const size of [0, 0n]) {
+    await refused({ ...c, size }, `a checkpoint that seals no leaves (${String(size)})`, /^Error: the checkpoint seals no leaves$/);
+  }
+  await verifyStateRootCheckpoint({ ...c, size: 21n });
+  await verifyStateRootCheckpoint({ ...c, size: Number.MAX_SAFE_INTEGER }).then(
+    () => assert.fail('a size of 2^53-1 leaves was accepted for a range of 21'),
+    (e) => assert.doesNotMatch(String(e), /not a whole number/, 'the largest safe integer is a whole number: it is refused for its range, not its form'),
+  );
+  await refused({ ...c, sealedRoot: 'not-hex' }, 'a sealed root that is not hex', /sealedRoot: not hex/);
+  await refused({ ...c, sealedRoot: c.sealedRoot.slice(2) }, 'a sealed root of 31 bytes', /sealedRoot: 31 bytes, want 32/);
+  await refused({ ...c, sealedRoot: undefined }, 'no sealed root', /sealedRoot/);
+  await refused({ ...c, compact: 'abcd' }, 'a compact range that is not a list', /compact: not a list/);
+  await refused({ ...c, compact: undefined }, 'no compact range', /compact range of 3 subtrees, not 0/);
+  await refused({ ...c, compact: [c.compact[0], c.compact[1], c.compact[2].slice(1)] }, 'an odd-length entry', /compact\[2\]: not hex/);
+  await refused({ ...c, compact: [c.compact[0], c.compact[1], c.compact[2].slice(2)] }, 'an entry of 31 bytes', /compact\[2\]: 31 bytes, want 32/);
+});
+
+const docNamed = (name) => {
+  const c = loadVectors().documents.find((d) => d.name === name);
+  assert.ok(c, `the vectors have the case "${name}"`);
+  return c;
+};
+const confirmedCase = () => docNamed('an unavailable proof whose checkpoint L0 confirms is a skip saying so');
+const check = (c, doc, reader) => checkStateRootProof(doc, hex(c.bundleRoot), c.consumerId ?? '', reader === undefined ? readerFor(c) : reader);
+const withCheckpoint = (c, edit) => {
+  const doc = JSON.parse(JSON.stringify(c.document));
+  edit(doc.checkpoint, doc);
+  return doc;
+};
+
+test('a document that states a true checkpoint is a skip and never a pass, for every checkpoint size of the vectors, with and without L0', async () => {
+  const vf = loadVectors();
+  const base = confirmedCase();
+  for (const c of vf.checkpoints) {
+    const doc = withCheckpoint(base, (k) => {
+      k.size = c.size;
+      k.sealedRoot = c.sealed;
+      k.compact = [...c.compact];
+    });
+    const l0 = { anchors: { cc33: { roots: ['01'.repeat(32), c.sealed], firstHeight: 150, lastHeight: 160 } } };
+    const confirmed = await check(base, doc, readerFor(l0));
+    assert.equal(confirmed.verdict, 'skip', `size ${c.size}: ${confirmed.detail}`);
+    assert.match(confirmed.detail, new RegExp(`checkpointed at leaf ${c.size} `));
+    assert.match(confirmed.detail, /L0 lists that seal in anchor transaction cc33/);
+    const offline = await check(base, doc, null);
+    assert.equal(offline.verdict, 'skip', `size ${c.size} offline`);
+    assert.match(offline.detail, /no L0 endpoint was supplied/);
+    const unlisted = await check(base, doc, readerFor({ anchors: { cc33: { roots: ['01'.repeat(32)] } } }));
+    assert.equal(unlisted.verdict, 'fail', `size ${c.size}: a seal L0 never listed`);
+    assert.match(unlisted.detail, /never anchored/);
+  }
+});
+
+test('every field of a checkpoint statement is held: size, sealed root, compact range, last height, reason and anchor', async () => {
+  const c = confirmedCase();
+  const premise = await check(c, c.document);
+  assert.equal(premise.verdict, 'skip');
+  assert.match(premise.detail, /L0 lists that seal in anchor transaction cc33/);
+  assert.match(premise.detail, /no leaf is held for this bundle/, 'the document reason is carried');
+  assert.match(premise.detail, /checkpointed at leaf 21 \(canonical height 160\)/);
+  assert.match(premise.detail, /folds to sealed root 55fc35a95aeeccab\.\.\./);
+
+  // the node's own words (last height, reason) are reported, never judged: the verdict holds and the detail carries what the document says
+  const moved = await check(c, withCheckpoint(c, (k, d) => { k.lastHeight = 999; d.reason = 'another reason'; }));
+  assert.equal(moved.verdict, 'skip');
+  assert.match(moved.detail, /another reason/);
+  assert.match(moved.detail, /canonical height 999/);
+  const noHeight = await check(c, withCheckpoint(c, (k) => { delete k.lastHeight; }));
+  assert.match(noHeight.detail, /canonical height 0\)/);
+  const noReason = await check(c, withCheckpoint(c, (_, d) => { delete d.reason; }));
+  assert.equal(noReason.verdict, 'skip');
+  assert.match(noReason.detail, /state root: ; it states/);
+
+  // the size
+  for (const size of [22, 20, 0, -1, 1.5, '21', null]) {
+    const r = await check(c, withCheckpoint(c, (k) => { k.size = size; }));
+    assert.equal(r.verdict, 'fail', `size ${String(size)}`);
+    assert.match(r.detail, new RegExp(`checkpointed its root history at leaf ${size === null ? 'null' : String(size)}, and the statement is false`));
+  }
+  // the sealed root
+  for (const sealedRoot of ['09'.repeat(32), 'zz', '', undefined]) {
+    const r = await check(c, withCheckpoint(c, (k) => { k.sealedRoot = sealedRoot; }));
+    assert.equal(r.verdict, 'fail', `sealedRoot ${String(sealedRoot)}`);
+    assert.match(r.detail, /the statement is false/);
+  }
+  // the compact range, entry by entry
+  for (let i = 0; i < 3; i++) {
+    const r = await check(c, withCheckpoint(c, (k) => { k.compact[i] = flip(k.compact[i]); }));
+    assert.equal(r.verdict, 'fail', `compact[${i}] flipped`);
+    assert.match(r.detail, /does not fold to the sealed root/);
+    const d = await check(c, withCheckpoint(c, (k) => { k.compact.splice(i, 1); }));
+    assert.equal(d.verdict, 'fail', `compact[${i}] dropped`);
+    assert.match(d.detail, /the statement is false: a tree of 21 leaves has a compact range of 3 subtrees, not 2/);
+  }
+  const extra = await check(c, withCheckpoint(c, (k) => { k.compact.push('08'.repeat(32)); }));
+  assert.equal(extra.verdict, 'fail');
+  assert.match(extra.detail, /more entries than the 21 leaves it covers have subtrees/);
+  const none = await check(c, withCheckpoint(c, (k) => { delete k.compact; }));
+  assert.equal(none.verdict, 'fail');
+  assert.match(none.detail, /compact range of 3 subtrees, not 0/);
+
+  // the anchor: absent or empty is unconfirmed, a transaction L0 does not have or cannot read is refused, a seal it does not list is refused; the account is a locator only
+  for (const edit of [(k) => { delete k.anchor; }, (k) => { k.anchor = {}; }, (k) => { k.anchor.txHash = ''; }]) {
+    const r = await check(c, withCheckpoint(c, edit));
+    assert.equal(r.verdict, 'skip');
+    assert.match(r.detail, /names no L0 anchor for that seal, so it is unconfirmed/);
+  }
+  const unknownTx = await check(c, withCheckpoint(c, (k) => { k.anchor.txHash = 'dead'; }));
+  assert.equal(unknownTx.verdict, 'fail');
+  assert.match(unknownTx.detail, /could not read the checkpoint's anchor from L0: no such transaction/);
+  const down = await check(c, c.document, readerFor({ anchorError: 'connection refused', anchors: c.anchors }));
+  assert.equal(down.verdict, 'fail');
+  assert.match(down.detail, /could not read the checkpoint's anchor from L0: connection refused/);
+  const otherSeal = await check(c, c.document, readerFor({ anchors: { cc33: { roots: ['04'.repeat(32)], firstHeight: 150, lastHeight: 160 } } }));
+  assert.equal(otherSeal.verdict, 'fail');
+  assert.match(otherSeal.detail, /sealed root 55fc35a95aeeccab\.\.\. is not listed in the L0 anchor entry of transaction cc33: the node never anchored it/);
+  const account = await check(c, withCheckpoint(c, (k) => { k.anchor.account = 'acc://elsewhere.acme/state'; }));
+  assert.equal(account.verdict, 'skip');
+  assert.match(account.detail, /L0 lists that seal/);
+  // the roots alone are enough to confirm a seal: a reader that offers no window still confirms it
+  const rootsOnly = await check(c, c.document, { async rootsAt(tx) { return c.anchors[tx].roots; } });
+  assert.equal(rootsOnly.verdict, 'skip');
+  assert.match(rootsOnly.detail, /L0 lists that seal/);
+  const rootsAsBytes = await check(c, c.document, { async rootsAt(tx) { return c.anchors[tx].roots.map(hex); } });
+  assert.match(rootsAsBytes.detail, /L0 lists that seal/);
+});
+
+test('the checkpoint is read only from an unavailable document of the version this verifier reads, as the runtime reads it', async () => {
+  const c = confirmedCase();
+  const falsified = (edit) => withCheckpoint(c, (k, d) => { k.compact[0] = flip(k.compact[0]); edit(d); });
+  // a version it does not read is never looked into, whatever its status or its statement says
+  const v1 = await check(c, falsified((d) => { d.version = 'infrix-state-root-proof-v1'; }));
+  assert.equal(v1.verdict, 'skip');
+  assert.match(v1.detail, /version 1/);
+  const v9 = await check(c, falsified((d) => { d.version = 'infrix-state-root-proof-v9'; }));
+  assert.equal(v9.verdict, 'skip');
+  assert.match(v9.detail, /does not read/);
+  const noVersion = await check(c, falsified((d) => { delete d.version; }));
+  assert.equal(noVersion.verdict, 'skip');
+  // a document that is not unavailable never has its statement judged: a proven one is judged as a proof, an awaiting one as awaiting
+  const awaiting = await check(c, falsified((d) => { d.status = 'awaiting_anchor'; }));
+  assert.equal(awaiting.verdict, 'skip');
+  assert.match(awaiting.detail, /unchecked until the next anchor/);
+  const p = passing();
+  const proven = await check(p, { ...p.document, checkpoint: { size: 0 } });
+  assert.equal(proven.verdict, 'pass', proven.detail);
+  const bogus = await check(c, falsified((d) => { d.status = 'bogus'; }));
+  assert.equal(bogus.verdict, 'skip');
+  assert.match(bogus.detail, /does not read/);
+  // no statement, an explicit null one: the plain unavailable skip; any other statement is judged, an empty one is false
+  const plain = await check(c, withCheckpoint(c, (_, d) => { delete d.checkpoint; }));
+  assert.equal(plain.verdict, 'skip');
+  assert.match(plain.detail, /^the node could not prove the bundle's state root: no leaf is held for this bundle$/);
+  const nulled = await check(c, withCheckpoint(c, (_, d) => { d.checkpoint = null; }));
+  assert.equal(nulled.verdict, 'skip');
+  assert.match(nulled.detail, /^the node could not prove the bundle's state root: no leaf is held for this bundle$/);
+  for (const statement of [{}, 0, false, '', 'x', []]) {
+    const r = await check(c, withCheckpoint(c, (_, d) => { d.checkpoint = statement; }));
+    assert.equal(r.verdict, 'fail', JSON.stringify(statement));
+    assert.match(r.detail, /the statement is false/);
+  }
+  // the bundle's own root and consumer are not read for a statement: it proves nothing about the bundle
+  const anonymous = await checkStateRootProof(c.document, new Uint8Array(32), '', readerFor(c));
+  assert.equal(anonymous.verdict, 'skip');
+  assert.match(anonymous.detail, /L0 lists that seal/);
+});
+
+test('over a file, a false checkpoint fails the verification and a true one leaves it unchecked, and a required proof refuses both skips', async () => {
+  const c = confirmedCase();
+  const root = hex(c.bundleRoot);
+  const base = { passed: true, checks: [{ name: 'version', passed: true }] };
+  const file = (doc) => ({ ...pkgOf(root, c.consumerId ?? 'outcome-x'), [STATE_ROOT_DOCUMENT_KEY]: doc });
+  const good = await verifyStateRootOfExport(file(c.document), readerFor(c));
+  assert.equal(good.name, STATE_ROOT_CHECK_NAME);
+  assert.equal(good.verdict, 'skip');
+  assert.match(good.detail, /L0 lists that seal/);
+  const required = await verifyStateRootOfExport(file(c.document), readerFor(c), { require: true });
+  assert.equal(required.verdict, 'fail');
+  assert.match(required.detail, /^a proven state root is required but it is not: .*L0 lists that seal/);
+
+  const falseDoc = withCheckpoint(c, (k) => { k.compact[1] = flip(k.compact[1]); });
+  const bad = await verifyStateRootOfExport(file(falseDoc), readerFor(c));
+  assert.equal(bad.verdict, 'fail');
+  assert.match(bad.detail, /the statement is false/);
+
+  const shown = await appendStateRootCheck(base, file(c.document), readerFor(c));
+  assert.equal(shown.passed, true, 'a true statement leaves the verdict where it was');
+  assert.match(shown.checks[1].detail, /^unchecked: .*L0 lists that seal/);
+  const failed = await appendStateRootCheck(base, file(falseDoc), readerFor(c));
+  assert.equal(failed.passed, false, 'a false statement fails the whole verification');
+  assert.equal(failed.checks[1].passed, false);
+  assert.doesNotMatch(failed.checks[1].detail, /^unchecked/);
+  const offline = await appendStateRootCheck(base, file(c.document), null);
+  assert.equal(offline.passed, true);
+  assert.match(offline.checks[1].detail, /^unchecked: .*no L0 endpoint was supplied/);
+});
+
+// ---- every hex field is exactly 32 bytes of hex, and a leaf number is a place in its tree (found by the planted cuts of part 25d) ----
+
+const BAD_HEX = [
+  ['not hex', 'zz'.repeat(32)],
+  ['not hex', '0'.repeat(63)],
+  ['not hex', '0'.repeat(65)],
+  ['31 bytes, want 32', '00'.repeat(31)],
+  ['33 bytes, want 32', '00'.repeat(33)],
+  ['0 bytes, want 32', ''],
+  // a value that is not a string is never read through its own toString: only a string of hex is hex
+  ['not hex', { toString: () => '00'.repeat(32), length: 64 }],
+  ['not hex', 12345],
+  ['not hex', null],
+];
+
+test('a hex field of a proven document is exactly 32 bytes of hex: anything else is refused naming the field and what is wrong with it', async () => {
+  const c = passing();
+  const reader = readerFor(c);
+  const mutate = (edit) => {
+    const d = JSON.parse(JSON.stringify(c.document));
+    edit(d);
+    return d;
+  };
+  const refusedWith = async (edit, detail) => {
+    const res = await check(c, mutate(edit), reader);
+    assert.equal(res.verdict, 'fail', detail);
+    assert.equal(res.detail, detail);
+  };
+  for (const [why, bad] of BAD_HEX) {
+    await refusedWith((d) => { d.stateRoot = bad; }, `the attached state root proof is malformed: stateRoot: ${why}`);
+    await refusedWith((d) => { d.path[1] = bad; }, `the attached state root proof is malformed: path[1]: ${why}`);
+    await refusedWith((d) => { d.accumulatorRoot = bad; }, `the attached state root proof names a malformed accumulator root: ${why}`);
+    await refusedWith((d) => { d.prior.accumulatorRoot = bad; }, `the prior anchor names a malformed accumulator root: ${why}`);
+    await refusedWith((d) => { d.prior.mth = bad; }, `the prior anchor names a malformed tree hash: ${why}`);
+    await refusedWith((d) => { d.prior.consistency[0] = bad; }, `the prior anchor's consistency proof is malformed: [0]: ${why}`);
+  }
+});
+
+test('sealedRootOf refuses a leaf number outside its tree, a negative one, and a path of the wrong length, at the call itself', async () => {
+  const vf = loadVectors();
+  const at = (size, index) => {
+    const leaf = vf.leaves[index];
+    return [index, size, leaf.height, hex(leaf.root), leaf.consumer ?? '', paths(vf.trees[size - 1].proofs[index].path)];
+  };
+  const refusedCall = (args, what, message = /^Error: the proof does not prove inclusion$/) => assert.rejects(() => sealedRootOf(...args), message, what);
+  const tooMany = /^Error: the proof does not prove inclusion: it names more nodes than a tree of that size has on the way to the root$/;
+  const tooFew = /^Error: the proof does not prove inclusion: it names fewer nodes than a tree of that size has on the way to the root$/;
+  const ok = at(21, 13);
+  assert.equal(toHex(await sealedRootOf(...ok)), vf.trees[20].sealed, 'premise');
+  const withIndexAndSize = (index, size) => [index, size, ...ok.slice(2)];
+  for (const [index, size] of [[21, 21], [22, 21], [13, 0], [0, 0], [-1, 21], [-8, 21], [13, -21], [-13, -21]]) {
+    await refusedCall(withIndexAndSize(index, size), `leaf ${index} of ${size}`);
+  }
+  // the one leaf of a tree of one is leaf 0 only, and the last leaf of a tree of two is leaf 1 only: no other number proves the same seal
+  await refusedCall([1, 1, ...at(1, 0).slice(2)], 'leaf 1 of a tree of one');
+  await refusedCall([-1, 2, ...at(2, 1).slice(2)], 'leaf -1 of a tree of two reads as its last leaf');
+  assert.equal(toHex(await sealedRootOf(...at(2, 1))), vf.trees[1].sealed, 'premise: leaf 1 of two');
+  // a path with a node too many or too few, for every leaf of every size
+  for (const tree of vf.trees) {
+    for (const p of tree.proofs) {
+      const leaf = vf.leaves[p.index];
+      const base = [p.index, tree.size, leaf.height, hex(leaf.root), leaf.consumer ?? ''];
+      const path = paths(p.path);
+      await refusedCall([...base, [...path, new Uint8Array(32)]], `size ${tree.size} leaf ${p.index}: a node too many`, tooMany);
+      if (path.length > 0) {
+        await refusedCall([...base, path.slice(0, -1)], `size ${tree.size} leaf ${p.index}: the last node dropped`, tooFew);
+        await refusedCall([...base, path.slice(1)], `size ${tree.size} leaf ${p.index}: the first node dropped`, tooFew);
+      }
+    }
+  }
+});
+
+test('verifyConsistency refuses an empty, a negative or a larger first tree', async () => {
+  const h = new Uint8Array(32).fill(1);
+  for (const [first, second] of [[-1, 4], [0, 4], [1, -4], [-4, -1], [-2, 3], [5, 4]]) {
+    await assert.rejects(() => verifyConsistency(first, second, h, []), /^Error: the proof does not prove inclusion$/, `(${first},${second})`);
+  }
+});
+
+test('a hash is shortened in a detail only when it is longer than 16 characters', async () => {
+  const c = confirmedCase();
+  for (const [tx, shown] of [['a'.repeat(15), 'a'.repeat(15)], ['b'.repeat(16), 'b'.repeat(16)], ['c'.repeat(17), `${'c'.repeat(16)}...`]]) {
+    const doc = withCheckpoint(c, (k) => { k.anchor.txHash = tx; });
+    const res = await check(c, doc, readerFor({ anchors: { [tx]: c.anchors.cc33 } }));
+    assert.equal(res.verdict, 'skip', res.detail);
+    assert.ok(res.detail.endsWith(`in anchor transaction ${shown}`), res.detail);
+  }
+});
+
+// ---- the second round of planted cuts: the length of a proof, a half-dated entry, the edge of a prior, and the shape of a file ----
+
+test('a proof with a node too many or too few, a missing anchor, and a message that says which, are refused as such', async () => {
+  const vf = loadVectors();
+  const tooMany = /^Error: the proof does not prove inclusion: it names more nodes than a tree of that size has on the way to the root$/;
+  const tooFew = /^Error: the proof does not prove inclusion: it names fewer nodes than a tree of that size has on the way to the root$/;
+  const none = /^Error: the proof does not prove inclusion: it names no nodes$/;
+  const h = new Uint8Array(32).fill(1);
+  // the consistency proof of every pair: a node too many, a node too few, and no node at all
+  for (const c of vf.consistency) {
+    if (c.first === c.second) {
+      await assert.rejects(() => verifyConsistency(c.first, c.second, hex(c.firstMth), [h]), tooMany, `(${c.first},${c.second}) with a node it does not need`);
+      continue;
+    }
+    const path = paths(c.path);
+    await assert.rejects(() => verifyConsistency(c.first, c.second, hex(c.firstMth), [...path, h]), tooMany, `(${c.first},${c.second}) a node too many`);
+    if (path.length > 0) {
+      await assert.rejects(() => verifyConsistency(c.first, c.second, hex(c.firstMth), path.slice(0, -1)), /^Error: the proof does not prove inclusion: it names (fewer|no) nodes/, `(${c.first},${c.second}) the last node dropped`);
+    }
+  }
+  await assert.rejects(() => verifyConsistency(3, 4, h, []), none, 'a first tree that is not a power of two and no node at all');
+  await assert.rejects(() => verifyConsistency(6, 7, h, []), none, 'another');
+  await assert.rejects(() => verifyConsistency(1, 3, h, []), tooFew, 'the first tree alone is not the way to the second');
+  // a flipped node, at every position, never proves the covering tree's seal: the nodes only the second tree uses change its hash and nothing else
+  const c = passing();
+  for (let j = 0; j < c.document.prior.consistency.length; j++) {
+    const flippedAt = JSON.parse(JSON.stringify(c.document));
+    flippedAt.prior.consistency[j] = flip(flippedAt.prior.consistency[j]);
+    const res = await check(c, flippedAt, readerFor(c));
+    assert.equal(res.verdict, 'fail', `consistency node ${j} flipped`);
+    assert.match(res.detail, /not shown to be a prefix of the covering tree/);
+  }
+  // a document that names no anchor at all, for the covering seal and for the prior
+  const noAnchor = JSON.parse(JSON.stringify(c.document));
+  delete noAnchor.anchor;
+  assert.match((await check(c, noAnchor, readerFor(c))).detail, /^the attached state root proof names no L0 anchor transaction for its accumulator root$/);
+  const noPriorAnchor = JSON.parse(JSON.stringify(c.document));
+  delete noPriorAnchor.prior.anchor;
+  const res = await check(c, noPriorAnchor, readerFor(c));
+  assert.equal(res.verdict, 'fail');
+  assert.match(res.detail, /^the prior anchor names no L0 anchor transaction/);
+  // a seal that does not prove says why, to the word
+  const rootBad = JSON.parse(JSON.stringify(c.document));
+  rootBad.accumulatorRoot = '09'.repeat(32);
+  const bad = await check(c, rootBad, readerFor(c));
+  assert.equal(bad.detail, `the bundle's state root does not prove into the accumulator root the document names (${'09'.repeat(32)}): the proof does not prove inclusion`);
+  const sizeBad = JSON.parse(JSON.stringify(c.document));
+  sizeBad.treeSize = 0;
+  assert.match((await check(c, sizeBad, readerFor(c))).detail, /: the proof does not prove inclusion$/);
+  const extra = JSON.parse(JSON.stringify(c.document));
+  extra.path.push('00'.repeat(32));
+  assert.match((await check(c, extra, readerFor(c))).detail, /: the proof does not prove inclusion: it names more nodes/);
+  const short = JSON.parse(JSON.stringify(c.document));
+  short.path.pop();
+  assert.match((await check(c, short, readerFor(c))).detail, /: the proof does not prove inclusion: it names fewer nodes/);
+});
+
+test('an anchor entry that carries only one of its two heights is dated by the one it carries, and the edge of a prior is exact', async () => {
+  const c = passing();
+  const doc = c.document;
+  const entry = (firstHeight, lastHeight, roots) => ({ roots, firstHeight, lastHeight });
+  const coverRoots = c.anchors.aa11.roots;
+  const priorRoots = c.anchors.bb22.roots;
+  const run = (cover, prior) => check(c, doc, readerFor({ anchors: { aa11: cover, bb22: prior } }));
+  // the covering entry: a window that has only its first height (last 0) puts the leaf (139) after the last height; one with only its last height dates it fine
+  const onlyFirst = await run(entry(150, 0, coverRoots), entry(120, 124, priorRoots));
+  assert.equal(onlyFirst.verdict, 'fail');
+  assert.match(onlyFirst.detail, /after the last height 0 /);
+  const onlyLast = await run(entry(0, 160, coverRoots), entry(120, 124, priorRoots));
+  assert.equal(onlyLast.verdict, 'pass', onlyLast.detail);
+  // the prior entry: only its first height, only its last height
+  assert.equal((await run(entry(150, 160, coverRoots), entry(120, 0, priorRoots))).verdict, 'pass');
+  assert.equal((await run(entry(150, 160, coverRoots), entry(0, 124, priorRoots))).verdict, 'pass');
+  const priorOnlyLateFirst = await run(entry(150, 160, coverRoots), entry(140, 0, priorRoots));
+  assert.equal(priorOnlyLateFirst.verdict, 'fail');
+  assert.match(priorOnlyLateFirst.detail, /before the first height 140/);
+  assert.equal((await run(entry(150, 160, coverRoots), entry(0, 0, priorRoots))).verdict, 'skip');
+
+  // a leaf appended right after the prior anchor: leaf 9 of a tree of 21, the prior tree being the first 9 leaves, is inside no prior and passes; with a prior of 10 it is inside
+  const vf = loadVectors();
+  const leaf = vf.leaves[9];
+  const tree = vf.trees[20];
+  const consistency = (first) => vf.consistency.find((x) => x.first === first && x.second === 21);
+  const docFor = (priorSize) => {
+    const cc = consistency(priorSize);
+    return {
+      version: STATE_ROOT_DOCUMENT_VERSION,
+      status: 'proven',
+      stateRoot: leaf.root,
+      consumer: leaf.consumer,
+      leafHeight: leaf.height,
+      leafIndex: 9,
+      treeSize: 21,
+      path: tree.proofs[9].path,
+      accumulatorRoot: tree.sealed,
+      anchor: { txHash: 'aa11' },
+      prior: { anchor: { txHash: 'bb22' }, accumulatorRoot: vf.trees[priorSize - 1].sealed, treeSize: priorSize, mth: cc.firstMth, consistency: cc.path },
+    };
+  };
+  const l0 = (priorSize) => ({ anchors: { aa11: entry(150, 160, [tree.sealed]), bb22: entry(100, 126, [vf.trees[priorSize - 1].sealed]) } });
+  const edge = await checkStateRootProof(docFor(9), hex(leaf.root), leaf.consumer, readerFor(l0(9)));
+  assert.equal(edge.verdict, 'pass', edge.detail);
+  const inside = await checkStateRootProof(docFor(10), hex(leaf.root), leaf.consumer, readerFor(l0(10)));
+  assert.equal(inside.verdict, 'fail');
+  assert.match(inside.detail, /^the leaf \(number 9\) is inside the prior anchor's tree of 10 leaves/);
+});
+
+test('every status and every version a document can carry is read in the runtime\'s order: the version first, then the status', async () => {
+  const c = confirmedCase();
+  const p = passing();
+  const v1 = 'infrix-state-root-proof-v1';
+  for (const status of ['proven', 'awaiting_anchor', 'unavailable', 'bogus']) {
+    for (const [version, want] of [[v1, /version 1/], ['infrix-state-root-proof-v9', /does not read/], [undefined, /does not read/]]) {
+      const base = status === 'proven' ? p : c;
+      const doc = JSON.parse(JSON.stringify(base.document));
+      doc.status = status;
+      if (version === undefined) delete doc.version;
+      else doc.version = version;
+      const res = await check(base, doc, readerFor(base));
+      assert.equal(res.verdict, 'skip', `${status} ${String(version)}`);
+      assert.match(res.detail, want, `${status} ${String(version)}`);
+    }
+  }
+});
+
+test('over a file: a proof that passes still passes when a proven root is required, a bundle may carry its data as an object, and a bundle that cannot be read fails', async () => {
+  const c = passing();
+  const root = hex(c.bundleRoot);
+  const file = { ...pkgOf(root, c.consumerId), [STATE_ROOT_DOCUMENT_KEY]: c.document };
+  const required = await verifyStateRootOfExport(file, readerFor(c), { require: true });
+  assert.equal(required.verdict, 'pass', required.detail);
+  // bundleData as an object (the package encodes it either way)
+  const asObject = { version: '1', bundleData: { stateRoot: Array.from(root), outcomeId: c.consumerId }, [STATE_ROOT_DOCUMENT_KEY]: c.document };
+  assert.equal(bundleConsumerId(asObject), c.consumerId);
+  assert.deepEqual(Array.from(bundleStateRoot(asObject)), Array.from(root));
+  assert.equal((await verifyStateRootOfExport(asObject, readerFor(c))).verdict, 'pass');
+  // an outcome id that is not a string names no consumer
+  for (const outcomeId of [undefined, 123, null, {}, ['x']]) {
+    const pkg = { version: '1', bundleData: JSON.stringify({ stateRoot: Array.from(root), outcomeId }) };
+    assert.equal(bundleConsumerId(pkg), '', `outcomeId ${JSON.stringify(outcomeId)}`);
+  }
+  const anonymous = await verifyStateRootOfExport({ version: '1', bundleData: JSON.stringify({ stateRoot: Array.from(root), outcomeId: 123 }), [STATE_ROOT_DOCUMENT_KEY]: c.document }, readerFor(c));
+  assert.equal(anonymous.verdict, 'skip');
+  assert.match(anonymous.detail, /no consumer to bind/);
+  // a file whose bundle cannot be read
+  for (const broken of [{ version: '1', bundleData: 'not json', [STATE_ROOT_DOCUMENT_KEY]: c.document }, { bundle: { version: '1', bundleData: '{' }, [STATE_ROOT_DOCUMENT_KEY]: c.document }]) {
+    const res = await verifyStateRootOfExport(broken, readerFor(c));
+    assert.equal(res.verdict, 'fail');
+    assert.match(res.detail, /^the bundle's state root could not be read: /);
+  }
 });
