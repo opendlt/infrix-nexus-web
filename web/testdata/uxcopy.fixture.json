@@ -2,7 +2,7 @@
   "_generatedBy": "infrix uxcopy generate",
   "_source": "pkg/uxcopy",
   "_schemaVersion": 1,
-  "_contentSha256": "39305573f245e4b9e67b284172edfebdaca266b03853c8422e029824a8a0a985",
+  "_contentSha256": "13cb84645df93f0a480c8478ddb9d21c502a02ccd967117e6833ec55abeb3956",
   "version": "1",
   "labels": [
     {
@@ -121,8 +121,8 @@
       "id": "assurance.witness_quorum",
       "category": "assurance",
       "short": "Witness quorum met",
-      "plain": "Independent parties confirmed the same event.",
-      "technical": "A threshold of independent witness receipts attests the bundle reproduces.",
+      "plain": "The required number of witnesses confirmed the same event.",
+      "technical": "A threshold of witness receipts, each signed by a key authorized on its own L0 key page, attests the bundle reproduces. Whether the witnesses are separate parties is the distinct-operators badge; a witness set the producing run operates itself is self-witnessed and is not independent.",
       "neverUseWhen": [
         "l0Verified=false"
       ]
@@ -240,11 +240,424 @@
       "technical": "error_code: AGENT_WRITE_BUDGET_EXCEEDED"
     },
     {
+      "id": "error.ANCHOR_VERIFY_FAILED",
+      "category": "error",
+      "short": "The anchor did not verify",
+      "plain": "The L0 anchor named did not verify against the evidence.",
+      "technical": "error_code: ANCHOR_VERIFY_FAILED"
+    },
+    {
+      "id": "error.APPROVAL_EXPIRED",
+      "category": "error",
+      "short": "The approval expired",
+      "plain": "The approval passed its expiry and authorises nothing.",
+      "technical": "error_code: APPROVAL_EXPIRED"
+    },
+    {
+      "id": "error.APPROVAL_REQUIRED",
+      "category": "error",
+      "short": "An approval is required",
+      "plain": "The plan waits on an approval nobody has given yet; it runs once the approvers it names approve.",
+      "technical": "error_code: APPROVAL_REQUIRED"
+    },
+    {
+      "id": "error.APPROVAL_REVOKED",
+      "category": "error",
+      "short": "The approval was revoked",
+      "plain": "The approval was revoked and authorises nothing.",
+      "technical": "error_code: APPROVAL_REVOKED"
+    },
+    {
+      "id": "error.AUDIT_ANCHOR_HEAD_MISMATCH",
+      "category": "error",
+      "short": "The audit log disagrees with the head the node anchored",
+      "plain": "The audit log holds an event at the anchored entry count, but it is not the event whose hash the node anchored: the log was rewritten after the anchor.",
+      "technical": "error_code: AUDIT_ANCHOR_HEAD_MISMATCH"
+    },
+    {
+      "id": "error.AUDIT_ANCHOR_HEAD_MISSING",
+      "category": "error",
+      "short": "The audit log is shorter than the head the node anchored",
+      "plain": "The audit log holds no event at the anchored entry count: it was truncated after the node anchored that head.",
+      "technical": "error_code: AUDIT_ANCHOR_HEAD_MISSING"
+    },
+    {
+      "id": "error.AUDIT_ANCHOR_INCONSISTENT",
+      "category": "error",
+      "short": "The anchored audit checkpoint does not hash to what it claims",
+      "plain": "The head, entry count, state root and height in the anchored audit checkpoint record do not hash to the artifact hash the record carries.",
+      "technical": "error_code: AUDIT_ANCHOR_INCONSISTENT"
+    },
+    {
+      "id": "error.AUDIT_ANCHOR_NOT_FOUND",
+      "category": "error",
+      "short": "The node has anchored no audit checkpoint yet",
+      "plain": "The node has not anchored, and had L0 confirm, a v2 audit checkpoint (the periodic audit_checkpoint anchor that commits to the audit log head), or it runs no anchor.",
+      "technical": "error_code: AUDIT_ANCHOR_NOT_FOUND"
+    },
+    {
+      "id": "error.AUDIT_ANCHOR_NOT_ON_L0",
+      "category": "error",
+      "short": "L0 does not carry the audit checkpoint",
+      "plain": "The L0 transaction the audit checkpoint record names does not list its hash among the roots of its batch entry, or could not be read.",
+      "technical": "error_code: AUDIT_ANCHOR_NOT_ON_L0"
+    },
+    {
+      "id": "error.AUDIT_BAD_QUERY",
+      "category": "error",
+      "short": "The audit-chain query is malformed",
+      "plain": "A query parameter of the audit-chain read is not what the route takes (for example not an account URL).",
+      "technical": "error_code: AUDIT_BAD_QUERY"
+    },
+    {
+      "id": "error.AUDIT_CAPABILITY_DENIED",
+      "category": "error",
+      "short": "The caller lacks the audit:read grant",
+      "plain": "The audit chain is read only by an identity holding the audit:read operator grant.",
+      "technical": "error_code: AUDIT_CAPABILITY_DENIED"
+    },
+    {
+      "id": "error.AUDIT_DISCLOSURE_CONTEXT_REQUIRED",
+      "category": "error",
+      "short": "The audit read carries no disclosure context",
+      "plain": "X-Actor, X-Purpose and X-Workflow-Instance (or their query forms) are required on every audit-chain read.",
+      "technical": "error_code: AUDIT_DISCLOSURE_CONTEXT_REQUIRED"
+    },
+    {
+      "id": "error.AUDIT_METHOD_NOT_ALLOWED",
+      "category": "error",
+      "short": "The audit chain is read-only",
+      "plain": "Audit-chain routes take GET only.",
+      "technical": "error_code: AUDIT_METHOD_NOT_ALLOWED"
+    },
+    {
+      "id": "error.AUDIT_NOT_FOUND",
+      "category": "error",
+      "short": "No such audit-chain route",
+      "plain": "The path names no audit-chain route.",
+      "technical": "error_code: AUDIT_NOT_FOUND"
+    },
+    {
+      "id": "error.AUDIT_UNAVAILABLE",
+      "category": "error",
+      "short": "The node runs no audit chain",
+      "plain": "This node has no audit chain running, so it answers no audit-chain read.",
+      "technical": "error_code: AUDIT_UNAVAILABLE"
+    },
+    {
+      "id": "error.BAD_REQUEST",
+      "category": "error",
+      "short": "The request is malformed",
+      "plain": "The request body or a parameter could not be read.",
+      "technical": "error_code: BAD_REQUEST"
+    },
+    {
+      "id": "error.CAPABILITY_EXPIRED",
+      "category": "error",
+      "short": "The capability expired",
+      "plain": "The caller's capability grant passed its expiry.",
+      "technical": "error_code: CAPABILITY_EXPIRED"
+    },
+    {
+      "id": "error.CAPABILITY_MISSING",
+      "category": "error",
+      "short": "A capability is missing",
+      "plain": "The caller holds no capability grant the act requires.",
+      "technical": "error_code: CAPABILITY_MISSING"
+    },
+    {
+      "id": "error.CHAIN_ERROR",
+      "category": "error",
+      "short": "The ghost chain refused the request",
+      "plain": "The ghost chain answered an error for the request; the message names it.",
+      "technical": "error_code: CHAIN_ERROR"
+    },
+    {
+      "id": "error.CINEMA_BAD_REQUEST",
+      "category": "error",
+      "short": "The Cinema request is malformed",
+      "plain": "The route or body is not one the Cinema door takes.",
+      "technical": "error_code: CINEMA_BAD_REQUEST"
+    },
+    {
+      "id": "error.CINEMA_CAPABILITY_DENIED",
+      "category": "error",
+      "short": "The caller lacks the Cinema grant",
+      "plain": "Cinema sessions are viewed (cinema:view) and exported (cinema:export) only by an identity holding that operator grant.",
+      "technical": "error_code: CINEMA_CAPABILITY_DENIED"
+    },
+    {
+      "id": "error.CINEMA_CONTEXT_REQUIRED",
+      "category": "error",
+      "short": "The Cinema request carries no disclosure context",
+      "plain": "X-Actor, X-Purpose and X-Workflow-Instance are required on every Cinema request.",
+      "technical": "error_code: CINEMA_CONTEXT_REQUIRED"
+    },
+    {
+      "id": "error.CINEMA_CONTRACT_NOT_SHOWN",
+      "category": "error",
+      "short": "The contract is not shown to this caller",
+      "plain": "No such contract, or the caller may not see it; the answer is the same either way.",
+      "technical": "error_code: CINEMA_CONTRACT_NOT_SHOWN"
+    },
+    {
+      "id": "error.CINEMA_EXPORT_BUSY",
+      "category": "error",
+      "short": "The exporter is busy",
+      "plain": "The node is already running as many exports as it allows at once.",
+      "technical": "error_code: CINEMA_EXPORT_BUSY"
+    },
+    {
+      "id": "error.CINEMA_EXPORT_FILE_MISSING",
+      "category": "error",
+      "short": "The exported file is gone",
+      "plain": "The export finished but its file is no longer held by the node.",
+      "technical": "error_code: CINEMA_EXPORT_FILE_MISSING"
+    },
+    {
+      "id": "error.CINEMA_EXPORT_NOT_FOUND",
+      "category": "error",
+      "short": "The export left no job",
+      "plain": "The export finished and the node holds no job for it: a defect in the exporter.",
+      "technical": "error_code: CINEMA_EXPORT_NOT_FOUND"
+    },
+    {
+      "id": "error.CINEMA_EXPORT_NOT_READY",
+      "category": "error",
+      "short": "The export is still running",
+      "plain": "The export has not finished; its status says how far it is.",
+      "technical": "error_code: CINEMA_EXPORT_NOT_READY"
+    },
+    {
+      "id": "error.CINEMA_EXPORT_REFUSED",
+      "category": "error",
+      "short": "The export was refused",
+      "plain": "The export request names a format or option the exporter does not take.",
+      "technical": "error_code: CINEMA_EXPORT_REFUSED"
+    },
+    {
+      "id": "error.CINEMA_INTENT_NOT_VISIBLE",
+      "category": "error",
+      "short": "The intent is not shown to this caller",
+      "plain": "Only the intent's submitter, the operator, or a holder of a disclosure grant on it sees its session; the answer is the same whether or not the intent exists.",
+      "technical": "error_code: CINEMA_INTENT_NOT_VISIBLE"
+    },
+    {
+      "id": "error.CINEMA_METHOD_NOT_ALLOWED",
+      "category": "error",
+      "short": "The Cinema route takes another method",
+      "plain": "The route was asked with a method it does not take.",
+      "technical": "error_code: CINEMA_METHOD_NOT_ALLOWED"
+    },
+    {
+      "id": "error.CINEMA_NOTHING_TO_RENDER",
+      "category": "error",
+      "short": "The session has nothing to render",
+      "plain": "The session holds no frame or narrative to render or export.",
+      "technical": "error_code: CINEMA_NOTHING_TO_RENDER"
+    },
+    {
+      "id": "error.CINEMA_NOT_SERVED",
+      "category": "error",
+      "short": "The node serves no Cinema",
+      "plain": "This node has no Cinema engine to serve sessions from.",
+      "technical": "error_code: CINEMA_NOT_SERVED"
+    },
+    {
+      "id": "error.CINEMA_RENDER_REFUSED",
+      "category": "error",
+      "short": "The render was refused",
+      "plain": "The render request names a frame, format or option the renderer does not take.",
+      "technical": "error_code: CINEMA_RENDER_REFUSED"
+    },
+    {
+      "id": "error.CINEMA_SESSION_DENIED",
+      "category": "error",
+      "short": "The session was denied by policy",
+      "plain": "The cinema:visibility policy refused the session.",
+      "technical": "error_code: CINEMA_SESSION_DENIED"
+    },
+    {
+      "id": "error.CINEMA_SESSION_FAILED",
+      "category": "error",
+      "short": "The session could not be built",
+      "plain": "Building the session failed for a reason other than load or policy; the message names it.",
+      "technical": "error_code: CINEMA_SESSION_FAILED"
+    },
+    {
+      "id": "error.CINEMA_SESSION_LIMIT",
+      "category": "error",
+      "short": "The Cinema engine is at its session limit",
+      "plain": "The engine holds as many concurrent sessions as it allows; sessions idle out and free their place.",
+      "technical": "error_code: CINEMA_SESSION_LIMIT"
+    },
+    {
+      "id": "error.CINEMA_SESSION_NOT_FOUND",
+      "category": "error",
+      "short": "No such Cinema session",
+      "plain": "The session id names no session the engine holds (it may have idled out).",
+      "technical": "error_code: CINEMA_SESSION_NOT_FOUND"
+    },
+    {
+      "id": "error.CINEMA_SESSION_NOT_VISIBLE",
+      "category": "error",
+      "short": "The session is not shown to this caller",
+      "plain": "The caller may not see what the session shows.",
+      "technical": "error_code: CINEMA_SESSION_NOT_VISIBLE"
+    },
+    {
+      "id": "error.CINEMA_SESSION_SKIPPED",
+      "category": "error",
+      "short": "The Cinema session was skipped under load",
+      "plain": "Building the Cinema governance session went past its cinema_trace time budget. Cinema is an observability surface that yields under load, so the node dropped the session it was building and answered 503 with this code.",
+      "technical": "error_code: CINEMA_SESSION_SKIPPED"
+    },
+    {
+      "id": "error.CLAIMS_LOCAL_BACKING_REQUIRED",
+      "category": "error",
+      "short": "High-risk claims need local backing",
+      "plain": "Strict review found high-risk claims backed only elsewhere in the document, not next to the claim.",
+      "technical": "error_code: CLAIMS_LOCAL_BACKING_REQUIRED"
+    },
+    {
+      "id": "error.CLAIMS_UNBACKED",
+      "category": "error",
+      "short": "A public claim has no backing",
+      "plain": "One or more public claims have no supporting evidence anywhere in the document.",
+      "technical": "error_code: CLAIMS_UNBACKED"
+    },
+    {
       "id": "error.CLI_USAGE",
       "category": "error",
       "short": "That flag or command isn't recognized",
       "plain": "Infrix did not recognize a flag, argument, or subcommand in the command line.",
       "technical": "error_code: CLI_USAGE"
+    },
+    {
+      "id": "error.CONFIG_LOAD_FAILED",
+      "category": "error",
+      "short": "The production config could not be loaded",
+      "plain": "Infrix could not read or parse the production config file you pointed it at.",
+      "technical": "error_code: CONFIG_LOAD_FAILED"
+    },
+    {
+      "id": "error.CONFIRM_ALREADY_CONFIRMED",
+      "category": "error",
+      "short": "The ghost receipt is already confirmed",
+      "plain": "The receipt was confirmed before.",
+      "technical": "error_code: CONFIRM_ALREADY_CONFIRMED"
+    },
+    {
+      "id": "error.CONFIRM_CALLER_MISMATCH",
+      "category": "error",
+      "short": "The confirmation is made as another account",
+      "plain": "A ghost receipt is confirmed as the account that asks for it.",
+      "technical": "error_code: CONFIRM_CALLER_MISMATCH"
+    },
+    {
+      "id": "error.CONFIRM_CALLER_REQUIRED",
+      "category": "error",
+      "short": "The confirmation names no caller",
+      "plain": "A ghost confirmation requires the asking account.",
+      "technical": "error_code: CONFIRM_CALLER_REQUIRED"
+    },
+    {
+      "id": "error.CONFIRM_COUNTERFACTUAL",
+      "category": "error",
+      "short": "A counterfactual receipt is not confirmed",
+      "plain": "A counterfactual ghost receipt describes what would happen and cannot be confirmed into a real act.",
+      "technical": "error_code: CONFIRM_COUNTERFACTUAL"
+    },
+    {
+      "id": "error.CONFIRM_ERROR",
+      "category": "error",
+      "short": "The confirmation failed",
+      "plain": "The confirmation failed for a reason that carries no more specific code; the message names it.",
+      "technical": "error_code: CONFIRM_ERROR"
+    },
+    {
+      "id": "error.CONFIRM_NOT_SERVED",
+      "category": "error",
+      "short": "The node confirms no ghost receipts",
+      "plain": "This node serves no ghost confirmation.",
+      "technical": "error_code: CONFIRM_NOT_SERVED"
+    },
+    {
+      "id": "error.CONFIRM_NOT_YOUR_RECEIPT",
+      "category": "error",
+      "short": "The receipt is not the caller's",
+      "plain": "A ghost receipt is confirmed only by the account it was made for.",
+      "technical": "error_code: CONFIRM_NOT_YOUR_RECEIPT"
+    },
+    {
+      "id": "error.CONFIRM_RECEIPT_NOT_FOUND",
+      "category": "error",
+      "short": "No such ghost receipt",
+      "plain": "The receipt id names no receipt the ghost engine holds.",
+      "technical": "error_code: CONFIRM_RECEIPT_NOT_FOUND"
+    },
+    {
+      "id": "error.CONFLICT",
+      "category": "error",
+      "short": "Conflict",
+      "plain": "The request conflicts with the state the node holds (for example the id is taken).",
+      "technical": "error_code: CONFLICT"
+    },
+    {
+      "id": "error.DATA_MIGRATION_NODE_RUNNING",
+      "category": "error",
+      "short": "A node holds this data directory",
+      "plain": "The migration rewrites the object database and must have it to itself, but a node holds the instance lease on the data directory.",
+      "technical": "error_code: DATA_MIGRATION_NODE_RUNNING"
+    },
+    {
+      "id": "error.DATA_MIGRATION_REQUIRED",
+      "category": "error",
+      "short": "This data directory was written by an older binary and needs a data migration",
+      "plain": "The node refused to boot because a durable record was written before a field the current boot rebuild requires. Infrix will not invent that field at boot: an explicit, audited migration supplies it as a documented bound.",
+      "technical": "error_code: DATA_MIGRATION_REQUIRED"
+    },
+    {
+      "id": "error.DATA_RECORD_UNRECOVERABLE",
+      "category": "error",
+      "short": "A durable record cannot be upgraded by any migration",
+      "plain": "A record in this data directory lacks data its old binary never wrote and that no migration can supply without inventing it (for example a workflow instance without its stored state).",
+      "technical": "error_code: DATA_RECORD_UNRECOVERABLE"
+    },
+    {
+      "id": "error.DID_REFUSED",
+      "category": "error",
+      "short": "The DID or identity proof was refused",
+      "plain": "The identity policy refused a DID, alias binding, foreign-document admission, key rotation, or storage history; the reason names which rule failed.",
+      "technical": "error_code: DID_REFUSED"
+    },
+    {
+      "id": "error.DISCLOSURE_ACTOR_MISSING",
+      "category": "error",
+      "short": "No acting identity is configured",
+      "plain": "Every governed Infrix call must say WHO is asking. Infrix will not guess an identity, because the actor is what decides which data you are allowed to see.",
+      "technical": "error_code: DISCLOSURE_ACTOR_MISSING"
+    },
+    {
+      "id": "error.DISCLOSURE_REVOKED",
+      "category": "error",
+      "short": "The disclosure was revoked",
+      "plain": "The disclosure grant the read relied on was revoked.",
+      "technical": "error_code: DISCLOSURE_REVOKED"
+    },
+    {
+      "id": "error.DOOR_BAD_PARAMS",
+      "category": "error",
+      "short": "The JSON-RPC door's parameters are invalid",
+      "plain": "The parameters of a JSON-RPC door method could not be decoded into what the door takes.",
+      "technical": "error_code: DOOR_BAD_PARAMS"
+    },
+    {
+      "id": "error.ESCROW_LOCKED",
+      "category": "error",
+      "short": "The escrow is locked",
+      "plain": "The escrow's terms do not release it now.",
+      "technical": "error_code: ESCROW_LOCKED"
     },
     {
       "id": "error.EVIDENCE_MISSING",
@@ -254,6 +667,13 @@
       "technical": "error_code: EVIDENCE_MISSING"
     },
     {
+      "id": "error.EVIDENCE_NOT_ANCHORED",
+      "category": "error",
+      "short": "The evidence is not anchored yet",
+      "plain": "The evidence bundle has not been anchored to L0 yet; it is once the node's anchor path flushes it.",
+      "technical": "error_code: EVIDENCE_NOT_ANCHORED"
+    },
+    {
       "id": "error.EVIDENCE_STALE",
       "category": "error",
       "short": "The release evidence proves an older commit",
@@ -261,11 +681,102 @@
       "technical": "error_code: EVIDENCE_STALE"
     },
     {
+      "id": "error.EVIDENCE_VERIFY_FAILED",
+      "category": "error",
+      "short": "The evidence did not verify",
+      "plain": "The evidence bundle failed verification; the details name the failing check.",
+      "technical": "error_code: EVIDENCE_VERIFY_FAILED"
+    },
+    {
+      "id": "error.FORBIDDEN",
+      "category": "error",
+      "short": "Forbidden",
+      "plain": "The authenticated caller may not do this.",
+      "technical": "error_code: FORBIDDEN"
+    },
+    {
+      "id": "error.GHOST_CALLER_MISMATCH",
+      "category": "error",
+      "short": "A ghost call is made as its asker",
+      "plain": "A ghost call is made as the account that asks for it; the request named another.",
+      "technical": "error_code: GHOST_CALLER_MISMATCH"
+    },
+    {
+      "id": "error.GHOST_EXECUTION_ERROR",
+      "category": "error",
+      "short": "The ghost execution failed",
+      "plain": "The ghost engine could not execute the call; the message names why.",
+      "technical": "error_code: GHOST_EXECUTION_ERROR"
+    },
+    {
+      "id": "error.GHOST_PREVIEW_ERROR",
+      "category": "error",
+      "short": "The ghost preview failed",
+      "plain": "The ghost engine could not preview the call; the message names why.",
+      "technical": "error_code: GHOST_PREVIEW_ERROR"
+    },
+    {
       "id": "error.HUMAN_STUDY_INCOMPLETE",
       "category": "error",
       "short": "The human study is incomplete",
       "plain": "The human task-success study has fewer completed sessions, or a lower success rate, than the release threshold requires.",
       "technical": "error_code: HUMAN_STUDY_INCOMPLETE"
+    },
+    {
+      "id": "error.IDENTITY_NOT_VERIFIED",
+      "category": "error",
+      "short": "The identity is not verified",
+      "plain": "The submitting identity could not be verified against L0.",
+      "technical": "error_code: IDENTITY_NOT_VERIFIED"
+    },
+    {
+      "id": "error.INSUFFICIENT_TRUST",
+      "category": "error",
+      "short": "Insufficient trust",
+      "plain": "A trust profile the act depends on is below the level the act requires.",
+      "technical": "error_code: INSUFFICIENT_TRUST"
+    },
+    {
+      "id": "error.INTENT_EXPIRED",
+      "category": "error",
+      "short": "The intent expired",
+      "plain": "The intent passed its deadline before it ran.",
+      "technical": "error_code: INTENT_EXPIRED"
+    },
+    {
+      "id": "error.INTENT_GOAL_PARAMS_INVALID",
+      "category": "error",
+      "short": "The intent's goal parameters are invalid",
+      "plain": "The node refused the intent at admission: a parameter its goal declares as required is missing or malformed, or a constraint is out of range. The refusal names the goal and the field.",
+      "technical": "error_code: INTENT_GOAL_PARAMS_INVALID"
+    },
+    {
+      "id": "error.INTENT_INVALID",
+      "category": "error",
+      "short": "The intent is invalid",
+      "plain": "The intent was refused at admission; the message names why.",
+      "technical": "error_code: INTENT_INVALID"
+    },
+    {
+      "id": "error.INTERNAL_ERROR",
+      "category": "error",
+      "short": "The node failed internally",
+      "plain": "The node hit an internal error answering the request; the message names it.",
+      "technical": "error_code: INTERNAL_ERROR"
+    },
+    {
+      "id": "error.INVALID_REQUEST",
+      "category": "error",
+      "short": "The ghost request is malformed",
+      "plain": "The request body could not be read.",
+      "technical": "error_code: INVALID_REQUEST"
+    },
+    {
+      "id": "error.KEYBOOK_PROOF_UNAVAILABLE",
+      "category": "error",
+      "short": "A delegate key book could not be proved to the lite account's partition",
+      "plain": "A lite token account names a key book on another partition as its delegate, and the network applies that only with a proof of existence: the book's state and a receipt that ends at a Directory root the lite account's partition holds. The proof could not be built: the delegate is not a key book or does not exist (stage receipt), the Directory had not anchored the delegate partition's BPT root within the window or the endpoint serves no proof service (stage anchor), or the lite account's partition did not yet hold the Directory root (stage held).",
+      "technical": "error_code: KEYBOOK_PROOF_UNAVAILABLE"
     },
     {
       "id": "error.L0_ANCHOR_UNAVAILABLE",
@@ -287,6 +798,13 @@
       "short": "Timed out waiting for L0 finality",
       "plain": "The anchor did not confirm on Accumulate L0 within the timeout.",
       "technical": "error_code: L0_FINALITY_TIMEOUT"
+    },
+    {
+      "id": "error.L0_INCOMPATIBLE",
+      "category": "error",
+      "short": "This build cannot talk to the L0 network",
+      "plain": "The Accumulate network answered, but this binary's Accumulate library cannot decode its response: the network has been upgraded past the library this build was made with (for example a new executor version).",
+      "technical": "error_code: L0_INCOMPATIBLE"
     },
     {
       "id": "error.L0_KEY_NOT_ON_PAGE",
@@ -329,6 +847,13 @@
       "short": "Release launch-check inputs are missing",
       "plain": "A release-grade launch-check cannot start because required inputs are absent (evidence package, node URL, tenant token, or L0 endpoint).",
       "technical": "error_code: LAUNCH_PREREQUISITES_MISSING"
+    },
+    {
+      "id": "error.LAUNCH_SCOPE_EXCLUDED",
+      "category": "error",
+      "short": "The goal is outside this node's launch scope",
+      "plain": "The node refused the intent at submission: its operator declared that this node's launch does not offer this goal (config.launchScope). The refusal names the goal and the decision that excluded it.",
+      "technical": "error_code: LAUNCH_SCOPE_EXCLUDED"
     },
     {
       "id": "error.LOCAL_PHASE_TIMEOUT",
@@ -380,6 +905,13 @@
       "technical": "error_code: METAMASK_USER_REJECTED"
     },
     {
+      "id": "error.METHOD_NOT_ALLOWED",
+      "category": "error",
+      "short": "The ghost route takes another method",
+      "plain": "The route was asked with a method it does not take.",
+      "technical": "error_code: METHOD_NOT_ALLOWED"
+    },
+    {
       "id": "error.NETWORK_POSTURE_MISMATCH",
       "category": "error",
       "short": "The config's network does not match the claim",
@@ -392,6 +924,83 @@
       "short": "An off-domain network call was denied",
       "plain": "The consumption trust gate refused a network call because the host is not the configured, allow-listed node host (or a redirect tried to leave it).",
       "technical": "error_code: NETWORK_TRUST_DENIED"
+    },
+    {
+      "id": "error.NODE_APPROVAL_REQUIRED",
+      "category": "error",
+      "short": "The node parked the intent for approval",
+      "plain": "The node admitted the intent and its waiver policy requires signed approvals before the plan may run; this invocation holds no approver that can give them (none was passed, or a stage's threshold is above the distinct identities passed). The stages, roles and thresholds are in the cause.",
+      "technical": "error_code: NODE_APPROVAL_REQUIRED"
+    },
+    {
+      "id": "error.NODE_AUTH_REQUIRED",
+      "category": "error",
+      "short": "The node requires an API bearer token",
+      "plain": "The node answered 401: it enforces api.auth, and this request carried no bearer token or one the node does not accept.",
+      "technical": "error_code: NODE_AUTH_REQUIRED"
+    },
+    {
+      "id": "error.NODE_BOOT_FAILED",
+      "category": "error",
+      "short": "The node refused to boot from this config",
+      "plain": "The config loaded, but the node rejected it as invalid before booting (for example a required field such as blockPeriodMs is missing, or a claimed rule pack or settlement domain is not actually available).",
+      "technical": "error_code: NODE_BOOT_FAILED"
+    },
+    {
+      "id": "error.NODE_OWNED_ACTION",
+      "category": "error",
+      "short": "That action is the node's own and cannot be submitted",
+      "plain": "The node refused the intent at admission: the (subsystem, action) it names is an act the node performs on itself and records as its own system intent. A well-formed request cannot make it a request.",
+      "technical": "error_code: NODE_OWNED_ACTION"
+    },
+    {
+      "id": "error.NODE_REQUEST_REFUSED",
+      "category": "error",
+      "short": "The node refused the request",
+      "plain": "The node read the request and answered with a 4xx other than 401: a value outside what the route accepts, a missing disclosure context, or an object the node does not hold. The node's own error code and message are in the cause and the support data (httpStatus, nodeCode).",
+      "technical": "error_code: NODE_REQUEST_REFUSED"
+    },
+    {
+      "id": "error.NOT_ACCEPTABLE",
+      "category": "error",
+      "short": "Not acceptable",
+      "plain": "The node cannot answer in the representation the request accepts.",
+      "technical": "error_code: NOT_ACCEPTABLE"
+    },
+    {
+      "id": "error.NOT_FOUND",
+      "category": "error",
+      "short": "Not found",
+      "plain": "The request names nothing the node holds.",
+      "technical": "error_code: NOT_FOUND"
+    },
+    {
+      "id": "error.OBJECT_TRANSITION_INVALID",
+      "category": "error",
+      "short": "The object transition is invalid",
+      "plain": "The object's schema does not allow the transition from its current state.",
+      "technical": "error_code: OBJECT_TRANSITION_INVALID"
+    },
+    {
+      "id": "error.PLAN_DRIFT_EXCEEDED",
+      "category": "error",
+      "short": "The plan drifted too far",
+      "plain": "Execution drifted from the plan beyond the plan's drift threshold, so it was stopped.",
+      "technical": "error_code: PLAN_DRIFT_EXCEEDED"
+    },
+    {
+      "id": "error.PLAN_HASH_MISMATCH",
+      "category": "error",
+      "short": "The plan hash does not match",
+      "plain": "The plan hash an approval or request names is not the plan's.",
+      "technical": "error_code: PLAN_HASH_MISMATCH"
+    },
+    {
+      "id": "error.POLICY_DENIED",
+      "category": "error",
+      "short": "Denied by policy",
+      "plain": "A policy refused the act; the details name the policy and its decision.",
+      "technical": "error_code: POLICY_DENIED"
     },
     {
       "id": "error.PROFILE_LIVE_L0_MISSING",
@@ -420,6 +1029,13 @@
       "short": "TLS is required for this profile",
       "plain": "The selected production profile requires the API to serve over TLS, but TLS is not enabled.",
       "technical": "error_code: PROFILE_TLS_MISSING"
+    },
+    {
+      "id": "error.PROFILE_VALIDATION_FAILED",
+      "category": "error",
+      "short": "The config does not satisfy the required posture profile",
+      "plain": "The config loaded, but it does not meet the named production posture profile (for example public_production requires live L0 signer material, a state mirror, TLS, encrypted storage, billing throttling, and a real identity verifier).",
+      "technical": "error_code: PROFILE_VALIDATION_FAILED"
     },
     {
       "id": "error.PROOF_L0_UNAVAILABLE",
@@ -471,6 +1087,139 @@
       "technical": "error_code: PROOF_WITNESS_QUORUM_MISSING"
     },
     {
+      "id": "error.PROTOCOL_ALREADY_PROCESSED",
+      "category": "error",
+      "short": "The envelope was already processed",
+      "plain": "The transaction hash is already in the processor's ledger: a replay is answered from the ledger and never run again. To send again, change the memo.",
+      "technical": "error_code: PROTOCOL_ALREADY_PROCESSED"
+    },
+    {
+      "id": "error.PROTOCOL_BAD_ENVELOPE",
+      "category": "error",
+      "short": "The envelope is malformed",
+      "plain": "The envelope could not be decoded into a transaction.",
+      "technical": "error_code: PROTOCOL_BAD_ENVELOPE"
+    },
+    {
+      "id": "error.PROTOCOL_BAD_REQUEST",
+      "category": "error",
+      "short": "The protocol envelope is malformed",
+      "plain": "The envelope or its parameters are not what the protocol route takes.",
+      "technical": "error_code: PROTOCOL_BAD_REQUEST"
+    },
+    {
+      "id": "error.PROTOCOL_CAPABILITY_DENIED",
+      "category": "error",
+      "short": "The caller lacks the protocol:process grant",
+      "plain": "Envelopes are processed only for an identity holding the protocol:process operator grant.",
+      "technical": "error_code: PROTOCOL_CAPABILITY_DENIED"
+    },
+    {
+      "id": "error.PROTOCOL_DISCLOSURE_CONTEXT_REQUIRED",
+      "category": "error",
+      "short": "The protocol request carries no disclosure context",
+      "plain": "actor, purpose and workflowInstance are required.",
+      "technical": "error_code: PROTOCOL_DISCLOSURE_CONTEXT_REQUIRED"
+    },
+    {
+      "id": "error.PROTOCOL_ENVELOPE_UNSIGNED",
+      "category": "error",
+      "short": "The envelope is unsigned",
+      "plain": "The envelope carries no signature.",
+      "technical": "error_code: PROTOCOL_ENVELOPE_UNSIGNED"
+    },
+    {
+      "id": "error.PROTOCOL_FIELD_NOT_SUPPORTED",
+      "category": "error",
+      "short": "A field is not supported",
+      "plain": "The transaction states a field the node cannot honour; it is refused before the ledger is claimed, and the sender removes the field.",
+      "technical": "error_code: PROTOCOL_FIELD_NOT_SUPPORTED"
+    },
+    {
+      "id": "error.PROTOCOL_INITIATOR_MISMATCH",
+      "category": "error",
+      "short": "The initiator does not match",
+      "plain": "The transaction's initiator is missing, is the hash of no signature in the envelope, or is the signature of a key page that is not the principal's.",
+      "technical": "error_code: PROTOCOL_INITIATOR_MISMATCH"
+    },
+    {
+      "id": "error.PROTOCOL_METHOD_NOT_ALLOWED",
+      "category": "error",
+      "short": "The protocol route takes POST",
+      "plain": "The route was asked with a method other than POST.",
+      "technical": "error_code: PROTOCOL_METHOD_NOT_ALLOWED"
+    },
+    {
+      "id": "error.PROTOCOL_NOT_FOUND",
+      "category": "error",
+      "short": "No such protocol route",
+      "plain": "The path names no protocol route.",
+      "technical": "error_code: PROTOCOL_NOT_FOUND"
+    },
+    {
+      "id": "error.PROTOCOL_OUTCOME_UNKNOWN",
+      "category": "error",
+      "short": "The envelope's outcome is unknown",
+      "plain": "The transaction was claimed in the ledger but the node stopped before its answer: it is never run again, and its outcome is read back, not resubmitted.",
+      "technical": "error_code: PROTOCOL_OUTCOME_UNKNOWN"
+    },
+    {
+      "id": "error.PROTOCOL_PIPELINE_REFUSED",
+      "category": "error",
+      "short": "The governance pipeline refused the transaction",
+      "plain": "The pipeline refused the transaction after it was claimed: it is consumed, and to try again the sender changes the memo.",
+      "technical": "error_code: PROTOCOL_PIPELINE_REFUSED"
+    },
+    {
+      "id": "error.PROTOCOL_PRINCIPAL_MISMATCH",
+      "category": "error",
+      "short": "The principal is not the caller",
+      "plain": "The envelope's principal is not the authenticated actor.",
+      "technical": "error_code: PROTOCOL_PRINCIPAL_MISMATCH"
+    },
+    {
+      "id": "error.PROTOCOL_SIGNATURE_INVALID",
+      "category": "error",
+      "short": "A signature is invalid",
+      "plain": "A signature does not verify, or does not sign this transaction.",
+      "technical": "error_code: PROTOCOL_SIGNATURE_INVALID"
+    },
+    {
+      "id": "error.PROTOCOL_SIGNATURE_UNSUPPORTED",
+      "category": "error",
+      "short": "A signature kind is unsupported",
+      "plain": "A signature of a kind this door cannot honour (not a key signature).",
+      "technical": "error_code: PROTOCOL_SIGNATURE_UNSUPPORTED"
+    },
+    {
+      "id": "error.PROTOCOL_SIGNER_NOT_AUTHORIZED",
+      "category": "error",
+      "short": "The signer is not authorised",
+      "plain": "The signing key is not on the signer's key page, the page is not the principal's, or the page moved to another version.",
+      "technical": "error_code: PROTOCOL_SIGNER_NOT_AUTHORIZED"
+    },
+    {
+      "id": "error.PROTOCOL_SIGNER_UNAVAILABLE",
+      "category": "error",
+      "short": "The signer's key page could not be read",
+      "plain": "The key page could not be read from L0, so the signature was neither admitted nor refused; an unreachable L0 passes.",
+      "technical": "error_code: PROTOCOL_SIGNER_UNAVAILABLE"
+    },
+    {
+      "id": "error.PROTOCOL_TX_TYPE_NOT_ALLOWED",
+      "category": "error",
+      "short": "The transaction type is not allowed",
+      "plain": "The protocol door does not process this transaction type.",
+      "technical": "error_code: PROTOCOL_TX_TYPE_NOT_ALLOWED"
+    },
+    {
+      "id": "error.PROTOCOL_UNAVAILABLE",
+      "category": "error",
+      "short": "The block processor is not running",
+      "plain": "The node's protocol block processor is not running or has stopped.",
+      "technical": "error_code: PROTOCOL_UNAVAILABLE"
+    },
+    {
       "id": "error.PROVIDER_EVIDENCE_MISSING",
       "category": "error",
       "short": "Wallet/provider acceptance evidence is missing",
@@ -485,11 +1234,25 @@
       "technical": "error_code: PUBLICATION_STALE"
     },
     {
+      "id": "error.RECEIPT_NOT_FOUND",
+      "category": "error",
+      "short": "No such ghost receipt",
+      "plain": "The receipt id names no receipt the ghost engine holds.",
+      "technical": "error_code: RECEIPT_NOT_FOUND"
+    },
+    {
       "id": "error.RECEIPT_OVERCLAIM",
       "category": "error",
       "short": "The receipt claims more than it backs",
       "plain": "A shareable receipt asserts a higher assurance than its evidence supports (e.g. claims L4 with no live-L0 confirmation).",
       "technical": "error_code: RECEIPT_OVERCLAIM"
+    },
+    {
+      "id": "error.ROLE_UNAUTHORIZED",
+      "category": "error",
+      "short": "The role does not authorise this",
+      "plain": "The caller holds no role the act requires.",
+      "technical": "error_code: ROLE_UNAUTHORIZED"
     },
     {
       "id": "error.SDK_BALANCE_UNAVAILABLE",
@@ -518,6 +1281,153 @@
       "short": "A proof was requested but is unavailable",
       "plain": "The flow could not export a portable proof for this result.",
       "technical": "error_code: SDK_PROOF_UNAVAILABLE"
+    },
+    {
+      "id": "error.SERVICE_UNAVAILABLE",
+      "category": "error",
+      "short": "The service is not configured",
+      "plain": "The node has no such service configured (for example no governance pipeline).",
+      "technical": "error_code: SERVICE_UNAVAILABLE"
+    },
+    {
+      "id": "error.SESSION_ACTOR_MISMATCH",
+      "category": "error",
+      "short": "The request is not made as the delegating ADI",
+      "plain": "A session answers as the ADI that delegated it; X-Actor named another identity.",
+      "technical": "error_code: SESSION_ACTOR_MISMATCH"
+    },
+    {
+      "id": "error.SESSION_AUTHORITY_UNAVAILABLE",
+      "category": "error",
+      "short": "The grant's key page could not be read",
+      "plain": "The delegating ADI's key page could not be read from L0, so the grant is neither honoured nor judged forged. An unreachable L0 passes; a key page that does not exist never will.",
+      "technical": "error_code: SESSION_AUTHORITY_UNAVAILABLE"
+    },
+    {
+      "id": "error.SESSION_BAD_REQUEST",
+      "category": "error",
+      "short": "The session request is malformed",
+      "plain": "The request body could not be read or is missing a field the route requires.",
+      "technical": "error_code: SESSION_BAD_REQUEST"
+    },
+    {
+      "id": "error.SESSION_CAPABILITY_DENIED",
+      "category": "error",
+      "short": "The caller lacks the session grant",
+      "plain": "Session submission and revocation require the session:submit or session:revoke operator grant.",
+      "technical": "error_code: SESSION_CAPABILITY_DENIED"
+    },
+    {
+      "id": "error.SESSION_DISCLOSURE_CONTEXT_REQUIRED",
+      "category": "error",
+      "short": "The session request carries no disclosure context",
+      "plain": "X-Actor, X-Purpose and X-Workflow-Instance are required, and X-Actor must be the delegating ADI.",
+      "technical": "error_code: SESSION_DISCLOSURE_CONTEXT_REQUIRED"
+    },
+    {
+      "id": "error.SESSION_GRANT_EXPIRED",
+      "category": "error",
+      "short": "The session grant expired",
+      "plain": "The grant is past its expiry.",
+      "technical": "error_code: SESSION_GRANT_EXPIRED"
+    },
+    {
+      "id": "error.SESSION_GRANT_INVALID",
+      "category": "error",
+      "short": "The session grant does not verify",
+      "plain": "The grant is not signed by a key on the delegating ADI's key page, or it is revoked or expired.",
+      "technical": "error_code: SESSION_GRANT_INVALID"
+    },
+    {
+      "id": "error.SESSION_GRANT_NOT_YET_VALID",
+      "category": "error",
+      "short": "The session grant is not valid yet",
+      "plain": "The grant's validity window has not started; the same grant is honoured once it has.",
+      "technical": "error_code: SESSION_GRANT_NOT_YET_VALID"
+    },
+    {
+      "id": "error.SESSION_GRANT_REVOKED",
+      "category": "error",
+      "short": "The session grant was revoked",
+      "plain": "The grant was revoked by its delegating ADI.",
+      "technical": "error_code: SESSION_GRANT_REVOKED"
+    },
+    {
+      "id": "error.SESSION_METHOD_NOT_ALLOWED",
+      "category": "error",
+      "short": "Session routes take POST",
+      "plain": "The route was asked with a method other than POST.",
+      "technical": "error_code: SESSION_METHOD_NOT_ALLOWED"
+    },
+    {
+      "id": "error.SESSION_NOT_FOUND",
+      "category": "error",
+      "short": "No such session route",
+      "plain": "The path names no session route.",
+      "technical": "error_code: SESSION_NOT_FOUND"
+    },
+    {
+      "id": "error.SESSION_OUT_OF_SCOPE",
+      "category": "error",
+      "short": "The request is outside the grant",
+      "plain": "The request names a contract the session grant does not list.",
+      "technical": "error_code: SESSION_OUT_OF_SCOPE"
+    },
+    {
+      "id": "error.SESSION_REQUEST_REPLAYED",
+      "category": "error",
+      "short": "The session request was already submitted",
+      "plain": "A signed session request is accepted once; this one was seen before.",
+      "technical": "error_code: SESSION_REQUEST_REPLAYED"
+    },
+    {
+      "id": "error.SESSION_REQUEST_SIGNATURE_INVALID",
+      "category": "error",
+      "short": "The request signature is invalid",
+      "plain": "The request is not signed by the session key the grant names.",
+      "technical": "error_code: SESSION_REQUEST_SIGNATURE_INVALID"
+    },
+    {
+      "id": "error.SESSION_REQUEST_STALE",
+      "category": "error",
+      "short": "The session request is stale",
+      "plain": "The request was signed more than two minutes from the node's time, or before the node started; the same request is refused again, a newly signed one is not.",
+      "technical": "error_code: SESSION_REQUEST_STALE"
+    },
+    {
+      "id": "error.SESSION_REVOCATION_NOT_DURABLE",
+      "category": "error",
+      "short": "The revocation is not durable",
+      "plain": "The grant is revoked in memory, but the revocation could not be written to disk and would not survive a restart; revoking again writes it again.",
+      "technical": "error_code: SESSION_REVOCATION_NOT_DURABLE"
+    },
+    {
+      "id": "error.SESSION_SIGNER_NOT_AUTHORIZED",
+      "category": "error",
+      "short": "The grant's signer is not authorised",
+      "plain": "The key that signed the grant is not on the delegating ADI's key page.",
+      "technical": "error_code: SESSION_SIGNER_NOT_AUTHORIZED"
+    },
+    {
+      "id": "error.SESSION_UNAVAILABLE",
+      "category": "error",
+      "short": "The node runs no session door",
+      "plain": "This node's session door is not running.",
+      "technical": "error_code: SESSION_UNAVAILABLE"
+    },
+    {
+      "id": "error.SESSION_WINDOW_TOO_LONG",
+      "category": "error",
+      "short": "The session window is too long",
+      "plain": "A session grant is honoured for at most the node's maximum session lifetime.",
+      "technical": "error_code: SESSION_WINDOW_TOO_LONG"
+    },
+    {
+      "id": "error.SETTLEMENT_DISPUTED",
+      "category": "error",
+      "short": "The settlement is disputed",
+      "plain": "The settlement has an open dispute; it moves only once the dispute is resolved.",
+      "technical": "error_code: SETTLEMENT_DISPUTED"
     },
     {
       "id": "error.SETUP_GO_MISSING",
@@ -555,6 +1465,454 @@
       "technical": "error_code: SETUP_RUST_WASM_TARGET_MISSING"
     },
     {
+      "id": "error.STATEMIRROR_CAPABILITY_DENIED",
+      "category": "error",
+      "short": "The caller lacks the state-mirror grant",
+      "plain": "The state-mirror status is read only by an identity holding its operator grant.",
+      "technical": "error_code: STATEMIRROR_CAPABILITY_DENIED"
+    },
+    {
+      "id": "error.STATEMIRROR_DISCLOSURE_CONTEXT_REQUIRED",
+      "category": "error",
+      "short": "The state-mirror read carries no disclosure context",
+      "plain": "X-Actor, X-Purpose and X-Workflow-Instance (or their query forms) are required.",
+      "technical": "error_code: STATEMIRROR_DISCLOSURE_CONTEXT_REQUIRED"
+    },
+    {
+      "id": "error.STATEMIRROR_METHOD_NOT_ALLOWED",
+      "category": "error",
+      "short": "The state-mirror status is read-only",
+      "plain": "State-mirror routes take GET only.",
+      "technical": "error_code: STATEMIRROR_METHOD_NOT_ALLOWED"
+    },
+    {
+      "id": "error.STATEMIRROR_NOT_FOUND",
+      "category": "error",
+      "short": "No such state-mirror route",
+      "plain": "The path names no state-mirror route.",
+      "technical": "error_code: STATEMIRROR_NOT_FOUND"
+    },
+    {
+      "id": "error.STATEMIRROR_UNAVAILABLE",
+      "category": "error",
+      "short": "The node answers no state-mirror read",
+      "plain": "No operator-capability check is wired on this node, so the state-mirror status answers no one.",
+      "technical": "error_code: STATEMIRROR_UNAVAILABLE"
+    },
+    {
+      "id": "error.SUBMISSION_OUTCOME_UNKNOWN",
+      "category": "error",
+      "short": "A submission's outcome is unknown",
+      "plain": "The request was completely written to the L0 endpoint and no answer was read (a closed connection, a reset, a deadline), so the network MAY have executed the transaction. It is neither failed nor confirmed.",
+      "technical": "error_code: SUBMISSION_OUTCOME_UNKNOWN"
+    },
+    {
+      "id": "error.TOKEN_ARRAY_LENGTH_MISMATCH",
+      "category": "error",
+      "short": "The arrays differ in length",
+      "plain": "A batch act's id and amount arrays are not the same length.",
+      "technical": "error_code: TOKEN_ARRAY_LENGTH_MISMATCH"
+    },
+    {
+      "id": "error.TOKEN_BAD_REQUEST",
+      "category": "error",
+      "short": "The token act is malformed",
+      "plain": "A parameter of the token act is missing, malformed or out of its limit.",
+      "technical": "error_code: TOKEN_BAD_REQUEST"
+    },
+    {
+      "id": "error.TOKEN_BLOCK_UNAVAILABLE",
+      "category": "error",
+      "short": "The node gives the token door no block height",
+      "plain": "A voting token cannot checkpoint on a node that gives its token door no block height.",
+      "technical": "error_code: TOKEN_BLOCK_UNAVAILABLE"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_ACCOUNT_NOT_OWNED",
+      "category": "error",
+      "short": "The account is not the acting identity's",
+      "plain": "A bridge deposit moves only the acting identity's own account.",
+      "technical": "error_code: TOKEN_BRIDGE_ACCOUNT_NOT_OWNED"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_ALREADY_SETTLED",
+      "category": "error",
+      "short": "The bridge record is already settled",
+      "plain": "The bridge record is in a final state.",
+      "technical": "error_code: TOKEN_BRIDGE_ALREADY_SETTLED"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_AMOUNT_OUT_OF_RANGE",
+      "category": "error",
+      "short": "The bridge amount does not fit L0",
+      "plain": "The amount does not fit the 64 bits of an L0 amount.",
+      "technical": "error_code: TOKEN_BRIDGE_AMOUNT_OUT_OF_RANGE"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_BAD_ACCOUNT",
+      "category": "error",
+      "short": "The bridge account is not an Accumulate account",
+      "plain": "The named account is not an Accumulate account URL.",
+      "technical": "error_code: TOKEN_BRIDGE_BAD_ACCOUNT"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_DEPOSIT_CLAIMED",
+      "category": "error",
+      "short": "The deposit has already minted",
+      "plain": "An L0 deposit mints once; this transaction already minted.",
+      "technical": "error_code: TOKEN_BRIDGE_DEPOSIT_CLAIMED"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_ESCROW_INVALID",
+      "category": "error",
+      "short": "The bridge configuration is invalid",
+      "plain": "The token's L0 issuer or escrow is not an Accumulate token URL.",
+      "technical": "error_code: TOKEN_BRIDGE_ESCROW_INVALID"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_ESCROW_TAKEN",
+      "category": "error",
+      "short": "The escrow belongs to another token",
+      "plain": "The escrow account is already the escrow of another token.",
+      "technical": "error_code: TOKEN_BRIDGE_ESCROW_TAKEN"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_INSOLVENT",
+      "category": "error",
+      "short": "The bridge would go negative",
+      "plain": "The act would make a bridge balance negative.",
+      "technical": "error_code: TOKEN_BRIDGE_INSOLVENT"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_L0_REFUSED",
+      "category": "error",
+      "short": "L0 refused the bridge transaction",
+      "plain": "The network refused the bridge's L0 transaction; the record says why.",
+      "technical": "error_code: TOKEN_BRIDGE_L0_REFUSED"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_L0_UNAVAILABLE",
+      "category": "error",
+      "short": "L0 could not answer",
+      "plain": "The L0 ledger could not answer the bridge's read; nothing was changed.",
+      "technical": "error_code: TOKEN_BRIDGE_L0_UNAVAILABLE"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_NOT_ANCHORED",
+      "category": "error",
+      "short": "The deposit is not anchored",
+      "plain": "The claimed deposit is not held under enough L0 root anchors (or is not the transaction it claims to be). A genuine deposit that is not yet deep enough is claimable once L0 has anchored it; a forged or misstated one never is.",
+      "technical": "error_code: TOKEN_BRIDGE_NOT_ANCHORED"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_NOT_CONFIGURED",
+      "category": "error",
+      "short": "The token has no L0 bridge",
+      "plain": "The token was created without an L0 bridge (l0Issuer and bridgeEscrow).",
+      "technical": "error_code: TOKEN_BRIDGE_NOT_CONFIGURED"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_NOT_DELEGATED",
+      "category": "error",
+      "short": "The account has not delegated to the node",
+      "plain": "The node's signing key is not in the bridge account's authority list.",
+      "technical": "error_code: TOKEN_BRIDGE_NOT_DELEGATED"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_NOT_FOUND",
+      "category": "error",
+      "short": "No such bridge record",
+      "plain": "The token holds no bridge record with that id.",
+      "technical": "error_code: TOKEN_BRIDGE_NOT_FOUND"
+    },
+    {
+      "id": "error.TOKEN_BRIDGE_UNRESOLVED",
+      "category": "error",
+      "short": "The bridge outcome is unresolved",
+      "plain": "The record holds no L0 transaction id (the node stopped between its journal and its submission): nothing is signed again, and the account history settles it.",
+      "technical": "error_code: TOKEN_BRIDGE_UNRESOLVED"
+    },
+    {
+      "id": "error.TOKEN_CAPABILITY_DENIED",
+      "category": "error",
+      "short": "The caller lacks the token grant",
+      "plain": "The token act requires a grant the caller does not hold.",
+      "technical": "error_code: TOKEN_CAPABILITY_DENIED"
+    },
+    {
+      "id": "error.TOKEN_CONTRACT_EXISTS",
+      "category": "error",
+      "short": "A token already exists there",
+      "plain": "A token is already created at the URL.",
+      "technical": "error_code: TOKEN_CONTRACT_EXISTS"
+    },
+    {
+      "id": "error.TOKEN_CONTRACT_UNKNOWN",
+      "category": "error",
+      "short": "No token exists there",
+      "plain": "No token is created at the URL.",
+      "technical": "error_code: TOKEN_CONTRACT_UNKNOWN"
+    },
+    {
+      "id": "error.TOKEN_CREATE_FORBIDDEN",
+      "category": "error",
+      "short": "The node lets no actor create a token",
+      "plain": "This node has no gate that lets an actor create a token.",
+      "technical": "error_code: TOKEN_CREATE_FORBIDDEN"
+    },
+    {
+      "id": "error.TOKEN_DEPOSIT_NOT_ANCHORED",
+      "category": "error",
+      "short": "The deposit is not anchored",
+      "plain": "The deposit is not held under enough L0 anchors (or is not the transaction it claims to be). A genuine deposit that is not yet deep enough is claimable once L0 has anchored it.",
+      "technical": "error_code: TOKEN_DEPOSIT_NOT_ANCHORED"
+    },
+    {
+      "id": "error.TOKEN_DEPOSIT_REPLAYED",
+      "category": "error",
+      "short": "The deposit was already used",
+      "plain": "An L0 deposit is used once; this one was.",
+      "technical": "error_code: TOKEN_DEPOSIT_REPLAYED"
+    },
+    {
+      "id": "error.TOKEN_ID_ALREADY_MINTED",
+      "category": "error",
+      "short": "The token id is already minted",
+      "plain": "A token with this id already exists.",
+      "technical": "error_code: TOKEN_ID_ALREADY_MINTED"
+    },
+    {
+      "id": "error.TOKEN_ID_NOT_FOUND",
+      "category": "error",
+      "short": "No such snapshot",
+      "plain": "The snapshot id was not taken on this token.",
+      "technical": "error_code: TOKEN_ID_NOT_FOUND"
+    },
+    {
+      "id": "error.TOKEN_INSUFFICIENT_ALLOWANCE",
+      "category": "error",
+      "short": "The allowance is insufficient",
+      "plain": "The spender's allowance is below the amount.",
+      "technical": "error_code: TOKEN_INSUFFICIENT_ALLOWANCE"
+    },
+    {
+      "id": "error.TOKEN_INSUFFICIENT_BALANCE",
+      "category": "error",
+      "short": "The balance is insufficient",
+      "plain": "The account's balance is below the amount.",
+      "technical": "error_code: TOKEN_INSUFFICIENT_BALANCE"
+    },
+    {
+      "id": "error.TOKEN_INVALID_AMOUNT",
+      "category": "error",
+      "short": "The amount is invalid",
+      "plain": "The amount must be above zero.",
+      "technical": "error_code: TOKEN_INVALID_AMOUNT"
+    },
+    {
+      "id": "error.TOKEN_L0_DATA_ACCOUNT_BOUND",
+      "category": "error",
+      "short": "The token's metadata lives elsewhere",
+      "plain": "The token's metadata is bound to another L0 data account and cannot move.",
+      "technical": "error_code: TOKEN_L0_DATA_ACCOUNT_BOUND"
+    },
+    {
+      "id": "error.TOKEN_L0_DATA_ACCOUNT_NOT_OWNED",
+      "category": "error",
+      "short": "The data account is not the acting identity's",
+      "plain": "Metadata is written only to the acting identity's own L0 data account.",
+      "technical": "error_code: TOKEN_L0_DATA_ACCOUNT_NOT_OWNED"
+    },
+    {
+      "id": "error.TOKEN_L0_DATA_BAD_ACCOUNT",
+      "category": "error",
+      "short": "Not an L0 data account",
+      "plain": "The named account is not an L0 data account.",
+      "technical": "error_code: TOKEN_L0_DATA_BAD_ACCOUNT"
+    },
+    {
+      "id": "error.TOKEN_L0_DATA_NOT_DELEGATED",
+      "category": "error",
+      "short": "The data account has not delegated to the node",
+      "plain": "The node's signing key is not in the data account's authority list.",
+      "technical": "error_code: TOKEN_L0_DATA_NOT_DELEGATED"
+    },
+    {
+      "id": "error.TOKEN_L0_DATA_REFUSED",
+      "category": "error",
+      "short": "L0 refused the metadata write",
+      "plain": "The network refused the write to the data account.",
+      "technical": "error_code: TOKEN_L0_DATA_REFUSED"
+    },
+    {
+      "id": "error.TOKEN_L0_DATA_UNAVAILABLE",
+      "category": "error",
+      "short": "L0 could not answer the metadata read",
+      "plain": "Reading an entry of the data account failed; nothing was changed.",
+      "technical": "error_code: TOKEN_L0_DATA_UNAVAILABLE"
+    },
+    {
+      "id": "error.TOKEN_L0_DATA_UNRESOLVED",
+      "category": "error",
+      "short": "The metadata write is unresolved",
+      "plain": "The write's outcome is unknown; its transaction ids are read back, never signed again.",
+      "technical": "error_code: TOKEN_L0_DATA_UNRESOLVED"
+    },
+    {
+      "id": "error.TOKEN_MAX_SUPPLY_EXCEEDED",
+      "category": "error",
+      "short": "The maximum supply would be exceeded",
+      "plain": "The mint would take the supply above the token's maximum.",
+      "technical": "error_code: TOKEN_MAX_SUPPLY_EXCEEDED"
+    },
+    {
+      "id": "error.TOKEN_METADATA_INVALID",
+      "category": "error",
+      "short": "The metadata is invalid",
+      "plain": "Metadata must be a JSON object.",
+      "technical": "error_code: TOKEN_METADATA_INVALID"
+    },
+    {
+      "id": "error.TOKEN_METADATA_NOT_FOUND",
+      "category": "error",
+      "short": "No metadata is stored for the token",
+      "plain": "The token is bound to no L0 data account.",
+      "technical": "error_code: TOKEN_METADATA_NOT_FOUND"
+    },
+    {
+      "id": "error.TOKEN_NOT_APPROVED",
+      "category": "error",
+      "short": "The caller is not approved",
+      "plain": "The caller is not approved for the token or the owner's tokens.",
+      "technical": "error_code: TOKEN_NOT_APPROVED"
+    },
+    {
+      "id": "error.TOKEN_NOT_MINTER",
+      "category": "error",
+      "short": "The caller is not a minter",
+      "plain": "Only a minter of the token may mint.",
+      "technical": "error_code: TOKEN_NOT_MINTER"
+    },
+    {
+      "id": "error.TOKEN_NOT_OWNER",
+      "category": "error",
+      "short": "The caller may not do this",
+      "plain": "Only the record's initiator or the token's owner may.",
+      "technical": "error_code: TOKEN_NOT_OWNER"
+    },
+    {
+      "id": "error.TOKEN_NOT_VISIBLE",
+      "category": "error",
+      "short": "The token is not shown to this caller",
+      "plain": "No such token, or the caller may not see it.",
+      "technical": "error_code: TOKEN_NOT_VISIBLE"
+    },
+    {
+      "id": "error.TOKEN_OPERATION_DISABLED",
+      "category": "error",
+      "short": "The operation is disabled",
+      "plain": "The token was created with this operation disabled.",
+      "technical": "error_code: TOKEN_OPERATION_DISABLED"
+    },
+    {
+      "id": "error.TOKEN_PAUSED",
+      "category": "error",
+      "short": "The token is paused",
+      "plain": "The token is paused; its owner unpauses it by a governed act.",
+      "technical": "error_code: TOKEN_PAUSED"
+    },
+    {
+      "id": "error.TOKEN_PERMIT_EXPIRED",
+      "category": "error",
+      "short": "The permit expired",
+      "plain": "The permit is past its deadline.",
+      "technical": "error_code: TOKEN_PERMIT_EXPIRED"
+    },
+    {
+      "id": "error.TOKEN_PERMIT_INVALID",
+      "category": "error",
+      "short": "The permit is invalid",
+      "plain": "The permit's signature or nonce does not verify.",
+      "technical": "error_code: TOKEN_PERMIT_INVALID"
+    },
+    {
+      "id": "error.TOKEN_RECEIVER_REJECTED",
+      "category": "error",
+      "short": "The receiver rejected the transfer",
+      "plain": "The receiving contract's hook did not accept the safe transfer.",
+      "technical": "error_code: TOKEN_RECEIVER_REJECTED"
+    },
+    {
+      "id": "error.TOKEN_REFUSED",
+      "category": "error",
+      "short": "The token act was refused",
+      "plain": "The act did not happen; the message names why (an error that carries no more specific code).",
+      "technical": "error_code: TOKEN_REFUSED"
+    },
+    {
+      "id": "error.TOKEN_ROYALTY_TOO_HIGH",
+      "category": "error",
+      "short": "The royalty is above the cap",
+      "plain": "The royalty is above the collection's royalty cap.",
+      "technical": "error_code: TOKEN_ROYALTY_TOO_HIGH"
+    },
+    {
+      "id": "error.TOKEN_STANDARD_MISMATCH",
+      "category": "error",
+      "short": "The token is of another standard",
+      "plain": "The act names a standard other than the token's.",
+      "technical": "error_code: TOKEN_STANDARD_MISMATCH"
+    },
+    {
+      "id": "error.TOKEN_STORE_FAILURE",
+      "category": "error",
+      "short": "The token store failed",
+      "plain": "The token's store could not be read or written; the message names the failure.",
+      "technical": "error_code: TOKEN_STORE_FAILURE"
+    },
+    {
+      "id": "error.TOKEN_TYPE_EXISTS",
+      "category": "error",
+      "short": "The token type exists",
+      "plain": "A type with this id already exists.",
+      "technical": "error_code: TOKEN_TYPE_EXISTS"
+    },
+    {
+      "id": "error.TOKEN_TYPE_NOT_FOUND",
+      "category": "error",
+      "short": "No such token type",
+      "plain": "The type does not exist: create it before it has metadata.",
+      "technical": "error_code: TOKEN_TYPE_NOT_FOUND"
+    },
+    {
+      "id": "error.TOKEN_UNKNOWN_ACTION",
+      "category": "error",
+      "short": "Not a token action",
+      "plain": "The action is not \u003cstandard\u003e_\u003cverb\u003e for a standard the door serves.",
+      "technical": "error_code: TOKEN_UNKNOWN_ACTION"
+    },
+    {
+      "id": "error.TOKEN_UNKNOWN_STANDARD",
+      "category": "error",
+      "short": "Not a token standard",
+      "plain": "The standard is not one the door serves.",
+      "technical": "error_code: TOKEN_UNKNOWN_STANDARD"
+    },
+    {
+      "id": "error.TOKEN_ZERO_ADDRESS",
+      "category": "error",
+      "short": "The zero address is not an account",
+      "plain": "The act names the zero address as an account.",
+      "technical": "error_code: TOKEN_ZERO_ADDRESS"
+    },
+    {
+      "id": "error.TOO_MANY_REQUESTS",
+      "category": "error",
+      "short": "Too many requests",
+      "plain": "The caller is over the node's request rate; the limit refills with time.",
+      "technical": "error_code: TOO_MANY_REQUESTS"
+    },
+    {
       "id": "error.TRUST_CENTER_STALE",
       "category": "error",
       "short": "The trust-center facts are stale",
@@ -562,11 +1920,25 @@
       "technical": "error_code: TRUST_CENTER_STALE"
     },
     {
+      "id": "error.UNAUTHORIZED",
+      "category": "error",
+      "short": "Not authenticated",
+      "plain": "The request carries no bearer token the node accepts.",
+      "technical": "error_code: UNAUTHORIZED"
+    },
+    {
       "id": "error.UNKNOWN",
       "category": "error",
       "short": "Something went wrong",
       "plain": "Infrix hit an error it could not translate into specific guidance.",
       "technical": "error_code: UNKNOWN"
+    },
+    {
+      "id": "error.UX_COPY_DRIFT",
+      "category": "error",
+      "short": "A product-language copy has drifted from its source",
+      "plain": "A committed copy of the pkg/uxcopy fixture in a sibling repository (infrix-sdk-js, infrix-nexus-web) differs from the source, or the sibling checkout beside this repository is missing.",
+      "technical": "error_code: UX_COPY_DRIFT"
     },
     {
       "id": "error.UX_MATRIX_BUDGET_EXCEEDED",
@@ -595,6 +1967,104 @@
       "short": "The UX demo server port is in use",
       "plain": "The UX matrix runner failed before any test ran because the demo server port is already in use.",
       "technical": "error_code: UX_MATRIX_SERVER_PORT_IN_USE"
+    },
+    {
+      "id": "error.VERIFY_BAD_REQUEST",
+      "category": "error",
+      "short": "The verify request is malformed",
+      "plain": "A required field (for example the contract) is missing or malformed.",
+      "technical": "error_code: VERIFY_BAD_REQUEST"
+    },
+    {
+      "id": "error.VERIFY_CAPABILITY_DENIED",
+      "category": "error",
+      "short": "The caller lacks the verify:check grant",
+      "plain": "Property checks are made only by an identity holding the verify:check operator grant.",
+      "technical": "error_code: VERIFY_CAPABILITY_DENIED"
+    },
+    {
+      "id": "error.VERIFY_CONTRACT_NOT_VISIBLE",
+      "category": "error",
+      "short": "The contract is not shown to this caller",
+      "plain": "The contract visibility gate refused the caller.",
+      "technical": "error_code: VERIFY_CONTRACT_NOT_VISIBLE"
+    },
+    {
+      "id": "error.VERIFY_CONTRACT_UNKNOWN",
+      "category": "error",
+      "short": "No contract is deployed there",
+      "plain": "The request names a URL where no contract is deployed.",
+      "technical": "error_code: VERIFY_CONTRACT_UNKNOWN"
+    },
+    {
+      "id": "error.VERIFY_DISCLOSURE_CONTEXT_REQUIRED",
+      "category": "error",
+      "short": "The verify request carries no disclosure context",
+      "plain": "X-Actor, X-Purpose and X-Workflow-Instance are required.",
+      "technical": "error_code: VERIFY_DISCLOSURE_CONTEXT_REQUIRED"
+    },
+    {
+      "id": "error.VERIFY_KEY_DISCLOSURE_NOT_RECORDED",
+      "category": "error",
+      "short": "The key's disclosure could not be recorded",
+      "plain": "A grant opened the key, but its exercise could not be recorded, so the read is refused rather than released unrecorded.",
+      "technical": "error_code: VERIFY_KEY_DISCLOSURE_NOT_RECORDED"
+    },
+    {
+      "id": "error.VERIFY_KEY_NOT_READABLE",
+      "category": "error",
+      "short": "A bound key is not readable",
+      "plain": "The property binds a state key the contract's visibility declaration does not let this actor read.",
+      "technical": "error_code: VERIFY_KEY_NOT_READABLE"
+    },
+    {
+      "id": "error.VERIFY_KEY_POLICY_UNAVAILABLE",
+      "category": "error",
+      "short": "The contract's visibility declaration is unreadable",
+      "plain": "The node cannot read the contract's visibility declaration (no code it can read, or a schema section that does not parse), so every key it binds is refused.",
+      "technical": "error_code: VERIFY_KEY_POLICY_UNAVAILABLE"
+    },
+    {
+      "id": "error.VERIFY_METHOD_NOT_ALLOWED",
+      "category": "error",
+      "short": "The verify route takes another method",
+      "plain": "The route was asked with a method it does not take.",
+      "technical": "error_code: VERIFY_METHOD_NOT_ALLOWED"
+    },
+    {
+      "id": "error.VERIFY_NOT_FOUND",
+      "category": "error",
+      "short": "No such verify route",
+      "plain": "The path names no verify route.",
+      "technical": "error_code: VERIFY_NOT_FOUND"
+    },
+    {
+      "id": "error.VERIFY_NO_PROPERTIES",
+      "category": "error",
+      "short": "No property is registered for the contract",
+      "plain": "No active property this actor may read is registered for the contract.",
+      "technical": "error_code: VERIFY_NO_PROPERTIES"
+    },
+    {
+      "id": "error.VERIFY_PROPERTY_UNKNOWN",
+      "category": "error",
+      "short": "The property is not registered",
+      "plain": "No active property with the named id is registered for the contract.",
+      "technical": "error_code: VERIFY_PROPERTY_UNKNOWN"
+    },
+    {
+      "id": "error.VERIFY_STATE_MOVING",
+      "category": "error",
+      "short": "The contract state moved during the check",
+      "plain": "The contract's state changed while it was being read, so no consistent answer could be given; a later check reads a settled state.",
+      "technical": "error_code: VERIFY_STATE_MOVING"
+    },
+    {
+      "id": "error.VERIFY_UNAVAILABLE",
+      "category": "error",
+      "short": "The node cannot check properties",
+      "plain": "This node has no object registry or state store to check against.",
+      "technical": "error_code: VERIFY_UNAVAILABLE"
     },
     {
       "id": "glossary.accumulate-l0",
@@ -677,8 +2147,8 @@
       "id": "glossary.witness-quorum",
       "category": "glossary",
       "short": "witness quorum",
-      "plain": "Independent parties confirming the same event.",
-      "technical": "A threshold of distinct, independent witness receipts that each re-verify a bundle; full_public_production requires a 2-of-3 distinct-operator quorum."
+      "plain": "Witnesses confirming the same event.",
+      "technical": "A threshold of distinct witness receipts that each re-verify a bundle. Whether the witnesses are separate organisations is a separate claim (the distinct operators badge): full_public_production requires a 2-of-3 distinct-operator quorum, and a witness set the producing run operates itself is self-witnessed and is not independent."
     },
     {
       "id": "network.devnet",
@@ -980,11 +2450,11 @@
     {
       "id": "assurance.witness_quorum",
       "short": "Witness quorum met",
-      "plain": "Independent parties confirmed the same event.",
-      "technical": "A threshold of independent witness receipts attests the bundle reproduces.",
+      "plain": "The required number of witnesses confirmed the same event.",
+      "technical": "A threshold of witness receipts, each signed by a key authorized on its own L0 key page, attests the bundle reproduces. Whether the witnesses are separate parties is the distinct-operators badge; a witness set the producing run operates itself is self-witnessed and is not independent.",
       "icon": "users",
       "colorRole": "positive",
-      "screenReader": "Witness quorum met: independent witnesses confirmed the event.",
+      "screenReader": "Witness quorum met: the required number of witnesses confirmed the event.",
       "allowedConditions": [
         "witnessQuorumMet=true",
         "l0Verified=true"
@@ -1114,13 +2584,13 @@
     },
     {
       "term": "witness quorum",
-      "plain": "Independent parties confirming the same event.",
-      "technical": "A threshold of distinct, independent witness receipts that each re-verify a bundle; full_public_production requires a 2-of-3 distinct-operator quorum.",
+      "plain": "Witnesses confirming the same event.",
+      "technical": "A threshold of distinct witness receipts that each re-verify a bundle. Whether the witnesses are separate organisations is a separate claim (the distinct operators badge): full_public_production requires a 2-of-3 distinct-operator quorum, and a witness set the producing run operates itself is self-witnessed and is not independent.",
       "related": [
         "distinct operators",
         "assurance level"
       ],
-      "firstUseReplacement": "independent parties confirming the same event",
+      "firstUseReplacement": "witnesses confirming the same event",
       "docs": "docs/learn/glossary.md"
     }
   ],
@@ -1357,6 +2827,572 @@
       "technical": "error_code: AGENT_WRITE_BUDGET_EXCEEDED"
     },
     {
+      "code": "ANCHOR_VERIFY_FAILED",
+      "title": "The anchor did not verify",
+      "plainMeaning": "The L0 anchor named did not verify against the evidence.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: ANCHOR_VERIFY_FAILED"
+    },
+    {
+      "code": "APPROVAL_EXPIRED",
+      "title": "The approval expired",
+      "plainMeaning": "The approval passed its expiry and authorises nothing.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: APPROVAL_EXPIRED"
+    },
+    {
+      "code": "APPROVAL_REQUIRED",
+      "title": "An approval is required",
+      "plainMeaning": "The plan waits on an approval nobody has given yet; it runs once the approvers it names approve.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: APPROVAL_REQUIRED"
+    },
+    {
+      "code": "APPROVAL_REVOKED",
+      "title": "The approval was revoked",
+      "plainMeaning": "The approval was revoked and authorises nothing.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: APPROVAL_REVOKED"
+    },
+    {
+      "code": "AUDIT_ANCHOR_HEAD_MISMATCH",
+      "title": "The audit log disagrees with the head the node anchored",
+      "plainMeaning": "The audit log holds an event at the anchored entry count, but it is not the event whose hash the node anchored: the log was rewritten after the anchor.",
+      "fixes": [
+        {
+          "label": "Compare with the node own copy of the log",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --anchor --node-url \u003cnode\u003e --l0 https://kermit.accumulatenetwork.io/v3 --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Verify the chain itself",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/audit-chain.md",
+      "technical": "error_code: AUDIT_ANCHOR_HEAD_MISMATCH"
+    },
+    {
+      "code": "AUDIT_ANCHOR_HEAD_MISSING",
+      "title": "The audit log is shorter than the head the node anchored",
+      "plainMeaning": "The audit log holds no event at the anchored entry count: it was truncated after the node anchored that head.",
+      "fixes": [
+        {
+          "label": "Compare with the node own copy of the log",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --anchor --node-url \u003cnode\u003e --l0 https://kermit.accumulatenetwork.io/v3 --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Verify the chain itself",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/audit-chain.md",
+      "technical": "error_code: AUDIT_ANCHOR_HEAD_MISSING"
+    },
+    {
+      "code": "AUDIT_ANCHOR_INCONSISTENT",
+      "title": "The anchored audit checkpoint does not hash to what it claims",
+      "plainMeaning": "The head, entry count, state root and height in the anchored audit checkpoint record do not hash to the artifact hash the record carries.",
+      "fixes": [
+        {
+          "label": "Read the record again, from the node and from L0",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --anchor --node-url \u003cnode\u003e --l0 https://kermit.accumulatenetwork.io/v3 --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/audit-chain.md",
+      "technical": "error_code: AUDIT_ANCHOR_INCONSISTENT"
+    },
+    {
+      "code": "AUDIT_ANCHOR_NOT_FOUND",
+      "title": "The node has anchored no audit checkpoint yet",
+      "plainMeaning": "The node has not anchored, and had L0 confirm, a v2 audit checkpoint (the periodic audit_checkpoint anchor that commits to the audit log head), or it runs no anchor.",
+      "fixes": [
+        {
+          "label": "Read the node audit chain head and its anchors",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Retry after the next audit checkpoint interval has passed and L0 confirmed it",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --anchor --node-url \u003cnode\u003e --l0 https://kermit.accumulatenetwork.io/v3",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/audit-chain.md",
+      "technical": "error_code: AUDIT_ANCHOR_NOT_FOUND"
+    },
+    {
+      "code": "AUDIT_ANCHOR_NOT_ON_L0",
+      "title": "L0 does not carry the audit checkpoint",
+      "plainMeaning": "The L0 transaction the audit checkpoint record names does not list its hash among the roots of its batch entry, or could not be read.",
+      "fixes": [
+        {
+          "label": "Check the L0 endpoint is the network the node anchors to",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --anchor --node-url \u003cnode\u003e --l0 https://kermit.accumulatenetwork.io/v3 --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Look the transaction up on L0 directly",
+          "command": "infrix verify \u003cbundle\u003e --l0 https://kermit.accumulatenetwork.io/v3",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/audit-chain.md",
+      "technical": "error_code: AUDIT_ANCHOR_NOT_ON_L0"
+    },
+    {
+      "code": "AUDIT_BAD_QUERY",
+      "title": "The audit-chain query is malformed",
+      "plainMeaning": "A query parameter of the audit-chain read is not what the route takes (for example not an account URL).",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/audit-door.md",
+      "technical": "error_code: AUDIT_BAD_QUERY"
+    },
+    {
+      "code": "AUDIT_CAPABILITY_DENIED",
+      "title": "The caller lacks the audit:read grant",
+      "plainMeaning": "The audit chain is read only by an identity holding the audit:read operator grant.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/audit-door.md",
+      "technical": "error_code: AUDIT_CAPABILITY_DENIED"
+    },
+    {
+      "code": "AUDIT_DISCLOSURE_CONTEXT_REQUIRED",
+      "title": "The audit read carries no disclosure context",
+      "plainMeaning": "X-Actor, X-Purpose and X-Workflow-Instance (or their query forms) are required on every audit-chain read.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/audit-door.md",
+      "technical": "error_code: AUDIT_DISCLOSURE_CONTEXT_REQUIRED"
+    },
+    {
+      "code": "AUDIT_METHOD_NOT_ALLOWED",
+      "title": "The audit chain is read-only",
+      "plainMeaning": "Audit-chain routes take GET only.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/audit-door.md",
+      "technical": "error_code: AUDIT_METHOD_NOT_ALLOWED"
+    },
+    {
+      "code": "AUDIT_NOT_FOUND",
+      "title": "No such audit-chain route",
+      "plainMeaning": "The path names no audit-chain route.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/audit-door.md",
+      "technical": "error_code: AUDIT_NOT_FOUND"
+    },
+    {
+      "code": "AUDIT_UNAVAILABLE",
+      "title": "The node runs no audit chain",
+      "plainMeaning": "This node has no audit chain running, so it answers no audit-chain read.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/audit-door.md",
+      "technical": "error_code: AUDIT_UNAVAILABLE"
+    },
+    {
+      "code": "BAD_REQUEST",
+      "title": "The request is malformed",
+      "plainMeaning": "The request body or a parameter could not be read.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: BAD_REQUEST"
+    },
+    {
+      "code": "CAPABILITY_EXPIRED",
+      "title": "The capability expired",
+      "plainMeaning": "The caller's capability grant passed its expiry.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: CAPABILITY_EXPIRED"
+    },
+    {
+      "code": "CAPABILITY_MISSING",
+      "title": "A capability is missing",
+      "plainMeaning": "The caller holds no capability grant the act requires.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: CAPABILITY_MISSING"
+    },
+    {
+      "code": "CHAIN_ERROR",
+      "title": "The ghost chain refused the request",
+      "plainMeaning": "The ghost chain answered an error for the request; the message names it.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: CHAIN_ERROR"
+    },
+    {
+      "code": "CINEMA_BAD_REQUEST",
+      "title": "The Cinema request is malformed",
+      "plainMeaning": "The route or body is not one the Cinema door takes.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_BAD_REQUEST"
+    },
+    {
+      "code": "CINEMA_CAPABILITY_DENIED",
+      "title": "The caller lacks the Cinema grant",
+      "plainMeaning": "Cinema sessions are viewed (cinema:view) and exported (cinema:export) only by an identity holding that operator grant.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_CAPABILITY_DENIED"
+    },
+    {
+      "code": "CINEMA_CONTEXT_REQUIRED",
+      "title": "The Cinema request carries no disclosure context",
+      "plainMeaning": "X-Actor, X-Purpose and X-Workflow-Instance are required on every Cinema request.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_CONTEXT_REQUIRED"
+    },
+    {
+      "code": "CINEMA_CONTRACT_NOT_SHOWN",
+      "title": "The contract is not shown to this caller",
+      "plainMeaning": "No such contract, or the caller may not see it; the answer is the same either way.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_CONTRACT_NOT_SHOWN"
+    },
+    {
+      "code": "CINEMA_EXPORT_BUSY",
+      "title": "The exporter is busy",
+      "plainMeaning": "The node is already running as many exports as it allows at once.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_EXPORT_BUSY"
+    },
+    {
+      "code": "CINEMA_EXPORT_FILE_MISSING",
+      "title": "The exported file is gone",
+      "plainMeaning": "The export finished but its file is no longer held by the node.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_EXPORT_FILE_MISSING"
+    },
+    {
+      "code": "CINEMA_EXPORT_NOT_FOUND",
+      "title": "The export left no job",
+      "plainMeaning": "The export finished and the node holds no job for it: a defect in the exporter.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_EXPORT_NOT_FOUND"
+    },
+    {
+      "code": "CINEMA_EXPORT_NOT_READY",
+      "title": "The export is still running",
+      "plainMeaning": "The export has not finished; its status says how far it is.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_EXPORT_NOT_READY"
+    },
+    {
+      "code": "CINEMA_EXPORT_REFUSED",
+      "title": "The export was refused",
+      "plainMeaning": "The export request names a format or option the exporter does not take.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_EXPORT_REFUSED"
+    },
+    {
+      "code": "CINEMA_INTENT_NOT_VISIBLE",
+      "title": "The intent is not shown to this caller",
+      "plainMeaning": "Only the intent's submitter, the operator, or a holder of a disclosure grant on it sees its session; the answer is the same whether or not the intent exists.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_INTENT_NOT_VISIBLE"
+    },
+    {
+      "code": "CINEMA_METHOD_NOT_ALLOWED",
+      "title": "The Cinema route takes another method",
+      "plainMeaning": "The route was asked with a method it does not take.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_METHOD_NOT_ALLOWED"
+    },
+    {
+      "code": "CINEMA_NOTHING_TO_RENDER",
+      "title": "The session has nothing to render",
+      "plainMeaning": "The session holds no frame or narrative to render or export.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_NOTHING_TO_RENDER"
+    },
+    {
+      "code": "CINEMA_NOT_SERVED",
+      "title": "The node serves no Cinema",
+      "plainMeaning": "This node has no Cinema engine to serve sessions from.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_NOT_SERVED"
+    },
+    {
+      "code": "CINEMA_RENDER_REFUSED",
+      "title": "The render was refused",
+      "plainMeaning": "The render request names a frame, format or option the renderer does not take.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_RENDER_REFUSED"
+    },
+    {
+      "code": "CINEMA_SESSION_DENIED",
+      "title": "The session was denied by policy",
+      "plainMeaning": "The cinema:visibility policy refused the session.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_SESSION_DENIED"
+    },
+    {
+      "code": "CINEMA_SESSION_FAILED",
+      "title": "The session could not be built",
+      "plainMeaning": "Building the session failed for a reason other than load or policy; the message names it.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_SESSION_FAILED"
+    },
+    {
+      "code": "CINEMA_SESSION_LIMIT",
+      "title": "The Cinema engine is at its session limit",
+      "plainMeaning": "The engine holds as many concurrent sessions as it allows; sessions idle out and free their place.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_SESSION_LIMIT"
+    },
+    {
+      "code": "CINEMA_SESSION_NOT_FOUND",
+      "title": "No such Cinema session",
+      "plainMeaning": "The session id names no session the engine holds (it may have idled out).",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_SESSION_NOT_FOUND"
+    },
+    {
+      "code": "CINEMA_SESSION_NOT_VISIBLE",
+      "title": "The session is not shown to this caller",
+      "plainMeaning": "The caller may not see what the session shows.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_SESSION_NOT_VISIBLE"
+    },
+    {
+      "code": "CINEMA_SESSION_SKIPPED",
+      "title": "The Cinema session was skipped under load",
+      "plainMeaning": "Building the Cinema governance session went past its cinema_trace time budget. Cinema is an observability surface that yields under load, so the node dropped the session it was building and answered 503 with this code.",
+      "fixes": [
+        {
+          "label": "Ask for the session again (POST /v4/cinema/intents/session, with a short back-off); it is built once the node has the time",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/cinema.md",
+      "technical": "error_code: CINEMA_SESSION_SKIPPED"
+    },
+    {
+      "code": "CLAIMS_LOCAL_BACKING_REQUIRED",
+      "title": "High-risk claims need local backing",
+      "plainMeaning": "Strict review found high-risk claims backed only elsewhere in the document, not next to the claim.",
+      "fixes": [
+        {
+          "label": "Show which claims need local backing",
+          "command": "infrix claims lint --strict README.md docs/",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/claims.md",
+      "technical": "error_code: CLAIMS_LOCAL_BACKING_REQUIRED"
+    },
+    {
+      "code": "CLAIMS_UNBACKED",
+      "title": "A public claim has no backing",
+      "plainMeaning": "One or more public claims have no supporting evidence anywhere in the document.",
+      "fixes": [
+        {
+          "label": "List the unbacked claims",
+          "command": "infrix claims lint README.md docs/",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/claims.md",
+      "technical": "error_code: CLAIMS_UNBACKED"
+    },
+    {
       "code": "CLI_USAGE",
       "title": "That flag or command isn't recognized",
       "plainMeaning": "Infrix did not recognize a flag, argument, or subcommand in the command line.",
@@ -1369,6 +3405,280 @@
       ],
       "docs": "docs/errors/README.md",
       "technical": "error_code: CLI_USAGE"
+    },
+    {
+      "code": "CONFIG_LOAD_FAILED",
+      "title": "The production config could not be loaded",
+      "plainMeaning": "Infrix could not read or parse the production config file you pointed it at.",
+      "fixes": [
+        {
+          "label": "Check the path and re-run",
+          "command": "infrix plugin-inventory --instances --config \u003cfile\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Validate the config against the schema",
+          "command": "infrix doctor",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/node-config.md",
+      "technical": "error_code: CONFIG_LOAD_FAILED"
+    },
+    {
+      "code": "CONFIRM_ALREADY_CONFIRMED",
+      "title": "The ghost receipt is already confirmed",
+      "plainMeaning": "The receipt was confirmed before.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: CONFIRM_ALREADY_CONFIRMED"
+    },
+    {
+      "code": "CONFIRM_CALLER_MISMATCH",
+      "title": "The confirmation is made as another account",
+      "plainMeaning": "A ghost receipt is confirmed as the account that asks for it.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: CONFIRM_CALLER_MISMATCH"
+    },
+    {
+      "code": "CONFIRM_CALLER_REQUIRED",
+      "title": "The confirmation names no caller",
+      "plainMeaning": "A ghost confirmation requires the asking account.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: CONFIRM_CALLER_REQUIRED"
+    },
+    {
+      "code": "CONFIRM_COUNTERFACTUAL",
+      "title": "A counterfactual receipt is not confirmed",
+      "plainMeaning": "A counterfactual ghost receipt describes what would happen and cannot be confirmed into a real act.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: CONFIRM_COUNTERFACTUAL"
+    },
+    {
+      "code": "CONFIRM_ERROR",
+      "title": "The confirmation failed",
+      "plainMeaning": "The confirmation failed for a reason that carries no more specific code; the message names it.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: CONFIRM_ERROR"
+    },
+    {
+      "code": "CONFIRM_NOT_SERVED",
+      "title": "The node confirms no ghost receipts",
+      "plainMeaning": "This node serves no ghost confirmation.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: CONFIRM_NOT_SERVED"
+    },
+    {
+      "code": "CONFIRM_NOT_YOUR_RECEIPT",
+      "title": "The receipt is not the caller's",
+      "plainMeaning": "A ghost receipt is confirmed only by the account it was made for.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: CONFIRM_NOT_YOUR_RECEIPT"
+    },
+    {
+      "code": "CONFIRM_RECEIPT_NOT_FOUND",
+      "title": "No such ghost receipt",
+      "plainMeaning": "The receipt id names no receipt the ghost engine holds.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: CONFIRM_RECEIPT_NOT_FOUND"
+    },
+    {
+      "code": "CONFLICT",
+      "title": "Conflict",
+      "plainMeaning": "The request conflicts with the state the node holds (for example the id is taken).",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: CONFLICT"
+    },
+    {
+      "code": "DATA_MIGRATION_NODE_RUNNING",
+      "title": "A node holds this data directory",
+      "plainMeaning": "The migration rewrites the object database and must have it to itself, but a node holds the instance lease on the data directory.",
+      "fixes": [
+        {
+          "label": "See whether the node is up",
+          "command": "infrix node-status --config \u003ccfg\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Stop the node gracefully (SIGTERM), then re-run the migration",
+          "command": "infrix node migrate-data --config \u003ccfg\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/data-migration.md",
+      "technical": "error_code: DATA_MIGRATION_NODE_RUNNING"
+    },
+    {
+      "code": "DATA_MIGRATION_REQUIRED",
+      "title": "This data directory was written by an older binary and needs a data migration",
+      "plainMeaning": "The node refused to boot because a durable record was written before a field the current boot rebuild requires. Infrix will not invent that field at boot: an explicit, audited migration supplies it as a documented bound.",
+      "fixes": [
+        {
+          "label": "Stop the node, then preview the migration (changes nothing; lists every record, field and bound)",
+          "command": "infrix node migrate-data --config \u003ccfg\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Apply it (refuses while a node holds the data directory; writes a verified backup first)",
+          "command": "infrix node migrate-data --config \u003ccfg\u003e --apply",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/data-migration.md",
+      "technical": "error_code: DATA_MIGRATION_REQUIRED"
+    },
+    {
+      "code": "DATA_RECORD_UNRECOVERABLE",
+      "title": "A durable record cannot be upgraded by any migration",
+      "plainMeaning": "A record in this data directory lacks data its old binary never wrote and that no migration can supply without inventing it (for example a workflow instance without its stored state).",
+      "fixes": [
+        {
+          "label": "List every record the tool cannot upgrade (changes nothing)",
+          "command": "infrix node migrate-data --config \u003ccfg\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Restore the record from a backup taken by a binary that wrote the field, or retire it deliberately",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/data-migration.md",
+      "technical": "error_code: DATA_RECORD_UNRECOVERABLE"
+    },
+    {
+      "code": "DID_REFUSED",
+      "title": "The DID or identity proof was refused",
+      "plainMeaning": "The identity policy refused a DID, alias binding, foreign-document admission, key rotation, or storage history; the reason names which rule failed.",
+      "fixes": [
+        {
+          "label": "Inspect the identifier against the canonical grammar",
+          "command": "infrix did inspect \u003cdid\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Export the shared vectors every surface must agree on",
+          "command": "infrix did vectors",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/did.md",
+      "technical": "error_code: DID_REFUSED"
+    },
+    {
+      "code": "DISCLOSURE_ACTOR_MISSING",
+      "title": "No acting identity is configured",
+      "plainMeaning": "Every governed Infrix call must say WHO is asking. Infrix will not guess an identity, because the actor is what decides which data you are allowed to see.",
+      "fixes": [
+        {
+          "label": "Set the actor for this invocation",
+          "command": "infrix intent list --actor acc://your-adi.acme",
+          "safeToRun": true
+        },
+        {
+          "label": "Set it for this shell",
+          "command": "export INFRIX_ACTOR=acc://your-adi.acme",
+          "safeToRun": true
+        },
+        {
+          "label": "Check which identities you hold",
+          "command": "infrix identity list",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/disclosure-context.md",
+      "technical": "error_code: DISCLOSURE_ACTOR_MISSING"
+    },
+    {
+      "code": "DISCLOSURE_REVOKED",
+      "title": "The disclosure was revoked",
+      "plainMeaning": "The disclosure grant the read relied on was revoked.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: DISCLOSURE_REVOKED"
+    },
+    {
+      "code": "DOOR_BAD_PARAMS",
+      "title": "The JSON-RPC door's parameters are invalid",
+      "plainMeaning": "The parameters of a JSON-RPC door method could not be decoded into what the door takes.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: DOOR_BAD_PARAMS"
+    },
+    {
+      "code": "ESCROW_LOCKED",
+      "title": "The escrow is locked",
+      "plainMeaning": "The escrow's terms do not release it now.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: ESCROW_LOCKED"
     },
     {
       "code": "EVIDENCE_MISSING",
@@ -1390,6 +3700,20 @@
       "technical": "error_code: EVIDENCE_MISSING"
     },
     {
+      "code": "EVIDENCE_NOT_ANCHORED",
+      "title": "The evidence is not anchored yet",
+      "plainMeaning": "The evidence bundle has not been anchored to L0 yet; it is once the node's anchor path flushes it.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: EVIDENCE_NOT_ANCHORED"
+    },
+    {
       "code": "EVIDENCE_STALE",
       "title": "The release evidence proves an older commit",
       "plainMeaning": "The release-evidence package proves a commit other than the one being claimed (HEAD).",
@@ -1409,6 +3733,71 @@
       "technical": "error_code: EVIDENCE_STALE"
     },
     {
+      "code": "EVIDENCE_VERIFY_FAILED",
+      "title": "The evidence did not verify",
+      "plainMeaning": "The evidence bundle failed verification; the details name the failing check.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: EVIDENCE_VERIFY_FAILED"
+    },
+    {
+      "code": "FORBIDDEN",
+      "title": "Forbidden",
+      "plainMeaning": "The authenticated caller may not do this.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: FORBIDDEN"
+    },
+    {
+      "code": "GHOST_CALLER_MISMATCH",
+      "title": "A ghost call is made as its asker",
+      "plainMeaning": "A ghost call is made as the account that asks for it; the request named another.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: GHOST_CALLER_MISMATCH"
+    },
+    {
+      "code": "GHOST_EXECUTION_ERROR",
+      "title": "The ghost execution failed",
+      "plainMeaning": "The ghost engine could not execute the call; the message names why.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: GHOST_EXECUTION_ERROR"
+    },
+    {
+      "code": "GHOST_PREVIEW_ERROR",
+      "title": "The ghost preview failed",
+      "plainMeaning": "The ghost engine could not preview the call; the message names why.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: GHOST_PREVIEW_ERROR"
+    },
+    {
       "code": "HUMAN_STUDY_INCOMPLETE",
       "title": "The human study is incomplete",
       "plainMeaning": "The human task-success study has fewer completed sessions, or a lower success rate, than the release threshold requires.",
@@ -1421,6 +3810,127 @@
       ],
       "docs": "docs/errors/human-study.md",
       "technical": "error_code: HUMAN_STUDY_INCOMPLETE"
+    },
+    {
+      "code": "IDENTITY_NOT_VERIFIED",
+      "title": "The identity is not verified",
+      "plainMeaning": "The submitting identity could not be verified against L0.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: IDENTITY_NOT_VERIFIED"
+    },
+    {
+      "code": "INSUFFICIENT_TRUST",
+      "title": "Insufficient trust",
+      "plainMeaning": "A trust profile the act depends on is below the level the act requires.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: INSUFFICIENT_TRUST"
+    },
+    {
+      "code": "INTENT_EXPIRED",
+      "title": "The intent expired",
+      "plainMeaning": "The intent passed its deadline before it ran.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: INTENT_EXPIRED"
+    },
+    {
+      "code": "INTENT_GOAL_PARAMS_INVALID",
+      "title": "The intent's goal parameters are invalid",
+      "plainMeaning": "The node refused the intent at admission: a parameter its goal declares as required is missing or malformed, or a constraint is out of range. The refusal names the goal and the field.",
+      "fixes": [
+        {
+          "label": "Read the goal's declared parameters and resubmit with them",
+          "command": "infrix intent submit --help",
+          "safeToRun": true
+        },
+        {
+          "label": "Preview the intent to see the same refusal without executing",
+          "command": "infrix intent submit --json '{\"goalType\":\"\u003cGOAL\u003e\",\"actor\":\"\u003cadi\u003e\",\"preview\":true,\"customParams\":{}}'",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/intent.md",
+      "technical": "error_code: INTENT_GOAL_PARAMS_INVALID"
+    },
+    {
+      "code": "INTENT_INVALID",
+      "title": "The intent is invalid",
+      "plainMeaning": "The intent was refused at admission; the message names why.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: INTENT_INVALID"
+    },
+    {
+      "code": "INTERNAL_ERROR",
+      "title": "The node failed internally",
+      "plainMeaning": "The node hit an internal error answering the request; the message names it.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: INTERNAL_ERROR"
+    },
+    {
+      "code": "INVALID_REQUEST",
+      "title": "The ghost request is malformed",
+      "plainMeaning": "The request body could not be read.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: INVALID_REQUEST"
+    },
+    {
+      "code": "KEYBOOK_PROOF_UNAVAILABLE",
+      "title": "A delegate key book could not be proved to the lite account's partition",
+      "plainMeaning": "A lite token account names a key book on another partition as its delegate, and the network applies that only with a proof of existence: the book's state and a receipt that ends at a Directory root the lite account's partition holds. The proof could not be built: the delegate is not a key book or does not exist (stage receipt), the Directory had not anchored the delegate partition's BPT root within the window or the endpoint serves no proof service (stage anchor), or the lite account's partition did not yet hold the Directory root (stage held).",
+      "fixes": [
+        {
+          "label": "Check the delegate URL names an existing key book (stage receipt); nothing was signed, so correct it and run the act again",
+          "safeToRun": false
+        },
+        {
+          "label": "Stage anchor or held: the network was still anchoring; retry the act. A quiet partition anchors only when a block changes an account",
+          "command": "infrix doctor --persona operator",
+          "safeToRun": true
+        },
+        {
+          "label": "Stage anchor naming an endpoint that does not serve anchor-receipt: point the node at an L0 endpoint that serves the proof service",
+          "command": "infrix l0 compat --endpoint \u003cl0-endpoint\u003e",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/l0.md",
+      "technical": "error_code: KEYBOOK_PROOF_UNAVAILABLE"
     },
     {
       "code": "L0_ANCHOR_UNAVAILABLE",
@@ -1474,6 +3984,20 @@
       "retryGuidance": "This is often transient — wait a moment and try again.",
       "docs": "docs/errors/l0.md",
       "technical": "error_code: L0_FINALITY_TIMEOUT"
+    },
+    {
+      "code": "L0_INCOMPATIBLE",
+      "title": "This build cannot talk to the L0 network",
+      "plainMeaning": "The Accumulate network answered, but this binary's Accumulate library cannot decode its response: the network has been upgraded past the library this build was made with (for example a new executor version).",
+      "fixes": [
+        {
+          "label": "Confirm the incompatibility against the endpoint",
+          "command": "infrix l0 compat --endpoint \u003cl0-endpoint\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/l0.md",
+      "technical": "error_code: L0_INCOMPATIBLE"
     },
     {
       "code": "L0_KEY_NOT_ON_PAGE",
@@ -1567,6 +4091,20 @@
       ],
       "docs": "docs/errors/release-evidence.md",
       "technical": "error_code: LAUNCH_PREREQUISITES_MISSING"
+    },
+    {
+      "code": "LAUNCH_SCOPE_EXCLUDED",
+      "title": "The goal is outside this node's launch scope",
+      "plainMeaning": "The node refused the intent at submission: its operator declared that this node's launch does not offer this goal (config.launchScope). The refusal names the goal and the decision that excluded it.",
+      "fixes": [
+        {
+          "label": "See the launch scope this node's config declares",
+          "command": "infrix node-validate --config \u003cconfig.yaml\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/intent.md",
+      "technical": "error_code: LAUNCH_SCOPE_EXCLUDED"
     },
     {
       "code": "LOCAL_PHASE_TIMEOUT",
@@ -1677,6 +4215,19 @@
       "technical": "error_code: METAMASK_USER_REJECTED"
     },
     {
+      "code": "METHOD_NOT_ALLOWED",
+      "title": "The ghost route takes another method",
+      "plainMeaning": "The route was asked with a method it does not take.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: METHOD_NOT_ALLOWED"
+    },
+    {
       "code": "NETWORK_POSTURE_MISMATCH",
       "title": "The config's network does not match the claim",
       "plainMeaning": "The config's bound network (its name, contents, and NETWORK_POSTURE_MANIFEST entry) disagrees with --claim-network — e.g. a mainnet config used for a Kermit claim — or a template/unmanifested config was used where a network-bound one is required.",
@@ -1713,6 +4264,164 @@
       ],
       "docs": "docs/errors/network-trust.md",
       "technical": "error_code: NETWORK_TRUST_DENIED"
+    },
+    {
+      "code": "NODE_APPROVAL_REQUIRED",
+      "title": "The node parked the intent for approval",
+      "plainMeaning": "The node admitted the intent and its waiver policy requires signed approvals before the plan may run; this invocation holds no approver that can give them (none was passed, or a stage's threshold is above the distinct identities passed). The stages, roles and thresholds are in the cause.",
+      "fixes": [
+        {
+          "label": "Re-run with the approving identity and its key (add --approver-identity-2 and --approver-key-2 for a threshold above one)",
+          "command": "infrix new verifiable-app \u003cname\u003e \"\u003cintent\u003e\" --node --rpc \u003cnode\u003e --actor \u003cadi\u003e --workflow-definition \u003cid\u003e --approver-identity \u003cadi\u003e --approver-key \u003ckey-file\u003e",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/node-auth.md",
+      "technical": "error_code: NODE_APPROVAL_REQUIRED"
+    },
+    {
+      "code": "NODE_AUTH_REQUIRED",
+      "title": "The node requires an API bearer token",
+      "plainMeaning": "The node answered 401: it enforces api.auth, and this request carried no bearer token or one the node does not accept.",
+      "fixes": [
+        {
+          "label": "Set it for this shell (preferred: a flag value lands in shell history and the process list)",
+          "command": "export INFRIX_API_TOKEN=\u003ctoken\u003e",
+          "safeToRun": false
+        },
+        {
+          "label": "Or pass it for this invocation only",
+          "command": "infrix \u003ccommand\u003e --api-token \u003ctoken\u003e",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/node-auth.md",
+      "technical": "error_code: NODE_AUTH_REQUIRED"
+    },
+    {
+      "code": "NODE_BOOT_FAILED",
+      "title": "The node refused to boot from this config",
+      "plainMeaning": "The config loaded, but the node rejected it as invalid before booting (for example a required field such as blockPeriodMs is missing, or a claimed rule pack or settlement domain is not actually available).",
+      "fixes": [
+        {
+          "label": "Read the exact rejection cause above, fix the named field, then re-check the config",
+          "command": "infrix node-validate --config \u003cfile\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Render the per-instance readiness matrix once it loads",
+          "command": "infrix plugin-inventory --instances --config \u003cfile\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/node-config.md",
+      "technical": "error_code: NODE_BOOT_FAILED"
+    },
+    {
+      "code": "NODE_OWNED_ACTION",
+      "title": "That action is the node's own and cannot be submitted",
+      "plainMeaning": "The node refused the intent at admission: the (subsystem, action) it names is an act the node performs on itself and records as its own system intent. A well-formed request cannot make it a request.",
+      "fixes": [
+        {
+          "label": "Read the goal catalogue for the governed door that serves what you meant",
+          "command": "infrix intent submit --help",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/intent.md",
+      "technical": "error_code: NODE_OWNED_ACTION"
+    },
+    {
+      "code": "NODE_REQUEST_REFUSED",
+      "title": "The node refused the request",
+      "plainMeaning": "The node read the request and answered with a 4xx other than 401: a value outside what the route accepts, a missing disclosure context, or an object the node does not hold. The node's own error code and message are in the cause and the support data (httpStatus, nodeCode).",
+      "fixes": [
+        {
+          "label": "Read the node's reason in full",
+          "command": "infrix \u003ccommand\u003e --verbose",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/node-auth.md",
+      "technical": "error_code: NODE_REQUEST_REFUSED"
+    },
+    {
+      "code": "NOT_ACCEPTABLE",
+      "title": "Not acceptable",
+      "plainMeaning": "The node cannot answer in the representation the request accepts.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: NOT_ACCEPTABLE"
+    },
+    {
+      "code": "NOT_FOUND",
+      "title": "Not found",
+      "plainMeaning": "The request names nothing the node holds.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: NOT_FOUND"
+    },
+    {
+      "code": "OBJECT_TRANSITION_INVALID",
+      "title": "The object transition is invalid",
+      "plainMeaning": "The object's schema does not allow the transition from its current state.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: OBJECT_TRANSITION_INVALID"
+    },
+    {
+      "code": "PLAN_DRIFT_EXCEEDED",
+      "title": "The plan drifted too far",
+      "plainMeaning": "Execution drifted from the plan beyond the plan's drift threshold, so it was stopped.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: PLAN_DRIFT_EXCEEDED"
+    },
+    {
+      "code": "PLAN_HASH_MISMATCH",
+      "title": "The plan hash does not match",
+      "plainMeaning": "The plan hash an approval or request names is not the plan's.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: PLAN_HASH_MISMATCH"
+    },
+    {
+      "code": "POLICY_DENIED",
+      "title": "Denied by policy",
+      "plainMeaning": "A policy refused the act; the details name the policy and its decision.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: POLICY_DENIED"
     },
     {
       "code": "PROFILE_LIVE_L0_MISSING",
@@ -1783,6 +4492,20 @@
       ],
       "docs": "docs/errors/profile-tls-missing.md",
       "technical": "error_code: PROFILE_TLS_MISSING"
+    },
+    {
+      "code": "PROFILE_VALIDATION_FAILED",
+      "title": "The config does not satisfy the required posture profile",
+      "plainMeaning": "The config loaded, but it does not meet the named production posture profile (for example public_production requires live L0 signer material, a state mirror, TLS, encrypted storage, billing throttling, and a real identity verifier).",
+      "fixes": [
+        {
+          "label": "See exactly which posture requirements failed",
+          "command": "infrix node-validate --config \u003cfile\u003e --profile public_production",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/node-config.md",
+      "technical": "error_code: PROFILE_VALIDATION_FAILED"
     },
     {
       "code": "PROOF_L0_UNAVAILABLE",
@@ -1897,6 +4620,254 @@
       "technical": "error_code: PROOF_WITNESS_QUORUM_MISSING"
     },
     {
+      "code": "PROTOCOL_ALREADY_PROCESSED",
+      "title": "The envelope was already processed",
+      "plainMeaning": "The transaction hash is already in the processor's ledger: a replay is answered from the ledger and never run again. To send again, change the memo.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_ALREADY_PROCESSED"
+    },
+    {
+      "code": "PROTOCOL_BAD_ENVELOPE",
+      "title": "The envelope is malformed",
+      "plainMeaning": "The envelope could not be decoded into a transaction.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_BAD_ENVELOPE"
+    },
+    {
+      "code": "PROTOCOL_BAD_REQUEST",
+      "title": "The protocol envelope is malformed",
+      "plainMeaning": "The envelope or its parameters are not what the protocol route takes.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_BAD_REQUEST"
+    },
+    {
+      "code": "PROTOCOL_CAPABILITY_DENIED",
+      "title": "The caller lacks the protocol:process grant",
+      "plainMeaning": "Envelopes are processed only for an identity holding the protocol:process operator grant.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_CAPABILITY_DENIED"
+    },
+    {
+      "code": "PROTOCOL_DISCLOSURE_CONTEXT_REQUIRED",
+      "title": "The protocol request carries no disclosure context",
+      "plainMeaning": "actor, purpose and workflowInstance are required.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_DISCLOSURE_CONTEXT_REQUIRED"
+    },
+    {
+      "code": "PROTOCOL_ENVELOPE_UNSIGNED",
+      "title": "The envelope is unsigned",
+      "plainMeaning": "The envelope carries no signature.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_ENVELOPE_UNSIGNED"
+    },
+    {
+      "code": "PROTOCOL_FIELD_NOT_SUPPORTED",
+      "title": "A field is not supported",
+      "plainMeaning": "The transaction states a field the node cannot honour; it is refused before the ledger is claimed, and the sender removes the field.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_FIELD_NOT_SUPPORTED"
+    },
+    {
+      "code": "PROTOCOL_INITIATOR_MISMATCH",
+      "title": "The initiator does not match",
+      "plainMeaning": "The transaction's initiator is missing, is the hash of no signature in the envelope, or is the signature of a key page that is not the principal's.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_INITIATOR_MISMATCH"
+    },
+    {
+      "code": "PROTOCOL_METHOD_NOT_ALLOWED",
+      "title": "The protocol route takes POST",
+      "plainMeaning": "The route was asked with a method other than POST.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_METHOD_NOT_ALLOWED"
+    },
+    {
+      "code": "PROTOCOL_NOT_FOUND",
+      "title": "No such protocol route",
+      "plainMeaning": "The path names no protocol route.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_NOT_FOUND"
+    },
+    {
+      "code": "PROTOCOL_OUTCOME_UNKNOWN",
+      "title": "The envelope's outcome is unknown",
+      "plainMeaning": "The transaction was claimed in the ledger but the node stopped before its answer: it is never run again, and its outcome is read back, not resubmitted.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_OUTCOME_UNKNOWN"
+    },
+    {
+      "code": "PROTOCOL_PIPELINE_REFUSED",
+      "title": "The governance pipeline refused the transaction",
+      "plainMeaning": "The pipeline refused the transaction after it was claimed: it is consumed, and to try again the sender changes the memo.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_PIPELINE_REFUSED"
+    },
+    {
+      "code": "PROTOCOL_PRINCIPAL_MISMATCH",
+      "title": "The principal is not the caller",
+      "plainMeaning": "The envelope's principal is not the authenticated actor.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_PRINCIPAL_MISMATCH"
+    },
+    {
+      "code": "PROTOCOL_SIGNATURE_INVALID",
+      "title": "A signature is invalid",
+      "plainMeaning": "A signature does not verify, or does not sign this transaction.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_SIGNATURE_INVALID"
+    },
+    {
+      "code": "PROTOCOL_SIGNATURE_UNSUPPORTED",
+      "title": "A signature kind is unsupported",
+      "plainMeaning": "A signature of a kind this door cannot honour (not a key signature).",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_SIGNATURE_UNSUPPORTED"
+    },
+    {
+      "code": "PROTOCOL_SIGNER_NOT_AUTHORIZED",
+      "title": "The signer is not authorised",
+      "plainMeaning": "The signing key is not on the signer's key page, the page is not the principal's, or the page moved to another version.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_SIGNER_NOT_AUTHORIZED"
+    },
+    {
+      "code": "PROTOCOL_SIGNER_UNAVAILABLE",
+      "title": "The signer's key page could not be read",
+      "plainMeaning": "The key page could not be read from L0, so the signature was neither admitted nor refused; an unreachable L0 passes.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_SIGNER_UNAVAILABLE"
+    },
+    {
+      "code": "PROTOCOL_TX_TYPE_NOT_ALLOWED",
+      "title": "The transaction type is not allowed",
+      "plainMeaning": "The protocol door does not process this transaction type.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_TX_TYPE_NOT_ALLOWED"
+    },
+    {
+      "code": "PROTOCOL_UNAVAILABLE",
+      "title": "The block processor is not running",
+      "plainMeaning": "The node's protocol block processor is not running or has stopped.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_UNAVAILABLE"
+    },
+    {
       "code": "PROVIDER_EVIDENCE_MISSING",
       "title": "Wallet/provider acceptance evidence is missing",
       "plainMeaning": "A wallet/provider (e.g. MetaMask) acceptance bundle is absent, or it does not bind to the claimed commit.",
@@ -1930,6 +4901,19 @@
       "technical": "error_code: PUBLICATION_STALE"
     },
     {
+      "code": "RECEIPT_NOT_FOUND",
+      "title": "No such ghost receipt",
+      "plainMeaning": "The receipt id names no receipt the ghost engine holds.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ghost.md",
+      "technical": "error_code: RECEIPT_NOT_FOUND"
+    },
+    {
       "code": "RECEIPT_OVERCLAIM",
       "title": "The receipt claims more than it backs",
       "plainMeaning": "A shareable receipt asserts a higher assurance than its evidence supports (e.g. claims L4 with no live-L0 confirmation).",
@@ -1947,6 +4931,19 @@
       ],
       "docs": "docs/errors/proofs.md",
       "technical": "error_code: RECEIPT_OVERCLAIM"
+    },
+    {
+      "code": "ROLE_UNAUTHORIZED",
+      "title": "The role does not authorise this",
+      "plainMeaning": "The caller holds no role the act requires.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: ROLE_UNAUTHORIZED"
     },
     {
       "code": "SDK_BALANCE_UNAVAILABLE",
@@ -2005,6 +5002,282 @@
       "technical": "error_code: SDK_PROOF_UNAVAILABLE"
     },
     {
+      "code": "SERVICE_UNAVAILABLE",
+      "title": "The service is not configured",
+      "plainMeaning": "The node has no such service configured (for example no governance pipeline).",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: SERVICE_UNAVAILABLE"
+    },
+    {
+      "code": "SESSION_ACTOR_MISMATCH",
+      "title": "The request is not made as the delegating ADI",
+      "plainMeaning": "A session answers as the ADI that delegated it; X-Actor named another identity.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_ACTOR_MISMATCH"
+    },
+    {
+      "code": "SESSION_AUTHORITY_UNAVAILABLE",
+      "title": "The grant's key page could not be read",
+      "plainMeaning": "The delegating ADI's key page could not be read from L0, so the grant is neither honoured nor judged forged. An unreachable L0 passes; a key page that does not exist never will.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_AUTHORITY_UNAVAILABLE"
+    },
+    {
+      "code": "SESSION_BAD_REQUEST",
+      "title": "The session request is malformed",
+      "plainMeaning": "The request body could not be read or is missing a field the route requires.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_BAD_REQUEST"
+    },
+    {
+      "code": "SESSION_CAPABILITY_DENIED",
+      "title": "The caller lacks the session grant",
+      "plainMeaning": "Session submission and revocation require the session:submit or session:revoke operator grant.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_CAPABILITY_DENIED"
+    },
+    {
+      "code": "SESSION_DISCLOSURE_CONTEXT_REQUIRED",
+      "title": "The session request carries no disclosure context",
+      "plainMeaning": "X-Actor, X-Purpose and X-Workflow-Instance are required, and X-Actor must be the delegating ADI.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_DISCLOSURE_CONTEXT_REQUIRED"
+    },
+    {
+      "code": "SESSION_GRANT_EXPIRED",
+      "title": "The session grant expired",
+      "plainMeaning": "The grant is past its expiry.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_GRANT_EXPIRED"
+    },
+    {
+      "code": "SESSION_GRANT_INVALID",
+      "title": "The session grant does not verify",
+      "plainMeaning": "The grant is not signed by a key on the delegating ADI's key page, or it is revoked or expired.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_GRANT_INVALID"
+    },
+    {
+      "code": "SESSION_GRANT_NOT_YET_VALID",
+      "title": "The session grant is not valid yet",
+      "plainMeaning": "The grant's validity window has not started; the same grant is honoured once it has.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_GRANT_NOT_YET_VALID"
+    },
+    {
+      "code": "SESSION_GRANT_REVOKED",
+      "title": "The session grant was revoked",
+      "plainMeaning": "The grant was revoked by its delegating ADI.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_GRANT_REVOKED"
+    },
+    {
+      "code": "SESSION_METHOD_NOT_ALLOWED",
+      "title": "Session routes take POST",
+      "plainMeaning": "The route was asked with a method other than POST.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_METHOD_NOT_ALLOWED"
+    },
+    {
+      "code": "SESSION_NOT_FOUND",
+      "title": "No such session route",
+      "plainMeaning": "The path names no session route.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_NOT_FOUND"
+    },
+    {
+      "code": "SESSION_OUT_OF_SCOPE",
+      "title": "The request is outside the grant",
+      "plainMeaning": "The request names a contract the session grant does not list.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_OUT_OF_SCOPE"
+    },
+    {
+      "code": "SESSION_REQUEST_REPLAYED",
+      "title": "The session request was already submitted",
+      "plainMeaning": "A signed session request is accepted once; this one was seen before.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_REQUEST_REPLAYED"
+    },
+    {
+      "code": "SESSION_REQUEST_SIGNATURE_INVALID",
+      "title": "The request signature is invalid",
+      "plainMeaning": "The request is not signed by the session key the grant names.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_REQUEST_SIGNATURE_INVALID"
+    },
+    {
+      "code": "SESSION_REQUEST_STALE",
+      "title": "The session request is stale",
+      "plainMeaning": "The request was signed more than two minutes from the node's time, or before the node started; the same request is refused again, a newly signed one is not.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_REQUEST_STALE"
+    },
+    {
+      "code": "SESSION_REVOCATION_NOT_DURABLE",
+      "title": "The revocation is not durable",
+      "plainMeaning": "The grant is revoked in memory, but the revocation could not be written to disk and would not survive a restart; revoking again writes it again.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_REVOCATION_NOT_DURABLE"
+    },
+    {
+      "code": "SESSION_SIGNER_NOT_AUTHORIZED",
+      "title": "The grant's signer is not authorised",
+      "plainMeaning": "The key that signed the grant is not on the delegating ADI's key page.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_SIGNER_NOT_AUTHORIZED"
+    },
+    {
+      "code": "SESSION_UNAVAILABLE",
+      "title": "The node runs no session door",
+      "plainMeaning": "This node's session door is not running.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_UNAVAILABLE"
+    },
+    {
+      "code": "SESSION_WINDOW_TOO_LONG",
+      "title": "The session window is too long",
+      "plainMeaning": "A session grant is honoured for at most the node's maximum session lifetime.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/session-door.md",
+      "technical": "error_code: SESSION_WINDOW_TOO_LONG"
+    },
+    {
+      "code": "SETTLEMENT_DISPUTED",
+      "title": "The settlement is disputed",
+      "plainMeaning": "The settlement has an open dispute; it moves only once the dispute is resolved.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: SETTLEMENT_DISPUTED"
+    },
+    {
       "code": "SETUP_GO_MISSING",
       "title": "Go is not installed",
       "plainMeaning": "Infrix needs the Go toolchain to build and run, but `go` was not found.",
@@ -2049,7 +5322,7 @@
       "fixes": [
         {
           "label": "Install the SDK dependencies",
-          "command": "npm install --prefix sdk/typescript",
+          "command": "npm install @infrix/client",
           "safeToRun": true
         }
       ],
@@ -2091,6 +5364,848 @@
       "technical": "error_code: SETUP_RUST_WASM_TARGET_MISSING"
     },
     {
+      "code": "STATEMIRROR_CAPABILITY_DENIED",
+      "title": "The caller lacks the state-mirror grant",
+      "plainMeaning": "The state-mirror status is read only by an identity holding its operator grant.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/state-mirror-door.md",
+      "technical": "error_code: STATEMIRROR_CAPABILITY_DENIED"
+    },
+    {
+      "code": "STATEMIRROR_DISCLOSURE_CONTEXT_REQUIRED",
+      "title": "The state-mirror read carries no disclosure context",
+      "plainMeaning": "X-Actor, X-Purpose and X-Workflow-Instance (or their query forms) are required.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/state-mirror-door.md",
+      "technical": "error_code: STATEMIRROR_DISCLOSURE_CONTEXT_REQUIRED"
+    },
+    {
+      "code": "STATEMIRROR_METHOD_NOT_ALLOWED",
+      "title": "The state-mirror status is read-only",
+      "plainMeaning": "State-mirror routes take GET only.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/state-mirror-door.md",
+      "technical": "error_code: STATEMIRROR_METHOD_NOT_ALLOWED"
+    },
+    {
+      "code": "STATEMIRROR_NOT_FOUND",
+      "title": "No such state-mirror route",
+      "plainMeaning": "The path names no state-mirror route.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/state-mirror-door.md",
+      "technical": "error_code: STATEMIRROR_NOT_FOUND"
+    },
+    {
+      "code": "STATEMIRROR_UNAVAILABLE",
+      "title": "The node answers no state-mirror read",
+      "plainMeaning": "No operator-capability check is wired on this node, so the state-mirror status answers no one.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/state-mirror-door.md",
+      "technical": "error_code: STATEMIRROR_UNAVAILABLE"
+    },
+    {
+      "code": "SUBMISSION_OUTCOME_UNKNOWN",
+      "title": "A submission's outcome is unknown",
+      "plainMeaning": "The request was completely written to the L0 endpoint and no answer was read (a closed connection, a reset, a deadline), so the network MAY have executed the transaction. It is neither failed nor confirmed.",
+      "fixes": [
+        {
+          "label": "Do NOT resubmit or re-sign. Read the transaction ids named in the error back from the network (a query by message id), then act on what it reports: delivered, failed, pending, or absent (absent does not prove it was not delivered).",
+          "safeToRun": false
+        },
+        {
+          "label": "A node settles its own unresolved anchors and settlements by reading them back; check the node's status for records that are still unresolved",
+          "command": "infrix doctor --persona operator",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/submission-outcome.md",
+      "technical": "error_code: SUBMISSION_OUTCOME_UNKNOWN"
+    },
+    {
+      "code": "TOKEN_ARRAY_LENGTH_MISMATCH",
+      "title": "The arrays differ in length",
+      "plainMeaning": "A batch act's id and amount arrays are not the same length.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_ARRAY_LENGTH_MISMATCH"
+    },
+    {
+      "code": "TOKEN_BAD_REQUEST",
+      "title": "The token act is malformed",
+      "plainMeaning": "A parameter of the token act is missing, malformed or out of its limit.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BAD_REQUEST"
+    },
+    {
+      "code": "TOKEN_BLOCK_UNAVAILABLE",
+      "title": "The node gives the token door no block height",
+      "plainMeaning": "A voting token cannot checkpoint on a node that gives its token door no block height.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BLOCK_UNAVAILABLE"
+    },
+    {
+      "code": "TOKEN_BRIDGE_ACCOUNT_NOT_OWNED",
+      "title": "The account is not the acting identity's",
+      "plainMeaning": "A bridge deposit moves only the acting identity's own account.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_ACCOUNT_NOT_OWNED"
+    },
+    {
+      "code": "TOKEN_BRIDGE_ALREADY_SETTLED",
+      "title": "The bridge record is already settled",
+      "plainMeaning": "The bridge record is in a final state.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_ALREADY_SETTLED"
+    },
+    {
+      "code": "TOKEN_BRIDGE_AMOUNT_OUT_OF_RANGE",
+      "title": "The bridge amount does not fit L0",
+      "plainMeaning": "The amount does not fit the 64 bits of an L0 amount.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_AMOUNT_OUT_OF_RANGE"
+    },
+    {
+      "code": "TOKEN_BRIDGE_BAD_ACCOUNT",
+      "title": "The bridge account is not an Accumulate account",
+      "plainMeaning": "The named account is not an Accumulate account URL.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_BAD_ACCOUNT"
+    },
+    {
+      "code": "TOKEN_BRIDGE_DEPOSIT_CLAIMED",
+      "title": "The deposit has already minted",
+      "plainMeaning": "An L0 deposit mints once; this transaction already minted.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_DEPOSIT_CLAIMED"
+    },
+    {
+      "code": "TOKEN_BRIDGE_ESCROW_INVALID",
+      "title": "The bridge configuration is invalid",
+      "plainMeaning": "The token's L0 issuer or escrow is not an Accumulate token URL.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_ESCROW_INVALID"
+    },
+    {
+      "code": "TOKEN_BRIDGE_ESCROW_TAKEN",
+      "title": "The escrow belongs to another token",
+      "plainMeaning": "The escrow account is already the escrow of another token.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_ESCROW_TAKEN"
+    },
+    {
+      "code": "TOKEN_BRIDGE_INSOLVENT",
+      "title": "The bridge would go negative",
+      "plainMeaning": "The act would make a bridge balance negative.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_INSOLVENT"
+    },
+    {
+      "code": "TOKEN_BRIDGE_L0_REFUSED",
+      "title": "L0 refused the bridge transaction",
+      "plainMeaning": "The network refused the bridge's L0 transaction; the record says why.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_L0_REFUSED"
+    },
+    {
+      "code": "TOKEN_BRIDGE_L0_UNAVAILABLE",
+      "title": "L0 could not answer",
+      "plainMeaning": "The L0 ledger could not answer the bridge's read; nothing was changed.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_L0_UNAVAILABLE"
+    },
+    {
+      "code": "TOKEN_BRIDGE_NOT_ANCHORED",
+      "title": "The deposit is not anchored",
+      "plainMeaning": "The claimed deposit is not held under enough L0 root anchors (or is not the transaction it claims to be). A genuine deposit that is not yet deep enough is claimable once L0 has anchored it; a forged or misstated one never is.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_NOT_ANCHORED"
+    },
+    {
+      "code": "TOKEN_BRIDGE_NOT_CONFIGURED",
+      "title": "The token has no L0 bridge",
+      "plainMeaning": "The token was created without an L0 bridge (l0Issuer and bridgeEscrow).",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_NOT_CONFIGURED"
+    },
+    {
+      "code": "TOKEN_BRIDGE_NOT_DELEGATED",
+      "title": "The account has not delegated to the node",
+      "plainMeaning": "The node's signing key is not in the bridge account's authority list.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_NOT_DELEGATED"
+    },
+    {
+      "code": "TOKEN_BRIDGE_NOT_FOUND",
+      "title": "No such bridge record",
+      "plainMeaning": "The token holds no bridge record with that id.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_NOT_FOUND"
+    },
+    {
+      "code": "TOKEN_BRIDGE_UNRESOLVED",
+      "title": "The bridge outcome is unresolved",
+      "plainMeaning": "The record holds no L0 transaction id (the node stopped between its journal and its submission): nothing is signed again, and the account history settles it.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_BRIDGE_UNRESOLVED"
+    },
+    {
+      "code": "TOKEN_CAPABILITY_DENIED",
+      "title": "The caller lacks the token grant",
+      "plainMeaning": "The token act requires a grant the caller does not hold.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_CAPABILITY_DENIED"
+    },
+    {
+      "code": "TOKEN_CONTRACT_EXISTS",
+      "title": "A token already exists there",
+      "plainMeaning": "A token is already created at the URL.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_CONTRACT_EXISTS"
+    },
+    {
+      "code": "TOKEN_CONTRACT_UNKNOWN",
+      "title": "No token exists there",
+      "plainMeaning": "No token is created at the URL.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_CONTRACT_UNKNOWN"
+    },
+    {
+      "code": "TOKEN_CREATE_FORBIDDEN",
+      "title": "The node lets no actor create a token",
+      "plainMeaning": "This node has no gate that lets an actor create a token.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_CREATE_FORBIDDEN"
+    },
+    {
+      "code": "TOKEN_DEPOSIT_NOT_ANCHORED",
+      "title": "The deposit is not anchored",
+      "plainMeaning": "The deposit is not held under enough L0 anchors (or is not the transaction it claims to be). A genuine deposit that is not yet deep enough is claimable once L0 has anchored it.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_DEPOSIT_NOT_ANCHORED"
+    },
+    {
+      "code": "TOKEN_DEPOSIT_REPLAYED",
+      "title": "The deposit was already used",
+      "plainMeaning": "An L0 deposit is used once; this one was.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_DEPOSIT_REPLAYED"
+    },
+    {
+      "code": "TOKEN_ID_ALREADY_MINTED",
+      "title": "The token id is already minted",
+      "plainMeaning": "A token with this id already exists.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_ID_ALREADY_MINTED"
+    },
+    {
+      "code": "TOKEN_ID_NOT_FOUND",
+      "title": "No such snapshot",
+      "plainMeaning": "The snapshot id was not taken on this token.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_ID_NOT_FOUND"
+    },
+    {
+      "code": "TOKEN_INSUFFICIENT_ALLOWANCE",
+      "title": "The allowance is insufficient",
+      "plainMeaning": "The spender's allowance is below the amount.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_INSUFFICIENT_ALLOWANCE"
+    },
+    {
+      "code": "TOKEN_INSUFFICIENT_BALANCE",
+      "title": "The balance is insufficient",
+      "plainMeaning": "The account's balance is below the amount.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_INSUFFICIENT_BALANCE"
+    },
+    {
+      "code": "TOKEN_INVALID_AMOUNT",
+      "title": "The amount is invalid",
+      "plainMeaning": "The amount must be above zero.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_INVALID_AMOUNT"
+    },
+    {
+      "code": "TOKEN_L0_DATA_ACCOUNT_BOUND",
+      "title": "The token's metadata lives elsewhere",
+      "plainMeaning": "The token's metadata is bound to another L0 data account and cannot move.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_L0_DATA_ACCOUNT_BOUND"
+    },
+    {
+      "code": "TOKEN_L0_DATA_ACCOUNT_NOT_OWNED",
+      "title": "The data account is not the acting identity's",
+      "plainMeaning": "Metadata is written only to the acting identity's own L0 data account.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_L0_DATA_ACCOUNT_NOT_OWNED"
+    },
+    {
+      "code": "TOKEN_L0_DATA_BAD_ACCOUNT",
+      "title": "Not an L0 data account",
+      "plainMeaning": "The named account is not an L0 data account.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_L0_DATA_BAD_ACCOUNT"
+    },
+    {
+      "code": "TOKEN_L0_DATA_NOT_DELEGATED",
+      "title": "The data account has not delegated to the node",
+      "plainMeaning": "The node's signing key is not in the data account's authority list.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_L0_DATA_NOT_DELEGATED"
+    },
+    {
+      "code": "TOKEN_L0_DATA_REFUSED",
+      "title": "L0 refused the metadata write",
+      "plainMeaning": "The network refused the write to the data account.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_L0_DATA_REFUSED"
+    },
+    {
+      "code": "TOKEN_L0_DATA_UNAVAILABLE",
+      "title": "L0 could not answer the metadata read",
+      "plainMeaning": "Reading an entry of the data account failed; nothing was changed.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_L0_DATA_UNAVAILABLE"
+    },
+    {
+      "code": "TOKEN_L0_DATA_UNRESOLVED",
+      "title": "The metadata write is unresolved",
+      "plainMeaning": "The write's outcome is unknown; its transaction ids are read back, never signed again.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_L0_DATA_UNRESOLVED"
+    },
+    {
+      "code": "TOKEN_MAX_SUPPLY_EXCEEDED",
+      "title": "The maximum supply would be exceeded",
+      "plainMeaning": "The mint would take the supply above the token's maximum.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_MAX_SUPPLY_EXCEEDED"
+    },
+    {
+      "code": "TOKEN_METADATA_INVALID",
+      "title": "The metadata is invalid",
+      "plainMeaning": "Metadata must be a JSON object.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_METADATA_INVALID"
+    },
+    {
+      "code": "TOKEN_METADATA_NOT_FOUND",
+      "title": "No metadata is stored for the token",
+      "plainMeaning": "The token is bound to no L0 data account.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_METADATA_NOT_FOUND"
+    },
+    {
+      "code": "TOKEN_NOT_APPROVED",
+      "title": "The caller is not approved",
+      "plainMeaning": "The caller is not approved for the token or the owner's tokens.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_NOT_APPROVED"
+    },
+    {
+      "code": "TOKEN_NOT_MINTER",
+      "title": "The caller is not a minter",
+      "plainMeaning": "Only a minter of the token may mint.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_NOT_MINTER"
+    },
+    {
+      "code": "TOKEN_NOT_OWNER",
+      "title": "The caller may not do this",
+      "plainMeaning": "Only the record's initiator or the token's owner may.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_NOT_OWNER"
+    },
+    {
+      "code": "TOKEN_NOT_VISIBLE",
+      "title": "The token is not shown to this caller",
+      "plainMeaning": "No such token, or the caller may not see it.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_NOT_VISIBLE"
+    },
+    {
+      "code": "TOKEN_OPERATION_DISABLED",
+      "title": "The operation is disabled",
+      "plainMeaning": "The token was created with this operation disabled.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_OPERATION_DISABLED"
+    },
+    {
+      "code": "TOKEN_PAUSED",
+      "title": "The token is paused",
+      "plainMeaning": "The token is paused; its owner unpauses it by a governed act.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_PAUSED"
+    },
+    {
+      "code": "TOKEN_PERMIT_EXPIRED",
+      "title": "The permit expired",
+      "plainMeaning": "The permit is past its deadline.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_PERMIT_EXPIRED"
+    },
+    {
+      "code": "TOKEN_PERMIT_INVALID",
+      "title": "The permit is invalid",
+      "plainMeaning": "The permit's signature or nonce does not verify.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_PERMIT_INVALID"
+    },
+    {
+      "code": "TOKEN_RECEIVER_REJECTED",
+      "title": "The receiver rejected the transfer",
+      "plainMeaning": "The receiving contract's hook did not accept the safe transfer.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_RECEIVER_REJECTED"
+    },
+    {
+      "code": "TOKEN_REFUSED",
+      "title": "The token act was refused",
+      "plainMeaning": "The act did not happen; the message names why (an error that carries no more specific code).",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_REFUSED"
+    },
+    {
+      "code": "TOKEN_ROYALTY_TOO_HIGH",
+      "title": "The royalty is above the cap",
+      "plainMeaning": "The royalty is above the collection's royalty cap.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_ROYALTY_TOO_HIGH"
+    },
+    {
+      "code": "TOKEN_STANDARD_MISMATCH",
+      "title": "The token is of another standard",
+      "plainMeaning": "The act names a standard other than the token's.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_STANDARD_MISMATCH"
+    },
+    {
+      "code": "TOKEN_STORE_FAILURE",
+      "title": "The token store failed",
+      "plainMeaning": "The token's store could not be read or written; the message names the failure.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_STORE_FAILURE"
+    },
+    {
+      "code": "TOKEN_TYPE_EXISTS",
+      "title": "The token type exists",
+      "plainMeaning": "A type with this id already exists.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_TYPE_EXISTS"
+    },
+    {
+      "code": "TOKEN_TYPE_NOT_FOUND",
+      "title": "No such token type",
+      "plainMeaning": "The type does not exist: create it before it has metadata.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_TYPE_NOT_FOUND"
+    },
+    {
+      "code": "TOKEN_UNKNOWN_ACTION",
+      "title": "Not a token action",
+      "plainMeaning": "The action is not \u003cstandard\u003e_\u003cverb\u003e for a standard the door serves.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_UNKNOWN_ACTION"
+    },
+    {
+      "code": "TOKEN_UNKNOWN_STANDARD",
+      "title": "Not a token standard",
+      "plainMeaning": "The standard is not one the door serves.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_UNKNOWN_STANDARD"
+    },
+    {
+      "code": "TOKEN_ZERO_ADDRESS",
+      "title": "The zero address is not an account",
+      "plainMeaning": "The act names the zero address as an account.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/token-door.md",
+      "technical": "error_code: TOKEN_ZERO_ADDRESS"
+    },
+    {
+      "code": "TOO_MANY_REQUESTS",
+      "title": "Too many requests",
+      "plainMeaning": "The caller is over the node's request rate; the limit refills with time.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: TOO_MANY_REQUESTS"
+    },
+    {
       "code": "TRUST_CENTER_STALE",
       "title": "The trust-center facts are stale",
       "plainMeaning": "The exported trust-center JSON proves an older commit, or no current trust-center JSON exists where one is required.",
@@ -2105,6 +6220,19 @@
       "technical": "error_code: TRUST_CENTER_STALE"
     },
     {
+      "code": "UNAUTHORIZED",
+      "title": "Not authenticated",
+      "plainMeaning": "The request carries no bearer token the node accepts.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/api-v4.md",
+      "technical": "error_code: UNAUTHORIZED"
+    },
+    {
       "code": "UNKNOWN",
       "title": "Something went wrong",
       "plainMeaning": "Infrix hit an error it could not translate into specific guidance.",
@@ -2117,6 +6245,25 @@
       ],
       "docs": "docs/errors/README.md",
       "technical": "error_code: UNKNOWN"
+    },
+    {
+      "code": "UX_COPY_DRIFT",
+      "title": "A product-language copy has drifted from its source",
+      "plainMeaning": "A committed copy of the pkg/uxcopy fixture in a sibling repository (infrix-sdk-js, infrix-nexus-web) differs from the source, or the sibling checkout beside this repository is missing.",
+      "fixes": [
+        {
+          "label": "Regenerate every copy from the source",
+          "command": "infrix uxcopy generate --write",
+          "safeToRun": true
+        },
+        {
+          "label": "Check every copy without writing",
+          "command": "infrix uxcopy generate --check",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/uxcopy.md",
+      "technical": "error_code: UX_COPY_DRIFT"
     },
     {
       "code": "UX_MATRIX_BUDGET_EXCEEDED",
@@ -2175,6 +6322,189 @@
       "retryGuidance": "This is often transient — wait a moment and try again.",
       "docs": "docs/errors/ux-matrix.md",
       "technical": "error_code: UX_MATRIX_SERVER_PORT_IN_USE"
+    },
+    {
+      "code": "VERIFY_BAD_REQUEST",
+      "title": "The verify request is malformed",
+      "plainMeaning": "A required field (for example the contract) is missing or malformed.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_BAD_REQUEST"
+    },
+    {
+      "code": "VERIFY_CAPABILITY_DENIED",
+      "title": "The caller lacks the verify:check grant",
+      "plainMeaning": "Property checks are made only by an identity holding the verify:check operator grant.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_CAPABILITY_DENIED"
+    },
+    {
+      "code": "VERIFY_CONTRACT_NOT_VISIBLE",
+      "title": "The contract is not shown to this caller",
+      "plainMeaning": "The contract visibility gate refused the caller.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_CONTRACT_NOT_VISIBLE"
+    },
+    {
+      "code": "VERIFY_CONTRACT_UNKNOWN",
+      "title": "No contract is deployed there",
+      "plainMeaning": "The request names a URL where no contract is deployed.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_CONTRACT_UNKNOWN"
+    },
+    {
+      "code": "VERIFY_DISCLOSURE_CONTEXT_REQUIRED",
+      "title": "The verify request carries no disclosure context",
+      "plainMeaning": "X-Actor, X-Purpose and X-Workflow-Instance are required.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_DISCLOSURE_CONTEXT_REQUIRED"
+    },
+    {
+      "code": "VERIFY_KEY_DISCLOSURE_NOT_RECORDED",
+      "title": "The key's disclosure could not be recorded",
+      "plainMeaning": "A grant opened the key, but its exercise could not be recorded, so the read is refused rather than released unrecorded.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_KEY_DISCLOSURE_NOT_RECORDED"
+    },
+    {
+      "code": "VERIFY_KEY_NOT_READABLE",
+      "title": "A bound key is not readable",
+      "plainMeaning": "The property binds a state key the contract's visibility declaration does not let this actor read.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_KEY_NOT_READABLE"
+    },
+    {
+      "code": "VERIFY_KEY_POLICY_UNAVAILABLE",
+      "title": "The contract's visibility declaration is unreadable",
+      "plainMeaning": "The node cannot read the contract's visibility declaration (no code it can read, or a schema section that does not parse), so every key it binds is refused.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_KEY_POLICY_UNAVAILABLE"
+    },
+    {
+      "code": "VERIFY_METHOD_NOT_ALLOWED",
+      "title": "The verify route takes another method",
+      "plainMeaning": "The route was asked with a method it does not take.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_METHOD_NOT_ALLOWED"
+    },
+    {
+      "code": "VERIFY_NOT_FOUND",
+      "title": "No such verify route",
+      "plainMeaning": "The path names no verify route.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_NOT_FOUND"
+    },
+    {
+      "code": "VERIFY_NO_PROPERTIES",
+      "title": "No property is registered for the contract",
+      "plainMeaning": "No active property this actor may read is registered for the contract.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_NO_PROPERTIES"
+    },
+    {
+      "code": "VERIFY_PROPERTY_UNKNOWN",
+      "title": "The property is not registered",
+      "plainMeaning": "No active property with the named id is registered for the contract.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_PROPERTY_UNKNOWN"
+    },
+    {
+      "code": "VERIFY_STATE_MOVING",
+      "title": "The contract state moved during the check",
+      "plainMeaning": "The contract's state changed while it was being read, so no consistent answer could be given; a later check reads a settled state.",
+      "fixes": [
+        {
+          "label": "Ask again after a short back-off.",
+          "safeToRun": false
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_STATE_MOVING"
+    },
+    {
+      "code": "VERIFY_UNAVAILABLE",
+      "title": "The node cannot check properties",
+      "plainMeaning": "This node has no object registry or state store to check against.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/verify-door.md",
+      "technical": "error_code: VERIFY_UNAVAILABLE"
     }
   ],
   "nextActions": [
