@@ -2,7 +2,7 @@
   "_generatedBy": "infrix uxcopy generate",
   "_source": "pkg/uxcopy",
   "_schemaVersion": 1,
-  "_contentSha256": "39305573f245e4b9e67b284172edfebdaca266b03853c8422e029824a8a0a985",
+  "_contentSha256": "014dd2aff228197c94923e17e43e60b2fcf25910e1e0c4862b41d4d3be1c68e8",
   "version": "1",
   "labels": [
     {
@@ -121,8 +121,8 @@
       "id": "assurance.witness_quorum",
       "category": "assurance",
       "short": "Witness quorum met",
-      "plain": "Independent parties confirmed the same event.",
-      "technical": "A threshold of independent witness receipts attests the bundle reproduces.",
+      "plain": "The required number of witnesses confirmed the same event.",
+      "technical": "A threshold of witness receipts, each signed by a key authorized on its own L0 key page, attests the bundle reproduces. Whether the witnesses are separate parties is the distinct-operators badge; a witness set the producing run operates itself is self-witnessed and is not independent.",
       "neverUseWhen": [
         "l0Verified=false"
       ]
@@ -240,11 +240,102 @@
       "technical": "error_code: AGENT_WRITE_BUDGET_EXCEEDED"
     },
     {
+      "id": "error.AUDIT_ANCHOR_HEAD_MISMATCH",
+      "category": "error",
+      "short": "The audit log disagrees with the head the node anchored",
+      "plain": "The audit log holds an event at the anchored entry count, but it is not the event whose hash the node anchored: the log was rewritten after the anchor.",
+      "technical": "error_code: AUDIT_ANCHOR_HEAD_MISMATCH"
+    },
+    {
+      "id": "error.AUDIT_ANCHOR_HEAD_MISSING",
+      "category": "error",
+      "short": "The audit log is shorter than the head the node anchored",
+      "plain": "The audit log holds no event at the anchored entry count: it was truncated after the node anchored that head.",
+      "technical": "error_code: AUDIT_ANCHOR_HEAD_MISSING"
+    },
+    {
+      "id": "error.AUDIT_ANCHOR_INCONSISTENT",
+      "category": "error",
+      "short": "The anchored audit checkpoint does not hash to what it claims",
+      "plain": "The head, entry count, state root and height in the anchored audit checkpoint record do not hash to the artifact hash the record carries.",
+      "technical": "error_code: AUDIT_ANCHOR_INCONSISTENT"
+    },
+    {
+      "id": "error.AUDIT_ANCHOR_NOT_FOUND",
+      "category": "error",
+      "short": "The node has anchored no audit checkpoint yet",
+      "plain": "The node has not anchored, and had L0 confirm, a v2 audit checkpoint (the periodic audit_checkpoint anchor that commits to the audit log head), or it runs no anchor.",
+      "technical": "error_code: AUDIT_ANCHOR_NOT_FOUND"
+    },
+    {
+      "id": "error.AUDIT_ANCHOR_NOT_ON_L0",
+      "category": "error",
+      "short": "L0 does not carry the audit checkpoint",
+      "plain": "The L0 transaction the audit checkpoint record names does not list its hash among the roots of its batch entry, or could not be read.",
+      "technical": "error_code: AUDIT_ANCHOR_NOT_ON_L0"
+    },
+    {
+      "id": "error.CLAIMS_LOCAL_BACKING_REQUIRED",
+      "category": "error",
+      "short": "High-risk claims need local backing",
+      "plain": "Strict review found high-risk claims backed only elsewhere in the document, not next to the claim.",
+      "technical": "error_code: CLAIMS_LOCAL_BACKING_REQUIRED"
+    },
+    {
+      "id": "error.CLAIMS_UNBACKED",
+      "category": "error",
+      "short": "A public claim has no backing",
+      "plain": "One or more public claims have no supporting evidence anywhere in the document.",
+      "technical": "error_code: CLAIMS_UNBACKED"
+    },
+    {
       "id": "error.CLI_USAGE",
       "category": "error",
       "short": "That flag or command isn't recognized",
       "plain": "Infrix did not recognize a flag, argument, or subcommand in the command line.",
       "technical": "error_code: CLI_USAGE"
+    },
+    {
+      "id": "error.CONFIG_LOAD_FAILED",
+      "category": "error",
+      "short": "The production config could not be loaded",
+      "plain": "Infrix could not read or parse the production config file you pointed it at.",
+      "technical": "error_code: CONFIG_LOAD_FAILED"
+    },
+    {
+      "id": "error.DATA_MIGRATION_NODE_RUNNING",
+      "category": "error",
+      "short": "A node holds this data directory",
+      "plain": "The migration rewrites the object database and must have it to itself, but a node holds the instance lease on the data directory.",
+      "technical": "error_code: DATA_MIGRATION_NODE_RUNNING"
+    },
+    {
+      "id": "error.DATA_MIGRATION_REQUIRED",
+      "category": "error",
+      "short": "This data directory was written by an older binary and needs a data migration",
+      "plain": "The node refused to boot because a durable record was written before a field the current boot rebuild requires. Infrix will not invent that field at boot: an explicit, audited migration supplies it as a documented bound.",
+      "technical": "error_code: DATA_MIGRATION_REQUIRED"
+    },
+    {
+      "id": "error.DATA_RECORD_UNRECOVERABLE",
+      "category": "error",
+      "short": "A durable record cannot be upgraded by any migration",
+      "plain": "A record in this data directory lacks data its old binary never wrote and that no migration can supply without inventing it (for example a workflow instance without its stored state).",
+      "technical": "error_code: DATA_RECORD_UNRECOVERABLE"
+    },
+    {
+      "id": "error.DID_REFUSED",
+      "category": "error",
+      "short": "The DID or identity proof was refused",
+      "plain": "The identity policy refused a DID, alias binding, foreign-document admission, key rotation, or storage history; the reason names which rule failed.",
+      "technical": "error_code: DID_REFUSED"
+    },
+    {
+      "id": "error.DISCLOSURE_ACTOR_MISSING",
+      "category": "error",
+      "short": "No acting identity is configured",
+      "plain": "Every governed Infrix call must say WHO is asking. Infrix will not guess an identity, because the actor is what decides which data you are allowed to see.",
+      "technical": "error_code: DISCLOSURE_ACTOR_MISSING"
     },
     {
       "id": "error.EVIDENCE_MISSING",
@@ -268,6 +359,20 @@
       "technical": "error_code: HUMAN_STUDY_INCOMPLETE"
     },
     {
+      "id": "error.INTENT_GOAL_PARAMS_INVALID",
+      "category": "error",
+      "short": "The intent's goal parameters are invalid",
+      "plain": "The node refused the intent at admission: a parameter its goal declares as required is missing or malformed, or a constraint is out of range. The refusal names the goal and the field.",
+      "technical": "error_code: INTENT_GOAL_PARAMS_INVALID"
+    },
+    {
+      "id": "error.KEYBOOK_PROOF_UNAVAILABLE",
+      "category": "error",
+      "short": "A delegate key book could not be proved to the lite account's partition",
+      "plain": "A lite token account names a key book on another partition as its delegate, and the network applies that only with a proof of existence: the book's state and a receipt that ends at a Directory root the lite account's partition holds. The proof could not be built: the delegate is not a key book or does not exist (stage receipt), the Directory had not anchored the delegate partition's BPT root within the window or the endpoint serves no proof service (stage anchor), or the lite account's partition did not yet hold the Directory root (stage held).",
+      "technical": "error_code: KEYBOOK_PROOF_UNAVAILABLE"
+    },
+    {
       "id": "error.L0_ANCHOR_UNAVAILABLE",
       "category": "error",
       "short": "The L0 anchor is unavailable",
@@ -287,6 +392,13 @@
       "short": "Timed out waiting for L0 finality",
       "plain": "The anchor did not confirm on Accumulate L0 within the timeout.",
       "technical": "error_code: L0_FINALITY_TIMEOUT"
+    },
+    {
+      "id": "error.L0_INCOMPATIBLE",
+      "category": "error",
+      "short": "This build cannot talk to the L0 network",
+      "plain": "The Accumulate network answered, but this binary's Accumulate library cannot decode its response: the network has been upgraded past the library this build was made with (for example a new executor version).",
+      "technical": "error_code: L0_INCOMPATIBLE"
     },
     {
       "id": "error.L0_KEY_NOT_ON_PAGE",
@@ -329,6 +441,13 @@
       "short": "Release launch-check inputs are missing",
       "plain": "A release-grade launch-check cannot start because required inputs are absent (evidence package, node URL, tenant token, or L0 endpoint).",
       "technical": "error_code: LAUNCH_PREREQUISITES_MISSING"
+    },
+    {
+      "id": "error.LAUNCH_SCOPE_EXCLUDED",
+      "category": "error",
+      "short": "The goal is outside this node's launch scope",
+      "plain": "The node refused the intent at submission: its operator declared that this node's launch does not offer this goal (config.launchScope). The refusal names the goal and the decision that excluded it.",
+      "technical": "error_code: LAUNCH_SCOPE_EXCLUDED"
     },
     {
       "id": "error.LOCAL_PHASE_TIMEOUT",
@@ -394,6 +513,41 @@
       "technical": "error_code: NETWORK_TRUST_DENIED"
     },
     {
+      "id": "error.NODE_APPROVAL_REQUIRED",
+      "category": "error",
+      "short": "The node parked the intent for approval",
+      "plain": "The node admitted the intent and its waiver policy requires signed approvals before the plan may run; this invocation holds no approver that can give them (none was passed, or a stage's threshold is above the distinct identities passed). The stages, roles and thresholds are in the cause.",
+      "technical": "error_code: NODE_APPROVAL_REQUIRED"
+    },
+    {
+      "id": "error.NODE_AUTH_REQUIRED",
+      "category": "error",
+      "short": "The node requires an API bearer token",
+      "plain": "The node answered 401: it enforces api.auth, and this request carried no bearer token or one the node does not accept.",
+      "technical": "error_code: NODE_AUTH_REQUIRED"
+    },
+    {
+      "id": "error.NODE_BOOT_FAILED",
+      "category": "error",
+      "short": "The node refused to boot from this config",
+      "plain": "The config loaded, but the node rejected it as invalid before booting (for example a required field such as blockPeriodMs is missing, or a claimed rule pack or settlement domain is not actually available).",
+      "technical": "error_code: NODE_BOOT_FAILED"
+    },
+    {
+      "id": "error.NODE_OWNED_ACTION",
+      "category": "error",
+      "short": "That action is the node's own and cannot be submitted",
+      "plain": "The node refused the intent at admission: the (subsystem, action) it names is an act the node performs on itself and records as its own system intent. A well-formed request cannot make it a request.",
+      "technical": "error_code: NODE_OWNED_ACTION"
+    },
+    {
+      "id": "error.NODE_REQUEST_REFUSED",
+      "category": "error",
+      "short": "The node refused the request",
+      "plain": "The node read the request and answered with a 4xx other than 401: a value outside what the route accepts, a missing disclosure context, or an object the node does not hold. The node's own error code and message are in the cause and the support data (httpStatus, nodeCode).",
+      "technical": "error_code: NODE_REQUEST_REFUSED"
+    },
+    {
       "id": "error.PROFILE_LIVE_L0_MISSING",
       "category": "error",
       "short": "A live L0 endpoint is required for this profile",
@@ -420,6 +574,13 @@
       "short": "TLS is required for this profile",
       "plain": "The selected production profile requires the API to serve over TLS, but TLS is not enabled.",
       "technical": "error_code: PROFILE_TLS_MISSING"
+    },
+    {
+      "id": "error.PROFILE_VALIDATION_FAILED",
+      "category": "error",
+      "short": "The config does not satisfy the required posture profile",
+      "plain": "The config loaded, but it does not meet the named production posture profile (for example public_production requires live L0 signer material, a state mirror, TLS, encrypted storage, billing throttling, and a real identity verifier).",
+      "technical": "error_code: PROFILE_VALIDATION_FAILED"
     },
     {
       "id": "error.PROOF_L0_UNAVAILABLE",
@@ -555,6 +716,13 @@
       "technical": "error_code: SETUP_RUST_WASM_TARGET_MISSING"
     },
     {
+      "id": "error.SUBMISSION_OUTCOME_UNKNOWN",
+      "category": "error",
+      "short": "A submission's outcome is unknown",
+      "plain": "The request was completely written to the L0 endpoint and no answer was read (a closed connection, a reset, a deadline), so the network MAY have executed the transaction. It is neither failed nor confirmed.",
+      "technical": "error_code: SUBMISSION_OUTCOME_UNKNOWN"
+    },
+    {
       "id": "error.TRUST_CENTER_STALE",
       "category": "error",
       "short": "The trust-center facts are stale",
@@ -567,6 +735,13 @@
       "short": "Something went wrong",
       "plain": "Infrix hit an error it could not translate into specific guidance.",
       "technical": "error_code: UNKNOWN"
+    },
+    {
+      "id": "error.UX_COPY_DRIFT",
+      "category": "error",
+      "short": "A product-language copy has drifted from its source",
+      "plain": "A committed copy of the pkg/uxcopy fixture in a sibling repository (infrix-sdk-js, infrix-nexus-web) differs from the source, or the sibling checkout beside this repository is missing.",
+      "technical": "error_code: UX_COPY_DRIFT"
     },
     {
       "id": "error.UX_MATRIX_BUDGET_EXCEEDED",
@@ -677,8 +852,8 @@
       "id": "glossary.witness-quorum",
       "category": "glossary",
       "short": "witness quorum",
-      "plain": "Independent parties confirming the same event.",
-      "technical": "A threshold of distinct, independent witness receipts that each re-verify a bundle; full_public_production requires a 2-of-3 distinct-operator quorum."
+      "plain": "Witnesses confirming the same event.",
+      "technical": "A threshold of distinct witness receipts that each re-verify a bundle. Whether the witnesses are separate organisations is a separate claim (the distinct operators badge): full_public_production requires a 2-of-3 distinct-operator quorum, and a witness set the producing run operates itself is self-witnessed and is not independent."
     },
     {
       "id": "network.devnet",
@@ -980,11 +1155,11 @@
     {
       "id": "assurance.witness_quorum",
       "short": "Witness quorum met",
-      "plain": "Independent parties confirmed the same event.",
-      "technical": "A threshold of independent witness receipts attests the bundle reproduces.",
+      "plain": "The required number of witnesses confirmed the same event.",
+      "technical": "A threshold of witness receipts, each signed by a key authorized on its own L0 key page, attests the bundle reproduces. Whether the witnesses are separate parties is the distinct-operators badge; a witness set the producing run operates itself is self-witnessed and is not independent.",
       "icon": "users",
       "colorRole": "positive",
-      "screenReader": "Witness quorum met: independent witnesses confirmed the event.",
+      "screenReader": "Witness quorum met: the required number of witnesses confirmed the event.",
       "allowedConditions": [
         "witnessQuorumMet=true",
         "l0Verified=true"
@@ -1114,13 +1289,13 @@
     },
     {
       "term": "witness quorum",
-      "plain": "Independent parties confirming the same event.",
-      "technical": "A threshold of distinct, independent witness receipts that each re-verify a bundle; full_public_production requires a 2-of-3 distinct-operator quorum.",
+      "plain": "Witnesses confirming the same event.",
+      "technical": "A threshold of distinct witness receipts that each re-verify a bundle. Whether the witnesses are separate organisations is a separate claim (the distinct operators badge): full_public_production requires a 2-of-3 distinct-operator quorum, and a witness set the producing run operates itself is self-witnessed and is not independent.",
       "related": [
         "distinct operators",
         "assurance level"
       ],
-      "firstUseReplacement": "independent parties confirming the same event",
+      "firstUseReplacement": "witnesses confirming the same event",
       "docs": "docs/learn/glossary.md"
     }
   ],
@@ -1357,6 +1532,126 @@
       "technical": "error_code: AGENT_WRITE_BUDGET_EXCEEDED"
     },
     {
+      "code": "AUDIT_ANCHOR_HEAD_MISMATCH",
+      "title": "The audit log disagrees with the head the node anchored",
+      "plainMeaning": "The audit log holds an event at the anchored entry count, but it is not the event whose hash the node anchored: the log was rewritten after the anchor.",
+      "fixes": [
+        {
+          "label": "Compare with the node own copy of the log",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --anchor --node-url \u003cnode\u003e --l0 https://kermit.accumulatenetwork.io/v3 --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Verify the chain itself",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/audit-chain.md",
+      "technical": "error_code: AUDIT_ANCHOR_HEAD_MISMATCH"
+    },
+    {
+      "code": "AUDIT_ANCHOR_HEAD_MISSING",
+      "title": "The audit log is shorter than the head the node anchored",
+      "plainMeaning": "The audit log holds no event at the anchored entry count: it was truncated after the node anchored that head.",
+      "fixes": [
+        {
+          "label": "Compare with the node own copy of the log",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --anchor --node-url \u003cnode\u003e --l0 https://kermit.accumulatenetwork.io/v3 --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Verify the chain itself",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/audit-chain.md",
+      "technical": "error_code: AUDIT_ANCHOR_HEAD_MISSING"
+    },
+    {
+      "code": "AUDIT_ANCHOR_INCONSISTENT",
+      "title": "The anchored audit checkpoint does not hash to what it claims",
+      "plainMeaning": "The head, entry count, state root and height in the anchored audit checkpoint record do not hash to the artifact hash the record carries.",
+      "fixes": [
+        {
+          "label": "Read the record again, from the node and from L0",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --anchor --node-url \u003cnode\u003e --l0 https://kermit.accumulatenetwork.io/v3 --json",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/audit-chain.md",
+      "technical": "error_code: AUDIT_ANCHOR_INCONSISTENT"
+    },
+    {
+      "code": "AUDIT_ANCHOR_NOT_FOUND",
+      "title": "The node has anchored no audit checkpoint yet",
+      "plainMeaning": "The node has not anchored, and had L0 confirm, a v2 audit checkpoint (the periodic audit_checkpoint anchor that commits to the audit log head), or it runs no anchor.",
+      "fixes": [
+        {
+          "label": "Read the node audit chain head and its anchors",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Retry after the next audit checkpoint interval has passed and L0 confirmed it",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --anchor --node-url \u003cnode\u003e --l0 https://kermit.accumulatenetwork.io/v3",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/audit-chain.md",
+      "technical": "error_code: AUDIT_ANCHOR_NOT_FOUND"
+    },
+    {
+      "code": "AUDIT_ANCHOR_NOT_ON_L0",
+      "title": "L0 does not carry the audit checkpoint",
+      "plainMeaning": "The L0 transaction the audit checkpoint record names does not list its hash among the roots of its batch entry, or could not be read.",
+      "fixes": [
+        {
+          "label": "Check the L0 endpoint is the network the node anchors to",
+          "command": "infrix audit chain verify \u003caudit-chain-dir\u003e --anchor --node-url \u003cnode\u003e --l0 https://kermit.accumulatenetwork.io/v3 --json",
+          "safeToRun": true
+        },
+        {
+          "label": "Look the transaction up on L0 directly",
+          "command": "infrix verify \u003cbundle\u003e --l0 https://kermit.accumulatenetwork.io/v3",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/audit-chain.md",
+      "technical": "error_code: AUDIT_ANCHOR_NOT_ON_L0"
+    },
+    {
+      "code": "CLAIMS_LOCAL_BACKING_REQUIRED",
+      "title": "High-risk claims need local backing",
+      "plainMeaning": "Strict review found high-risk claims backed only elsewhere in the document, not next to the claim.",
+      "fixes": [
+        {
+          "label": "Show which claims need local backing",
+          "command": "infrix claims lint --strict README.md docs/",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/claims.md",
+      "technical": "error_code: CLAIMS_LOCAL_BACKING_REQUIRED"
+    },
+    {
+      "code": "CLAIMS_UNBACKED",
+      "title": "A public claim has no backing",
+      "plainMeaning": "One or more public claims have no supporting evidence anywhere in the document.",
+      "fixes": [
+        {
+          "label": "List the unbacked claims",
+          "command": "infrix claims lint README.md docs/",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/claims.md",
+      "technical": "error_code: CLAIMS_UNBACKED"
+    },
+    {
       "code": "CLI_USAGE",
       "title": "That flag or command isn't recognized",
       "plainMeaning": "Infrix did not recognize a flag, argument, or subcommand in the command line.",
@@ -1369,6 +1664,124 @@
       ],
       "docs": "docs/errors/README.md",
       "technical": "error_code: CLI_USAGE"
+    },
+    {
+      "code": "CONFIG_LOAD_FAILED",
+      "title": "The production config could not be loaded",
+      "plainMeaning": "Infrix could not read or parse the production config file you pointed it at.",
+      "fixes": [
+        {
+          "label": "Check the path and re-run",
+          "command": "infrix plugin-inventory --instances --config \u003cfile\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Validate the config against the schema",
+          "command": "infrix doctor",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/node-config.md",
+      "technical": "error_code: CONFIG_LOAD_FAILED"
+    },
+    {
+      "code": "DATA_MIGRATION_NODE_RUNNING",
+      "title": "A node holds this data directory",
+      "plainMeaning": "The migration rewrites the object database and must have it to itself, but a node holds the instance lease on the data directory.",
+      "fixes": [
+        {
+          "label": "See whether the node is up",
+          "command": "infrix node-status --config \u003ccfg\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Stop the node gracefully (SIGTERM), then re-run the migration",
+          "command": "infrix node migrate-data --config \u003ccfg\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/data-migration.md",
+      "technical": "error_code: DATA_MIGRATION_NODE_RUNNING"
+    },
+    {
+      "code": "DATA_MIGRATION_REQUIRED",
+      "title": "This data directory was written by an older binary and needs a data migration",
+      "plainMeaning": "The node refused to boot because a durable record was written before a field the current boot rebuild requires. Infrix will not invent that field at boot: an explicit, audited migration supplies it as a documented bound.",
+      "fixes": [
+        {
+          "label": "Stop the node, then preview the migration (changes nothing; lists every record, field and bound)",
+          "command": "infrix node migrate-data --config \u003ccfg\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Apply it (refuses while a node holds the data directory; writes a verified backup first)",
+          "command": "infrix node migrate-data --config \u003ccfg\u003e --apply",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/data-migration.md",
+      "technical": "error_code: DATA_MIGRATION_REQUIRED"
+    },
+    {
+      "code": "DATA_RECORD_UNRECOVERABLE",
+      "title": "A durable record cannot be upgraded by any migration",
+      "plainMeaning": "A record in this data directory lacks data its old binary never wrote and that no migration can supply without inventing it (for example a workflow instance without its stored state).",
+      "fixes": [
+        {
+          "label": "List every record the tool cannot upgrade (changes nothing)",
+          "command": "infrix node migrate-data --config \u003ccfg\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Restore the record from a backup taken by a binary that wrote the field, or retire it deliberately",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/data-migration.md",
+      "technical": "error_code: DATA_RECORD_UNRECOVERABLE"
+    },
+    {
+      "code": "DID_REFUSED",
+      "title": "The DID or identity proof was refused",
+      "plainMeaning": "The identity policy refused a DID, alias binding, foreign-document admission, key rotation, or storage history; the reason names which rule failed.",
+      "fixes": [
+        {
+          "label": "Inspect the identifier against the canonical grammar",
+          "command": "infrix did inspect \u003cdid\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Export the shared vectors every surface must agree on",
+          "command": "infrix did vectors",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/did.md",
+      "technical": "error_code: DID_REFUSED"
+    },
+    {
+      "code": "DISCLOSURE_ACTOR_MISSING",
+      "title": "No acting identity is configured",
+      "plainMeaning": "Every governed Infrix call must say WHO is asking. Infrix will not guess an identity, because the actor is what decides which data you are allowed to see.",
+      "fixes": [
+        {
+          "label": "Set the actor for this invocation",
+          "command": "infrix intent list --actor acc://your-adi.acme",
+          "safeToRun": true
+        },
+        {
+          "label": "Set it for this shell",
+          "command": "export INFRIX_ACTOR=acc://your-adi.acme",
+          "safeToRun": true
+        },
+        {
+          "label": "Check which identities you hold",
+          "command": "infrix identity list",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/disclosure-context.md",
+      "technical": "error_code: DISCLOSURE_ACTOR_MISSING"
     },
     {
       "code": "EVIDENCE_MISSING",
@@ -1423,6 +1836,49 @@
       "technical": "error_code: HUMAN_STUDY_INCOMPLETE"
     },
     {
+      "code": "INTENT_GOAL_PARAMS_INVALID",
+      "title": "The intent's goal parameters are invalid",
+      "plainMeaning": "The node refused the intent at admission: a parameter its goal declares as required is missing or malformed, or a constraint is out of range. The refusal names the goal and the field.",
+      "fixes": [
+        {
+          "label": "Read the goal's declared parameters and resubmit with them",
+          "command": "infrix intent submit --help",
+          "safeToRun": true
+        },
+        {
+          "label": "Preview the intent to see the same refusal without executing",
+          "command": "infrix intent submit --json '{\"goalType\":\"\u003cGOAL\u003e\",\"actor\":\"\u003cadi\u003e\",\"preview\":true,\"customParams\":{}}'",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/intent.md",
+      "technical": "error_code: INTENT_GOAL_PARAMS_INVALID"
+    },
+    {
+      "code": "KEYBOOK_PROOF_UNAVAILABLE",
+      "title": "A delegate key book could not be proved to the lite account's partition",
+      "plainMeaning": "A lite token account names a key book on another partition as its delegate, and the network applies that only with a proof of existence: the book's state and a receipt that ends at a Directory root the lite account's partition holds. The proof could not be built: the delegate is not a key book or does not exist (stage receipt), the Directory had not anchored the delegate partition's BPT root within the window or the endpoint serves no proof service (stage anchor), or the lite account's partition did not yet hold the Directory root (stage held).",
+      "fixes": [
+        {
+          "label": "Check the delegate URL names an existing key book (stage receipt); nothing was signed, so correct it and run the act again",
+          "safeToRun": false
+        },
+        {
+          "label": "Stage anchor or held: the network was still anchoring; retry the act. A quiet partition anchors only when a block changes an account",
+          "command": "infrix doctor --persona operator",
+          "safeToRun": true
+        },
+        {
+          "label": "Stage anchor naming an endpoint that does not serve anchor-receipt: point the node at an L0 endpoint that serves the proof service",
+          "command": "infrix l0 compat --endpoint \u003cl0-endpoint\u003e",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/l0.md",
+      "technical": "error_code: KEYBOOK_PROOF_UNAVAILABLE"
+    },
+    {
       "code": "L0_ANCHOR_UNAVAILABLE",
       "title": "The L0 anchor is unavailable",
       "plainMeaning": "Infrix could not fetch the anchor transaction from Accumulate L0.",
@@ -1474,6 +1930,20 @@
       "retryGuidance": "This is often transient — wait a moment and try again.",
       "docs": "docs/errors/l0.md",
       "technical": "error_code: L0_FINALITY_TIMEOUT"
+    },
+    {
+      "code": "L0_INCOMPATIBLE",
+      "title": "This build cannot talk to the L0 network",
+      "plainMeaning": "The Accumulate network answered, but this binary's Accumulate library cannot decode its response: the network has been upgraded past the library this build was made with (for example a new executor version).",
+      "fixes": [
+        {
+          "label": "Confirm the incompatibility against the endpoint",
+          "command": "infrix l0 compat --endpoint \u003cl0-endpoint\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/l0.md",
+      "technical": "error_code: L0_INCOMPATIBLE"
     },
     {
       "code": "L0_KEY_NOT_ON_PAGE",
@@ -1567,6 +2037,20 @@
       ],
       "docs": "docs/errors/release-evidence.md",
       "technical": "error_code: LAUNCH_PREREQUISITES_MISSING"
+    },
+    {
+      "code": "LAUNCH_SCOPE_EXCLUDED",
+      "title": "The goal is outside this node's launch scope",
+      "plainMeaning": "The node refused the intent at submission: its operator declared that this node's launch does not offer this goal (config.launchScope). The refusal names the goal and the decision that excluded it.",
+      "fixes": [
+        {
+          "label": "See the launch scope this node's config declares",
+          "command": "infrix node-validate --config \u003cconfig.yaml\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/intent.md",
+      "technical": "error_code: LAUNCH_SCOPE_EXCLUDED"
     },
     {
       "code": "LOCAL_PHASE_TIMEOUT",
@@ -1715,6 +2199,86 @@
       "technical": "error_code: NETWORK_TRUST_DENIED"
     },
     {
+      "code": "NODE_APPROVAL_REQUIRED",
+      "title": "The node parked the intent for approval",
+      "plainMeaning": "The node admitted the intent and its waiver policy requires signed approvals before the plan may run; this invocation holds no approver that can give them (none was passed, or a stage's threshold is above the distinct identities passed). The stages, roles and thresholds are in the cause.",
+      "fixes": [
+        {
+          "label": "Re-run with the approving identity and its key (add --approver-identity-2 and --approver-key-2 for a threshold above one)",
+          "command": "infrix new verifiable-app \u003cname\u003e \"\u003cintent\u003e\" --node --rpc \u003cnode\u003e --actor \u003cadi\u003e --workflow-definition \u003cid\u003e --approver-identity \u003cadi\u003e --approver-key \u003ckey-file\u003e",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/node-auth.md",
+      "technical": "error_code: NODE_APPROVAL_REQUIRED"
+    },
+    {
+      "code": "NODE_AUTH_REQUIRED",
+      "title": "The node requires an API bearer token",
+      "plainMeaning": "The node answered 401: it enforces api.auth, and this request carried no bearer token or one the node does not accept.",
+      "fixes": [
+        {
+          "label": "Set it for this shell (preferred: a flag value lands in shell history and the process list)",
+          "command": "export INFRIX_API_TOKEN=\u003ctoken\u003e",
+          "safeToRun": false
+        },
+        {
+          "label": "Or pass it for this invocation only",
+          "command": "infrix \u003ccommand\u003e --api-token \u003ctoken\u003e",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/node-auth.md",
+      "technical": "error_code: NODE_AUTH_REQUIRED"
+    },
+    {
+      "code": "NODE_BOOT_FAILED",
+      "title": "The node refused to boot from this config",
+      "plainMeaning": "The config loaded, but the node rejected it as invalid before booting (for example a required field such as blockPeriodMs is missing, or a claimed rule pack or settlement domain is not actually available).",
+      "fixes": [
+        {
+          "label": "Read the exact rejection cause above, fix the named field, then re-check the config",
+          "command": "infrix node-validate --config \u003cfile\u003e",
+          "safeToRun": true
+        },
+        {
+          "label": "Render the per-instance readiness matrix once it loads",
+          "command": "infrix plugin-inventory --instances --config \u003cfile\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/node-config.md",
+      "technical": "error_code: NODE_BOOT_FAILED"
+    },
+    {
+      "code": "NODE_OWNED_ACTION",
+      "title": "That action is the node's own and cannot be submitted",
+      "plainMeaning": "The node refused the intent at admission: the (subsystem, action) it names is an act the node performs on itself and records as its own system intent. A well-formed request cannot make it a request.",
+      "fixes": [
+        {
+          "label": "Read the goal catalogue for the governed door that serves what you meant",
+          "command": "infrix intent submit --help",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/intent.md",
+      "technical": "error_code: NODE_OWNED_ACTION"
+    },
+    {
+      "code": "NODE_REQUEST_REFUSED",
+      "title": "The node refused the request",
+      "plainMeaning": "The node read the request and answered with a 4xx other than 401: a value outside what the route accepts, a missing disclosure context, or an object the node does not hold. The node's own error code and message are in the cause and the support data (httpStatus, nodeCode).",
+      "fixes": [
+        {
+          "label": "Read the node's reason in full",
+          "command": "infrix \u003ccommand\u003e --verbose",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/node-auth.md",
+      "technical": "error_code: NODE_REQUEST_REFUSED"
+    },
+    {
       "code": "PROFILE_LIVE_L0_MISSING",
       "title": "A live L0 endpoint is required for this profile",
       "plainMeaning": "The selected profile requires a reachable, cryptographically-verified L0 anchor, but none is configured.",
@@ -1783,6 +2347,20 @@
       ],
       "docs": "docs/errors/profile-tls-missing.md",
       "technical": "error_code: PROFILE_TLS_MISSING"
+    },
+    {
+      "code": "PROFILE_VALIDATION_FAILED",
+      "title": "The config does not satisfy the required posture profile",
+      "plainMeaning": "The config loaded, but it does not meet the named production posture profile (for example public_production requires live L0 signer material, a state mirror, TLS, encrypted storage, billing throttling, and a real identity verifier).",
+      "fixes": [
+        {
+          "label": "See exactly which posture requirements failed",
+          "command": "infrix node-validate --config \u003cfile\u003e --profile public_production",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/node-config.md",
+      "technical": "error_code: PROFILE_VALIDATION_FAILED"
     },
     {
       "code": "PROOF_L0_UNAVAILABLE",
@@ -2049,7 +2627,7 @@
       "fixes": [
         {
           "label": "Install the SDK dependencies",
-          "command": "npm install --prefix sdk/typescript",
+          "command": "npm install @infrix/client",
           "safeToRun": true
         }
       ],
@@ -2091,6 +2669,24 @@
       "technical": "error_code: SETUP_RUST_WASM_TARGET_MISSING"
     },
     {
+      "code": "SUBMISSION_OUTCOME_UNKNOWN",
+      "title": "A submission's outcome is unknown",
+      "plainMeaning": "The request was completely written to the L0 endpoint and no answer was read (a closed connection, a reset, a deadline), so the network MAY have executed the transaction. It is neither failed nor confirmed.",
+      "fixes": [
+        {
+          "label": "Do NOT resubmit or re-sign. Read the transaction ids named in the error back from the network (a query by message id), then act on what it reports: delivered, failed, pending, or absent (absent does not prove it was not delivered).",
+          "safeToRun": false
+        },
+        {
+          "label": "A node settles its own unresolved anchors and settlements by reading them back; check the node's status for records that are still unresolved",
+          "command": "infrix doctor --persona operator",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/submission-outcome.md",
+      "technical": "error_code: SUBMISSION_OUTCOME_UNKNOWN"
+    },
+    {
       "code": "TRUST_CENTER_STALE",
       "title": "The trust-center facts are stale",
       "plainMeaning": "The exported trust-center JSON proves an older commit, or no current trust-center JSON exists where one is required.",
@@ -2117,6 +2713,25 @@
       ],
       "docs": "docs/errors/README.md",
       "technical": "error_code: UNKNOWN"
+    },
+    {
+      "code": "UX_COPY_DRIFT",
+      "title": "A product-language copy has drifted from its source",
+      "plainMeaning": "A committed copy of the pkg/uxcopy fixture in a sibling repository (infrix-sdk-js, infrix-nexus-web) differs from the source, or the sibling checkout beside this repository is missing.",
+      "fixes": [
+        {
+          "label": "Regenerate every copy from the source",
+          "command": "infrix uxcopy generate --write",
+          "safeToRun": true
+        },
+        {
+          "label": "Check every copy without writing",
+          "command": "infrix uxcopy generate --check",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/uxcopy.md",
+      "technical": "error_code: UX_COPY_DRIFT"
     },
     {
       "code": "UX_MATRIX_BUDGET_EXCEEDED",
