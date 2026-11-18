@@ -2,7 +2,7 @@
   "_generatedBy": "infrix uxcopy generate",
   "_source": "pkg/uxcopy",
   "_schemaVersion": 1,
-  "_contentSha256": "13cb84645df93f0a480c8478ddb9d21c502a02ccd967117e6833ec55abeb3956",
+  "_contentSha256": "606e5cdfc068b8e66ad12bf3bcb5958a773fe7935a101b428438ba0b26f0e07f",
   "version": "1",
   "labels": [
     {
@@ -1918,6 +1918,13 @@
       "short": "The trust-center facts are stale",
       "plain": "The exported trust-center JSON proves an older commit, or no current trust-center JSON exists where one is required.",
       "technical": "error_code: TRUST_CENTER_STALE"
+    },
+    {
+      "id": "error.TX_NOT_VISIBLE",
+      "category": "error",
+      "short": "The recorded call is not shown to this caller",
+      "plain": "No such transaction, or the caller may not see it: the caller is not the call's submitter and holds no disclosure grant on it.",
+      "technical": "error_code: TX_NOT_VISIBLE"
     },
     {
       "id": "error.UNAUTHORIZED",
@@ -6218,6 +6225,19 @@
       ],
       "docs": "docs/errors/release-evidence.md",
       "technical": "error_code: TRUST_CENTER_STALE"
+    },
+    {
+      "code": "TX_NOT_VISIBLE",
+      "title": "The recorded call is not shown to this caller",
+      "plainMeaning": "No such transaction, or the caller may not see it: the caller is not the call's submitter and holds no disclosure grant on it.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/debug-door.md",
+      "technical": "error_code: TX_NOT_VISIBLE"
     },
     {
       "code": "UNAUTHORIZED",
