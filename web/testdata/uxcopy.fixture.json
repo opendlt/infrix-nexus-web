@@ -2,7 +2,7 @@
   "_generatedBy": "infrix uxcopy generate",
   "_source": "pkg/uxcopy",
   "_schemaVersion": 1,
-  "_contentSha256": "13cb84645df93f0a480c8478ddb9d21c502a02ccd967117e6833ec55abeb3956",
+  "_contentSha256": "260e89376a8b3467aa721f971fbc59c8922dc0fb36a91a7bc7b52b25dcaa692f",
   "version": "1",
   "labels": [
     {
@@ -982,6 +982,48 @@
       "technical": "error_code: OBJECT_TRANSITION_INVALID"
     },
     {
+      "id": "error.OPSREAD_FORBIDDEN",
+      "category": "error",
+      "short": "The caller may not make this read",
+      "plain": "The read needs an operator capability the caller does not hold, or visibility into the contract it names.",
+      "technical": "error_code: OPSREAD_FORBIDDEN"
+    },
+    {
+      "id": "error.OPSREAD_GATE_UNSET",
+      "category": "error",
+      "short": "The read has no gate",
+      "plain": "The read declares no gate, or the node wired no disclosure gate, so it answers no one: a defect in the node, not the request.",
+      "technical": "error_code: OPSREAD_GATE_UNSET"
+    },
+    {
+      "id": "error.OPSREAD_INVALID_PARAMS",
+      "category": "error",
+      "short": "The read's parameters are invalid",
+      "plain": "A parameter the read takes is missing or malformed; the message names it.",
+      "technical": "error_code: OPSREAD_INVALID_PARAMS"
+    },
+    {
+      "id": "error.OPSREAD_NOT_FOUND",
+      "category": "error",
+      "short": "Nothing is held under that name",
+      "plain": "The read names an object, session or record the node does not hold.",
+      "technical": "error_code: OPSREAD_NOT_FOUND"
+    },
+    {
+      "id": "error.OPSREAD_SOURCE_FAILED",
+      "category": "error",
+      "short": "The read's engine failed to answer",
+      "plain": "The engine behind the read could not answer (a record it holds and cannot read, a plan it cannot derive); the message names the failure.",
+      "technical": "error_code: OPSREAD_SOURCE_FAILED"
+    },
+    {
+      "id": "error.OPSREAD_SOURCE_NOT_WIRED",
+      "category": "error",
+      "short": "The node serves no such engine",
+      "plain": "This node has no engine of that kind wired, so it cannot answer the read.",
+      "technical": "error_code: OPSREAD_SOURCE_NOT_WIRED"
+    },
+    {
       "id": "error.PLAN_DRIFT_EXCEEDED",
       "category": "error",
       "short": "The plan drifted too far",
@@ -1918,6 +1960,13 @@
       "short": "The trust-center facts are stale",
       "plain": "The exported trust-center JSON proves an older commit, or no current trust-center JSON exists where one is required.",
       "technical": "error_code: TRUST_CENTER_STALE"
+    },
+    {
+      "id": "error.TX_NOT_VISIBLE",
+      "category": "error",
+      "short": "The recorded call is not shown to this caller",
+      "plain": "No such transaction, or the caller may not see it: the caller is neither the call's submitter nor the node operator, and holds no disclosure grant on it.",
+      "technical": "error_code: TX_NOT_VISIBLE"
     },
     {
       "id": "error.UNAUTHORIZED",
@@ -4385,6 +4434,84 @@
       "technical": "error_code: OBJECT_TRANSITION_INVALID"
     },
     {
+      "code": "OPSREAD_FORBIDDEN",
+      "title": "The caller may not make this read",
+      "plainMeaning": "The read needs an operator capability the caller does not hold, or visibility into the contract it names.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ops-read.md",
+      "technical": "error_code: OPSREAD_FORBIDDEN"
+    },
+    {
+      "code": "OPSREAD_GATE_UNSET",
+      "title": "The read has no gate",
+      "plainMeaning": "The read declares no gate, or the node wired no disclosure gate, so it answers no one: a defect in the node, not the request.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ops-read.md",
+      "technical": "error_code: OPSREAD_GATE_UNSET"
+    },
+    {
+      "code": "OPSREAD_INVALID_PARAMS",
+      "title": "The read's parameters are invalid",
+      "plainMeaning": "A parameter the read takes is missing or malformed; the message names it.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ops-read.md",
+      "technical": "error_code: OPSREAD_INVALID_PARAMS"
+    },
+    {
+      "code": "OPSREAD_NOT_FOUND",
+      "title": "Nothing is held under that name",
+      "plainMeaning": "The read names an object, session or record the node does not hold.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ops-read.md",
+      "technical": "error_code: OPSREAD_NOT_FOUND"
+    },
+    {
+      "code": "OPSREAD_SOURCE_FAILED",
+      "title": "The read's engine failed to answer",
+      "plainMeaning": "The engine behind the read could not answer (a record it holds and cannot read, a plan it cannot derive); the message names the failure.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ops-read.md",
+      "technical": "error_code: OPSREAD_SOURCE_FAILED"
+    },
+    {
+      "code": "OPSREAD_SOURCE_NOT_WIRED",
+      "title": "The node serves no such engine",
+      "plainMeaning": "This node has no engine of that kind wired, so it cannot answer the read.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/ops-read.md",
+      "technical": "error_code: OPSREAD_SOURCE_NOT_WIRED"
+    },
+    {
       "code": "PLAN_DRIFT_EXCEEDED",
       "title": "The plan drifted too far",
       "plainMeaning": "Execution drifted from the plan beyond the plan's drift threshold, so it was stopped.",
@@ -6218,6 +6345,19 @@
       ],
       "docs": "docs/errors/release-evidence.md",
       "technical": "error_code: TRUST_CENTER_STALE"
+    },
+    {
+      "code": "TX_NOT_VISIBLE",
+      "title": "The recorded call is not shown to this caller",
+      "plainMeaning": "No such transaction, or the caller may not see it: the caller is neither the call's submitter nor the node operator, and holds no disclosure grant on it.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/debug-door.md",
+      "technical": "error_code: TX_NOT_VISIBLE"
     },
     {
       "code": "UNAUTHORIZED",
