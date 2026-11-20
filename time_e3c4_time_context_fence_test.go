@@ -47,8 +47,15 @@ func TestTimeE3C4_SpineCommonInjectsAt(t *testing.T) {
 	if !strings.Contains(src, "import { withAt } from '/lib/timeContext.js'") {
 		t.Errorf("spineCommon.js must import withAt from /lib/timeContext.js")
 	}
-	if !strings.Contains(src, "withAt({ ...DISCLOSURE, ...params })") {
-		t.Errorf("rpcWithDisclosure must wrap its params in withAt so every RPC inherits the at-coordinate")
+	// every READ inherits the at-coordinate; a governed submission never does (infrix-core item 2c part 28aa: the governed-submit contract is decoded
+	// strictly and refuses a view-time "at"), which web/test/submitNoAt.test.mjs drives through the real module
+	if !strings.Contains(src, "const merged = { ...DISCLOSURE, ...params };") || !strings.Contains(src, "SUBMIT_METHODS.has(method) ? merged : withAt(merged)") {
+		t.Errorf("rpcWithDisclosure must wrap every read's params in withAt so it inherits the at-coordinate, and only the governed submissions in SUBMIT_METHODS go without it")
+	}
+	for _, m := range []string{"'governed.submit'", "'intent.submit'", "'nexus.previewDossier'"} {
+		if !strings.Contains(src, m) {
+			t.Errorf("SUBMIT_METHODS must name %s: a submission the node decodes strictly must never carry the view-time at-coordinate", m)
+		}
 	}
 }
 

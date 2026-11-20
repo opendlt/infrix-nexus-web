@@ -67,8 +67,14 @@ export function setDisclosure(actor, purpose) {
  * coordinate is sourced from lib/timeContext.js; live reads pass
  * through unchanged. */
 export function rpcWithDisclosure(method, params = {}) {
-  return rpc(method, withAt({ ...DISCLOSURE, ...params }));
+  const merged = { ...DISCLOSURE, ...params };
+  // A governed submission is made NOW: the node decodes it under the one strict governed-submit contract (infrix-core item 2c part 28aa),
+  // which refuses a member it does not name, a view-time "at" among them. The cursor shapes what the explorer READS, never what it submits.
+  return rpc(method, SUBMIT_METHODS.has(method) ? merged : withAt(merged));
 }
+
+/** The methods whose request is the governed-submit contract: they never carry the view-time at-coordinate. */
+export const SUBMIT_METHODS = new Set(['governed.submit', 'intent.submit', 'nexus.previewDossier', 'intent.submissionSigning']);
 
 /** Truncate a long hash/id for compact rendering, preserving copy-paste-ability. */
 export function shortHash(s, head = 6, tail = 4) {
