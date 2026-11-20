@@ -27,6 +27,7 @@ import { renderDossier } from '/lib/dossier.js';
 import { simulatePolicyDelta, renderPolicyDeltaTable, policyDeltaGatesSubmit } from '/lib/whatIfSimulator.js';
 import { onAtChange, isAtLive } from '/lib/timeContext.js';
 import { agoLabel } from '/lib/liveness.js';
+import { governedSubmitParams, submittedIntentId } from '/lib/submitContract.js';
 
 // =================================================================
 // Pending approval queue
@@ -458,11 +459,9 @@ export function createQuickComposeDock() {
       // the full Intent Studio surfaces — plan hash, approvals/waiver,
       // ghost evidence, plugin selections, trust assumptions, expected
       // evidence, and per-signal risks.
-      const dossier = await rpcWithDisclosure('nexus.previewDossier', {
-        goalType: goalSelect.value,
-        customParams: params,
-      });
-      previewedParams = { goalType: goalSelect.value, customParams: params };
+      // the body is exactly the governed-submit contract (lib/submitContract.js; infrix-core item 2c part 28ac row 4)
+      previewedParams = governedSubmitParams(goalSelect.value, params);
+      const dossier = await rpcWithDisclosure('nexus.previewDossier', previewedParams);
       const policyDenied = dossier && dossier.policyDecision && dossier.policyDecision.allowed === false;
       const noPlan = !dossier || !dossier.plan;
       submitBtn.disabled = policyDenied || noPlan;
@@ -489,13 +488,10 @@ export function createQuickComposeDock() {
     submitBtn.disabled = true;
     out.replaceChildren(loadingPreview('Submitting…'));
     try {
-      const result = await rpcWithDisclosure('governed.submit', {
-        goalType: previewedParams.goalType,
-        customParams: previewedParams.customParams,
-      });
+      const result = await rpcWithDisclosure('governed.submit', governedSubmitParams(previewedParams.goalType, previewedParams.customParams));
       const banner = document.createElement('div');
       banner.className = 'verify-summary verify-pass';
-      const intentID = result && result.Intent && result.Intent.ID;
+      const intentID = submittedIntentId(result);
       banner.textContent = intentID ? `✓ Submitted as ${intentID}` : '✓ Submitted.';
       out.replaceChildren(banner);
       // Navigate to the new intent's narrative

@@ -20,6 +20,7 @@
 import { verifyExportedFile } from '/lib/verifyExport.js';
 import { assuranceSummary, PLAIN } from '/lib/guidedAssurance.js';
 import { mountLearnPanel } from '/lib/learnPanels.js';
+import { governedSubmitParams, escrowSettlementParams, submittedIntentId } from '/lib/submitContract.js';
 
 // The deterministic UX-demo fixture intent the guided flows reference.
 const DEMO_INTENT = 'int-fixture-1';
@@ -58,6 +59,9 @@ function backToStart() {
 }
 
 // ---- minimal RPC (avoids the spineCommon import chain) ----
+// NodeRefusal is a JSON-RPC error: the node answered and refused. It is never retried.
+class NodeRefusal extends Error {}
+
 async function rpc(method, params) {
   const res = await fetch('/rpc', {
     method: 'POST',
@@ -65,13 +69,14 @@ async function rpc(method, params) {
     body: JSON.stringify({ jsonrpc: '2.0', method, params: params || {}, id: 1 }),
   });
   const j = await res.json();
-  if (j && j.error) throw new Error(j.error.message || 'rpc error');
+  if (j && j.error) throw new NodeRefusal(j.error.message || 'rpc error');
   return j ? j.result : null;
 }
 
 // rpcRetry tolerates a transient network blip (a dropped connection under
 // load) by retrying the fetch a couple of times. A JSON-RPC *error* (a real
-// node response) is never retried — only a transport failure.
+// node response) is never retried — only a transport failure. (It used to
+// catch the refusal too and send the same request three times.)
 async function rpcRetry(method, params, tries) {
   const max = tries || 3;
   let lastErr;
@@ -79,6 +84,7 @@ async function rpcRetry(method, params, tries) {
     try {
       return await rpc(method, params);
     } catch (err) {
+      if (err instanceof NodeRefusal) throw err;
       lastErr = err;
       // Back off briefly before the next attempt.
       await new Promise((r) => setTimeout(r, 150 * (i + 1)));
@@ -148,10 +154,12 @@ function renderEscrow(shell) {
     modeNote.textContent = 'Kermit runs live and needs a funded node; here the demo answers locally. Run `infrix demo start --mode kermit` for a real L4 proof.';
   });
 
-  // Buyer / seller / amount with defaults.
+  // Buyer / seller / amount / asset / arbiter with defaults (an escrow leg requires its arbiter).
   const buyer = field(form, 'Buyer', 'acc://buyer.acme');
   const seller = field(form, 'Seller', 'acc://seller.acme');
   const amount = field(form, 'Amount', '1000');
+  const asset = field(form, 'Asset', 'ACME');
+  const arbiter = field(form, 'Arbiter', 'acc://arbiter.acme');
 
   const submit = el('button', 'guided-primary', 'Submit governed escrow');
   submit.type = 'button';
@@ -162,16 +170,29 @@ function renderEscrow(shell) {
   result.id = 'guidedEscrowResult';
   shell.appendChild(result);
 
+  // THE GOVERNED ESCROW (infrix-core item 2c part 28ac row 4). The flow used to submit governed.submit with goalType ESCROW_RELEASE — a goal
+  // type the node does not have — and mode, buyer, seller and amount at the top level, with no actor: the old doors dropped what they did
+  // not read, so it never worked as built, and on a failed answer it showed the fixture intent as if it had been submitted. It now submits the
+  // SETTLEMENT goal with one escrow leg (the goal the node's escrow door compiles an escrow to) through governed.submit, with exactly the
+  // governed-submit contract's members (lib/submitContract.js); mode is the explorer's own choice and is never sent.
   submit.addEventListener('click', () => {
+    let body;
+    try {
+      body = { ...guidedDisclosure(), ...governedSubmitParams('SETTLEMENT', escrowSettlementParams({ buyer: buyer.value, seller: seller.value, amount: amount.value, asset: asset.value, arbiter: arbiter.value })) };
+    } catch (err) {
+      result.replaceChildren(el('p', 'guided-error', 'Could not submit: ' + err.message));
+      return;
+    }
     submit.disabled = true;
     result.replaceChildren(el('p', 'guided-loading', 'Submitting…'));
-    rpcRetry('governed.submit', {
-      goalType: 'ESCROW_RELEASE',
-      mode: chosenMode,
-      buyer: buyer.value, seller: seller.value, amount: amount.value,
-    }).then((res) => {
-      const intentId = (res && res.intentId) || DEMO_INTENT;
-      renderEscrowResult(result, intentId, chosenMode);
+    rpcRetry('governed.submit', body).then((res) => {
+      const intentId = submittedIntentId(res);
+      if (!intentId) {
+        result.replaceChildren(el('p', 'guided-error', 'The node answered without naming the escrow\'s intent, so nothing can be shown as submitted.'));
+        submit.disabled = false;
+        return;
+      }
+      renderEscrowResult(result, intentId, chosenMode, res && res.awaitingApproval === true ? 'pending_approval' : String((res && res.outcomeStatus) || ''));
     }).catch((err) => {
       result.replaceChildren(el('p', 'guided-error', 'Could not submit: ' + err.message));
       submit.disabled = false;
@@ -181,15 +202,25 @@ function renderEscrow(shell) {
   shell.appendChild(expertFooter('#/spine/' + DEMO_INTENT, 'Open the expert spine view'));
 }
 
-function renderEscrowResult(result, intentId, mode) {
+// guidedDisclosure is the disclosure context of a guided submission (actor, purpose, workflowInstance: the Gap 12 context every governed
+// submission carries), read from the same localStorage keys lib/spineCommon.js DISCLOSURE reads; this module stays import-light by design.
+function guidedDisclosure() {
+  const read = (key, fallback) => { try { return localStorage.getItem(key) || fallback; } catch (_) { return fallback; } };
+  return { actor: read('nexus.actor', 'acc://test.acme'), purpose: read('nexus.purpose', 'operational'), workflowInstance: 'nexus-guided' };
+}
+
+function renderEscrowResult(result, intentId, mode, status) {
   result.replaceChildren();
-  // Plain progress stages.
+  // Plain progress stages, from what the node answered: an escrow whose creation parks for its approval has not been approved, executed or
+  // proven yet, and is not shown as if it had.
+  const parked = status === 'pending_approval';
+  const after = parked ? 'pending' : 'done';
   const stages = [
     ['Requested', 'done'],
     ['Policy checked', 'done'],
-    ['Approved', 'done'],
-    ['Executed', 'done'],
-    ['Proof created', 'done'],
+    [parked ? 'Awaiting approval' : 'Approved', after],
+    ['Executed', after],
+    ['Proof created', after],
     [mode === 'kermit' ? 'Anchored on L0 (when funded)' : 'Anchored (local demo — not L0-confirmed)', mode === 'kermit' ? 'pending' : 'local'],
   ];
   const list = el('ol', 'guided-stages');
@@ -203,7 +234,7 @@ function renderEscrowResult(result, intentId, mode) {
   const receipt = el('div', 'guided-receipt');
   receipt.appendChild(el('h3', 'guided-receipt-title', 'Proof receipt'));
   receipt.appendChild(kv('Intent', intentId));
-  receipt.appendChild(kv('Result', 'completed'));
+  receipt.appendChild(kv('Result', parked ? 'awaiting approval' : (status || 'submitted')));
   if (mode === 'kermit') {
     receipt.appendChild(kv('Assurance', 'L4/G2 when the live L0 anchor confirms'));
   } else {
