@@ -2,7 +2,7 @@
   "_generatedBy": "infrix uxcopy generate",
   "_source": "pkg/uxcopy",
   "_schemaVersion": 1,
-  "_contentSha256": "260e89376a8b3467aa721f971fbc59c8922dc0fb36a91a7bc7b52b25dcaa692f",
+  "_contentSha256": "120a9c0679ae568206526696cd4c45057434e24e5e201751dec317b748c92e72",
   "version": "1",
   "labels": [
     {
@@ -952,6 +952,13 @@
       "short": "That action is the node's own and cannot be submitted",
       "plain": "The node refused the intent at admission: the (subsystem, action) it names is an act the node performs on itself and records as its own system intent. A well-formed request cannot make it a request.",
       "technical": "error_code: NODE_OWNED_ACTION"
+    },
+    {
+      "id": "error.NODE_READ_ONLY",
+      "category": "error",
+      "short": "The node is read-only and takes no governed write",
+      "plain": "The node is configured readOnly: it serves governed reads and its read-only probes, and refused the intent at admission because it is a governed write (every governed control act is one).",
+      "technical": "error_code: NODE_READ_ONLY"
     },
     {
       "id": "error.NODE_REQUEST_REFUSED",
@@ -4379,6 +4386,19 @@
       ],
       "docs": "docs/errors/intent.md",
       "technical": "error_code: NODE_OWNED_ACTION"
+    },
+    {
+      "code": "NODE_READ_ONLY",
+      "title": "The node is read-only and takes no governed write",
+      "plainMeaning": "The node is configured readOnly: it serves governed reads and its read-only probes, and refused the intent at admission because it is a governed write (every governed control act is one).",
+      "fixes": [
+        {
+          "label": "Submit the write to a node that is not configured readOnly",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/intent.md",
+      "technical": "error_code: NODE_READ_ONLY"
     },
     {
       "code": "NODE_REQUEST_REFUSED",
