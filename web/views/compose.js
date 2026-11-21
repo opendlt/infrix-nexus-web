@@ -30,6 +30,7 @@ import { rpcWithDisclosure, errorStateNode, hashChip } from '/lib/spineCommon.js
 import { renderDossier } from '/lib/dossier.js';
 import { openConfirmModal } from '/lib/rationaleModal.js';
 import { mountPolicyDelta } from '/lib/whatIfSimulator.js';
+import { governedSubmitParams, planHashHex, submittedIntentId, submittedPlanHash } from '/lib/submitContract.js';
 
 let rootEl = null;
 let templates = [];
@@ -378,10 +379,7 @@ function renderMain(main) {
     try { cp = getCustomParams(); }
     catch (err) { out.replaceChildren(errorStateNode(err)); return; }
     try {
-      const dossier = await rpcWithDisclosure('nexus.previewDossier', {
-        goalType: tmpl.goalType,
-        customParams: cp,
-      });
+      const dossier = await rpcWithDisclosure('nexus.previewDossier', governedSubmitParams(tmpl.goalType, cp));
       lastDossier = { goalType: tmpl.goalType, customParams: cp, response: dossier };
       out.replaceChildren(renderDossier(dossier, {
         goalType: tmpl.goalType,                 // RUNBOOK-07 SP6 — feeds the consequence panel
@@ -729,23 +727,15 @@ async function submitDossier(out) {
   banner.textContent = 'Submitting plan…';
   out.replaceChildren(banner);
   try {
-    // RUNBOOK-04 Task 5 — Option A (verify-after): governed.submit still re-plans
-    // server-side from {goalType, customParams}, so also send the previewed
-    // expectedPlanHash. If the server echoes a produced plan hash that differs,
-    // do NOT navigate — warn and tell the user to re-preview. (Option B —
-    // submit-by-plan-id to skip re-planning — is the backend-gated true fix.)
-    const result = await rpcWithDisclosure('governed.submit', {
-      goalType: lastDossier.goalType,
-      customParams: lastDossier.customParams,
-      expectedPlanHash: plan.planHash,
-    });
-    const producedHash = result && (
-      result.planHash
-      || (result.Plan && result.Plan.planHash)
-      || (result.plan && result.plan.planHash)
-      || (result.Intent && result.Intent.PlanHash)
-    );
-    if (producedHash && producedHash !== plan.planHash) {
+    // RUNBOOK-04 Task 5 — Option A (verify-after): governed.submit re-plans server-side from {goalType, customParams}. The body is exactly
+    // the governed-submit contract (lib/submitContract.js; infrix-core item 2c part 28ac row 4): it used to carry expectedPlanHash, which the
+    // contract does not name and the node never read. The answer's plan hash (plan.planHash, 32 bytes) is compared with the reviewed one (hex):
+    // if they differ, do NOT navigate — warn and tell the user to re-preview. (Option B — submit-by-plan-id to skip re-planning — is the
+    // backend-gated true fix.)
+    const result = await rpcWithDisclosure('governed.submit', governedSubmitParams(lastDossier.goalType, lastDossier.customParams));
+    const producedHash = submittedPlanHash(result);
+    const reviewedHash = planHashHex(plan.planHash);
+    if (producedHash && producedHash !== reviewedHash) {
       const warn = document.createElement('div');
       warn.className = 'verify-summary verify-warn';
       warn.textContent = '⚠ The server produced a different plan than you reviewed (the plan hash changed since preview). Re-preview before submitting — nothing was executed under the old hash.';
@@ -754,8 +744,9 @@ async function submitDossier(out) {
     }
     const ok = document.createElement('div');
     ok.className = 'verify-summary verify-pass';
-    const intentID = result && result.Intent && result.Intent.ID;
-    ok.textContent = intentID ? `✓ Submitted as ${intentID} — opening narrative…` : '✓ Submitted.';
+    const intentID = submittedIntentId(result);
+    const unchecked = producedHash ? '' : ' — the answer names no plan hash, so the reviewed plan could not be compared';
+    ok.textContent = intentID ? `✓ Submitted as ${intentID}${unchecked} — opening narrative…` : `✓ Submitted${unchecked}.`;
     out.replaceChildren(ok);
     if (intentID) {
       setTimeout(() => { window.location.hash = '#/spine/' + encodeURIComponent(intentID); }, 600);
