@@ -2,7 +2,7 @@
   "_generatedBy": "infrix uxcopy generate",
   "_source": "pkg/uxcopy",
   "_schemaVersion": 1,
-  "_contentSha256": "120a9c0679ae568206526696cd4c45057434e24e5e201751dec317b748c92e72",
+  "_contentSha256": "8087527160d2eddd21bc794b9a255b65e348f07c6bdad3a59faf7d9f8f803bfd",
   "version": "1",
   "labels": [
     {
@@ -532,6 +532,13 @@
       "short": "That flag or command isn't recognized",
       "plain": "Infrix did not recognize a flag, argument, or subcommand in the command line.",
       "technical": "error_code: CLI_USAGE"
+    },
+    {
+      "id": "error.COMMERCIAL_GENERATION_STALE",
+      "category": "error",
+      "short": "The commercial service does not serve the committed generation",
+      "plain": "A governed act committed a newer generation of the commercial store and the node's post-commit reload failed, so the service still holds an older generation.",
+      "technical": "error_code: COMMERCIAL_GENERATION_STALE"
     },
     {
       "id": "error.CONFIG_LOAD_FAILED",
@@ -3461,6 +3468,26 @@
       ],
       "docs": "docs/errors/README.md",
       "technical": "error_code: CLI_USAGE"
+    },
+    {
+      "code": "COMMERCIAL_GENERATION_STALE",
+      "title": "The commercial service does not serve the committed generation",
+      "plainMeaning": "A governed act committed a newer generation of the commercial store and the node's post-commit reload failed, so the service still holds an older generation.",
+      "fixes": [
+        {
+          "label": "Read the node's readiness: the commercial_generation and commercial_reload rows name the generation and the reload's error",
+          "command": "curl -s \u003cnode\u003e/v4/network/readiness",
+          "safeToRun": true
+        },
+        {
+          "label": "Retry the read after the next block close: the block-close sweep retries the reload until it succeeds",
+          "command": "curl -s -H 'Authorization: Bearer \u003ctenant-token\u003e' \u003cnode\u003e/v4/account/usage",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/commercial.md",
+      "technical": "error_code: COMMERCIAL_GENERATION_STALE"
     },
     {
       "code": "CONFIG_LOAD_FAILED",
