@@ -2,7 +2,7 @@
   "_generatedBy": "infrix uxcopy generate",
   "_source": "pkg/uxcopy",
   "_schemaVersion": 1,
-  "_contentSha256": "120a9c0679ae568206526696cd4c45057434e24e5e201751dec317b748c92e72",
+  "_contentSha256": "9c589dbced2ec6b114e09e372981b0c6a0eb11f7ee45d70d1af7935c4d8c9b99",
   "version": "1",
   "labels": [
     {
@@ -69,7 +69,8 @@
       "technical": "Proof level L4: bundle anchor confirmed through a live L0 lookup.",
       "neverUseWhen": [
         "l0Verified=false",
-        "verificationMode=local_only"
+        "verificationMode=local_only",
+        "localEmbedded=true"
       ]
     },
     {
@@ -78,6 +79,16 @@
       "short": "Local proof",
       "plain": "Checked on this machine only — not yet confirmed against the chain.",
       "technical": "Structurally consistent; no live L0 confirmation. Caps below L4."
+    },
+    {
+      "id": "assurance.local_embedded_l0",
+      "category": "assurance",
+      "short": "Embedded L0 proofs verified (local-embedded)",
+      "plain": "Confirmed offline from Accumulate proofs of this run's own in-process network, under the pin you passed — not Kermit, and not durable beyond that network.",
+      "technical": "Proof level L4/G2 local-embedded: the embedded anchor, key-page and governance-execution chains verified against the relying party's local-embedded pin (--l0-pin); no live L0 lookup.",
+      "neverUseWhen": [
+        "l0Verified=false"
+      ]
     },
     {
       "id": "assurance.no_node_trust",
@@ -532,6 +543,13 @@
       "short": "That flag or command isn't recognized",
       "plain": "Infrix did not recognize a flag, argument, or subcommand in the command line.",
       "technical": "error_code: CLI_USAGE"
+    },
+    {
+      "id": "error.COMMERCIAL_GENERATION_STALE",
+      "category": "error",
+      "short": "The commercial service does not serve the committed generation",
+      "plain": "A governed act committed a newer generation of the commercial store and the node's post-commit reload failed, so the service still holds an older generation.",
+      "technical": "error_code: COMMERCIAL_GENERATION_STALE"
     },
     {
       "id": "error.CONFIG_LOAD_FAILED",
@@ -2418,7 +2436,8 @@
       ],
       "disallowedConditions": [
         "l0Verified=false",
-        "verificationMode=local_only"
+        "verificationMode=local_only",
+        "localEmbedded=true"
       ]
     },
     {
@@ -2434,6 +2453,22 @@
         "l0Verified=false"
       ],
       "disallowedConditions": []
+    },
+    {
+      "id": "assurance.local_embedded_l0",
+      "short": "Embedded L0 proofs verified (local-embedded)",
+      "plain": "Confirmed offline from Accumulate proofs of this run's own in-process network, under the pin you passed — not Kermit, and not durable beyond that network.",
+      "technical": "Proof level L4/G2 local-embedded: the embedded anchor, key-page and governance-execution chains verified against the relying party's local-embedded pin (--l0-pin); no live L0 lookup.",
+      "icon": "anchor",
+      "colorRole": "info",
+      "screenReader": "Embedded L0 proofs verified, local-embedded: confirmed against the run's own Accumulate network pin, not Kermit.",
+      "allowedConditions": [
+        "l0Verified=true",
+        "localEmbedded=true"
+      ],
+      "disallowedConditions": [
+        "l0Verified=false"
+      ]
     },
     {
       "id": "assurance.no_node_trust",
@@ -3461,6 +3496,26 @@
       ],
       "docs": "docs/errors/README.md",
       "technical": "error_code: CLI_USAGE"
+    },
+    {
+      "code": "COMMERCIAL_GENERATION_STALE",
+      "title": "The commercial service does not serve the committed generation",
+      "plainMeaning": "A governed act committed a newer generation of the commercial store and the node's post-commit reload failed, so the service still holds an older generation.",
+      "fixes": [
+        {
+          "label": "Read the node's readiness: the commercial_generation and commercial_reload rows name the generation and the reload's error",
+          "command": "curl -s \u003cnode\u003e/v4/network/readiness",
+          "safeToRun": true
+        },
+        {
+          "label": "Retry the read after the next block close: the block-close sweep retries the reload until it succeeds",
+          "command": "curl -s -H 'Authorization: Bearer \u003ctenant-token\u003e' \u003cnode\u003e/v4/account/usage",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/commercial.md",
+      "technical": "error_code: COMMERCIAL_GENERATION_STALE"
     },
     {
       "code": "CONFIG_LOAD_FAILED",

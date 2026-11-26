@@ -53,7 +53,7 @@ export function conditionHolds(state, token) {
 const BOOLEAN_FIELDS = Object.freeze({
   verified: 1, cryptographicallyVerified: 1, l0Verified: 1, replayVerified: 1,
   nodeTrusted: 1, witnessQuorumMet: 1, distinctOperatorsMet: 1, operatorAttested: 1,
-  disclosureProofVerified: 1, releaseEvidenceVerified: 1,
+  disclosureProofVerified: 1, releaseEvidenceVerified: 1, localEmbedded: 1,
 });
 
 /** badgeAllowed reports whether one badge may be shown for a state. */
