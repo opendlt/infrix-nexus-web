@@ -5,7 +5,7 @@
       "id": "proof-receipt",
       "topic": "proof-receipt",
       "title": "What is a proof receipt?",
-      "explanation": "A proof receipt is a small, fail-closed summary of a verification verdict. It records exactly what was checked (internal consistency, replay, live L0, witness quorum) and never asserts more than those checks support. If a receipt says \"verified\" it had to pass at least one concrete check; if it claims L4 it must carry a live L0 confirmation, or it is rejected.",
+      "explanation": "A proof receipt is a small, fail-closed summary of a verification verdict. It records exactly what was checked (internal consistency, replay, live L0, witness quorum) and never asserts more than those checks support. If a receipt says \"verified\" it had to pass at least one concrete check; if it claims L4 it must carry an L0 confirmation that names where and how it was confirmed (a live Kermit check, or a local run's own network pin: local-embedded), or it is rejected.",
       "example": "A receipt with status=partial, proofLevel=L3, l0Verified=false means: checked locally, the node was not trusted, but live Accumulate L0 was not confirmed — so it is not L4.",
       "tryIt": "infrix tutor explain testdata/offline-proof.infrix.json",
       "quiz": {
@@ -61,19 +61,19 @@
       "id": "L3-vs-L4",
       "topic": "L3-vs-L4",
       "title": "What is L3 vs L4?",
-      "explanation": "The assurance ladder describes how strongly a result is backed. L3 means the bundle is internally consistent and (typically) replay-checked, verified locally without trusting the node — but the live Accumulate L0 anchor was not confirmed. L4 is L3 PLUS a confirmed live L0 anchor: the outcome is provably recorded on Accumulate's root chain. The tutor never reports L4 unless the verifier actually confirmed L0.",
-      "example": "Local run: caps at L3 (no live network). Same run on Kermit with `--l0`: the verifier confirms the anchor and the proof reaches L4.",
-      "tryIt": "infrix verify \u003cbundle\u003e --l0 --network kermit   # adds the live L0 confirmation that L4 requires",
+      "explanation": "The assurance ladder describes how strongly a result is backed. L3 means the bundle is internally consistent and (typically) replay-checked, verified without trusting the node — but no Accumulate L0 anchor was confirmed. L4 is L3 PLUS a confirmed Accumulate L0 anchor: the outcome is provably recorded on an Accumulate network, proven by an embedded proof chain checked against a pin the verifier holds, or re-read live. The tutor never reports L4 unless the verifier actually confirmed L0, and it always names which network's pin confirmed it.",
+      "example": "Local run: L4/G2 local-embedded, verified under the run's own in-process Accumulate network pin (--l0-pin), never a Kermit claim; without the pin, L3. Same flow on Kermit with `--l0`: the verifier confirms the anchor live and the proof reaches L4 on Kermit.",
+      "tryIt": "infrix verify \u003cbundle\u003e --l0-pin \u003crun\u003e/pin.local-embedded.json   # confirms a local run's embedded L0 proofs under its own pin",
       "quiz": {
         "topic": "L3-vs-L4",
         "question": "What does L4 add over L3?",
         "choices": [
-          "A confirmed live Accumulate L0 anchor.",
+          "A confirmed Accumulate L0 anchor, proven against a pin the verifier holds.",
           "Trusting the Infrix node instead of verifying.",
           "A faster but unverified result."
         ],
         "answer": 0,
-        "explain": "L4 = L3 plus a live L0 confirmation. Without the confirmed anchor, the honest level is at most L3."
+        "explain": "L4 = L3 plus a confirmed L0 anchor (embedded and pinned, or re-read live). Without the confirmed anchor, the honest level is at most L3."
       },
       "related": [
         "accumulate-l0",
@@ -222,28 +222,29 @@
   "sample": {
     "kind": "proof_receipt",
     "audience": "auditor",
-    "summary": "For the record: This proof was verified locally (L3) and does not trust the Infrix node. Live Accumulate L0 was not checked.",
+    "summary": "For the record: This proof was verified offline at L4/G2 local-embedded, under the pin of the run's own in-process Accumulate network; it does not trust the Infrix node and is not a Kermit or mainnet claim.",
     "status": "partial",
     "canClaim": [
       "The bundle is internally consistent and its bindings check out.",
       "Replay matched: re-executing the recorded inputs reproduced the same outcome.",
-      "The producing Infrix node was not trusted; the proof was checked from the evidence itself."
+      "The producing Infrix node was not trusted; the proof was checked from the evidence itself.",
+      "Accumulate L0 anchoring was confirmed offline from embedded proofs, against the pin of the run's own in-process Accumulate network (local-embedded).",
+      "This is an L4/G2 proof under the run's own pin (local-embedded): the anchor, the approver keys on their key page and the executed 2-of-3 approval are proven by embedded Accumulate proofs."
     ],
     "cannotClaim": [
       "Live Accumulate L0 verification was not performed.",
-      "This is not an L4 proof.",
+      "This is not a Kermit or mainnet claim: the trust root is the run's own network pin, passed with --l0-pin.",
       "No independent witness quorum was confirmed."
     ],
     "nextActions": [
-      "To raise this to L4, request a live-L0 verification on Kermit and re-run `infrix verify --l0`.",
-      "Independently re-run `infrix verify` against the bundle; do not trust this summary alone."
+      "Re-run `infrix verify \u003cbundle\u003e --l0-pin \u003crun\u003e/pin.local-embedded.json` to re-check it independently; anchor on Kermit (`infrix app anchor`) for a public-testnet L4."
     ],
     "technicalDetails": [
       "subject: intent intent-demo-escrow",
-      "proofLevel=L3 governanceLevel=G0",
+      "proofLevel=L4 governanceLevel=G2",
       "status=partial nodeTrusted=false",
-      "l0Verified=false replayVerified=true witnessQuorumVerified=false",
-      "verify: infrix verify proof.json"
+      "l0Verified=true replayVerified=true witnessQuorumVerified=false",
+      "verify: infrix verify proof.infrix.json --l0-pin pin.local-embedded.json"
     ],
     "grounded": true,
     "modelImproved": false
@@ -252,11 +253,11 @@
     "topic": "L3-vs-L4",
     "question": "What does L4 add over L3?",
     "choices": [
-      "A confirmed live Accumulate L0 anchor.",
+      "A confirmed Accumulate L0 anchor, proven against a pin the verifier holds.",
       "Trusting the Infrix node instead of verifying.",
       "A faster but unverified result."
     ],
     "answer": 0,
-    "explain": "L4 = L3 plus a live L0 confirmation. Without the confirmed anchor, the honest level is at most L3."
+    "explain": "L4 = L3 plus a confirmed L0 anchor (embedded and pinned, or re-read live). Without the confirmed anchor, the honest level is at most L3."
   }
 }

@@ -106,6 +106,15 @@ const failed = { verified: false, nodeTrusted: true };
   console.log('✓ Live L0 badge appears with an L0 anchor');
 }
 {
+  // brief 28bl row 1: an L0 confirmation from a local run's own network pin is never "Live L0"; it is the local-embedded badge
+  const localEmbedded = { ...liveL0, localEmbedded: true };
+  const ids = ux.badgesFor(localEmbedded).map((b) => b.id);
+  assert.ok(!ids.includes('assurance.live_l0'), 'no Live L0 badge for a local-embedded confirmation');
+  assert.ok(ids.includes('assurance.local_embedded_l0'), 'the local-embedded badge is present for a local-embedded confirmation');
+  assert.ok(!ux.badgesFor(liveL0).map((b) => b.id).includes('assurance.local_embedded_l0'), 'no local-embedded badge on a live confirmation');
+  console.log('✓ a local-embedded confirmation is labelled local-embedded, never Live L0');
+}
+{
   const ids = ux.badgesFor(offline).map((b) => b.id);
   assert.ok(!ids.includes('assurance.live_l0'), 'no Live L0 badge offline');
   assert.ok(ids.includes('assurance.offline') && ids.includes('assurance.no_node_trust'), 'offline + no-node-trust present');
