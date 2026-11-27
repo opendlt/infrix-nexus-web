@@ -240,7 +240,7 @@
     ],
     "technicalDetails": [
       "subject: intent intent-demo-escrow",
-      "proofLevel=L3 governanceLevel=G2",
+      "proofLevel=L3 governanceLevel=G0",
       "status=partial nodeTrusted=false",
       "l0Verified=false replayVerified=true witnessQuorumVerified=false",
       "verify: infrix verify proof.json"
