@@ -1,10 +1,12 @@
 // nextux-13 — Conversational Proof Tutor smoke test (no browser).
 //
 // Proves the browser twin (lib/tutor.js) reads the Go-generated tutor fixture
-// and reports honest results: the worked example explains an OFFLINE proof, so
-// it never claims L4, it is never green, and it discloses that live L0 was not
-// performed; the curriculum carries the seven lessons; and an audience switch
-// changes the wording only (the facts are identical).
+// and reports honest results: the worked example explains a local run's proof
+// verified under its own in-process Accumulate network pin (L4/G2
+// local-embedded, brief 28bl row 1), so every L4 line names local-embedded, it
+// is never green, it discloses that live L0 was not performed and that it is
+// not a Kermit or mainnet claim; the curriculum carries the seven lessons; and
+// an audience switch changes the wording only (the facts are identical).
 
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
@@ -38,17 +40,29 @@ test('teach by alias resolves (L4 -> the L3-vs-L4 lesson)', () => {
   assert.equal(l.id, 'L3-vs-L4', 'L4 maps to the L3-vs-L4 lesson');
 });
 
-test('the worked example is an OFFLINE proof — never L4, never green', () => {
+test('the worked example is the local-embedded claim — L4 only with its route, never green', () => {
   const s = t.sample();
   assert.ok(s, 'a worked example is present');
-  assert.notEqual(s.status, 'verified', 'an offline proof is not green/verified');
+  assert.notEqual(s.status, 'verified', 'a local proof is not green/verified');
+  let l4 = false;
   for (const c of s.canClaim) {
-    assert.ok(!/\bl4\b/i.test(c), `offline proof must not claim L4: ${c}`);
+    if (/\bl4\b/i.test(c)) {
+      l4 = true;
+      assert.ok(/local-embedded/i.test(c), `a local L4 line must name local-embedded: ${c}`);
+    }
   }
+  assert.ok(l4, 'the worked example states its L4/G2 local-embedded claim');
   assert.ok(s.cannotClaim.some((c) => /live accumulate l0 verification was not performed/i.test(c)),
-    'the offline proof discloses live L0 was not performed');
+    'the local proof discloses live L0 was not performed');
+  assert.ok(s.cannotClaim.some((c) => /not a kermit or mainnet claim/i.test(c)),
+    'the local proof discloses it is not a Kermit or mainnet claim');
   assert.equal(t.sampleIsHonest(), true, 'the worked example satisfies the honesty rails');
-  assert.notEqual(t.sampleStatusTone(), 'positive', 'an offline proof tone is never positive/green');
+  assert.notEqual(t.sampleStatusTone(), 'positive', 'a local proof tone is never positive/green');
+  // the bite: an L4 line without the route is not honest
+  const saved = s.canClaim;
+  s.canClaim = [...saved, 'This is an L4 proof.'];
+  assert.equal(t.sampleIsHonest(), false, 'an L4 line without the local-embedded route passes the honesty rails');
+  s.canClaim = saved;
 });
 
 test('the six audiences are present (wording only — facts come from the artifact)', () => {

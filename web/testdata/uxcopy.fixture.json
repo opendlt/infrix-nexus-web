@@ -2,7 +2,7 @@
   "_generatedBy": "infrix uxcopy generate",
   "_source": "pkg/uxcopy",
   "_schemaVersion": 1,
-  "_contentSha256": "120a9c0679ae568206526696cd4c45057434e24e5e201751dec317b748c92e72",
+  "_contentSha256": "491e7504c1915dcdfe2e99b3c5b151aa2bf5db5b016019d49f78e9b2cc903e7d",
   "version": "1",
   "labels": [
     {
@@ -69,7 +69,8 @@
       "technical": "Proof level L4: bundle anchor confirmed through a live L0 lookup.",
       "neverUseWhen": [
         "l0Verified=false",
-        "verificationMode=local_only"
+        "verificationMode=local_only",
+        "localEmbedded=true"
       ]
     },
     {
@@ -78,6 +79,16 @@
       "short": "Local proof",
       "plain": "Checked on this machine only — not yet confirmed against the chain.",
       "technical": "Structurally consistent; no live L0 confirmation. Caps below L4."
+    },
+    {
+      "id": "assurance.local_embedded_l0",
+      "category": "assurance",
+      "short": "Embedded L0 proofs verified (local-embedded)",
+      "plain": "Confirmed offline from Accumulate proofs of this run's own in-process network, under the pin you passed — not Kermit, and not durable beyond that network.",
+      "technical": "Proof level L4/G2 local-embedded: the embedded anchor, key-page and governance-execution chains verified against the relying party's local-embedded pin (--l0-pin); no live L0 lookup.",
+      "neverUseWhen": [
+        "l0Verified=false"
+      ]
     },
     {
       "id": "assurance.no_node_trust",
@@ -532,6 +543,13 @@
       "short": "That flag or command isn't recognized",
       "plain": "Infrix did not recognize a flag, argument, or subcommand in the command line.",
       "technical": "error_code: CLI_USAGE"
+    },
+    {
+      "id": "error.COMMERCIAL_GENERATION_STALE",
+      "category": "error",
+      "short": "The commercial service does not serve the committed generation",
+      "plain": "A governed act committed a newer generation of the commercial store and the node's post-commit reload failed, so the service still holds an older generation.",
+      "technical": "error_code: COMMERCIAL_GENERATION_STALE"
     },
     {
       "id": "error.CONFIG_LOAD_FAILED",
@@ -989,6 +1007,13 @@
       "technical": "error_code: OBJECT_TRANSITION_INVALID"
     },
     {
+      "id": "error.OPERATOR_MATERIAL_REQUIRED",
+      "category": "error",
+      "short": "The config needs external operator material",
+      "plain": "public-production-smoke booted every section that does not need external material; the config names material no harness can stand in for (a real KMS/Key Vault account, a live RPC of a chain the harness runs no in-process node of, or TEE hardware). The refusal lists each piece by config section.",
+      "technical": "error_code: OPERATOR_MATERIAL_REQUIRED"
+    },
+    {
       "id": "error.OPSREAD_FORBIDDEN",
       "category": "error",
       "short": "The caller may not make this read",
@@ -1253,6 +1278,13 @@
       "short": "The signer's key page could not be read",
       "plain": "The key page could not be read from L0, so the signature was neither admitted nor refused; an unreachable L0 passes.",
       "technical": "error_code: PROTOCOL_SIGNER_UNAVAILABLE"
+    },
+    {
+      "id": "error.PROTOCOL_TX_INVALID",
+      "category": "error",
+      "short": "The transaction breaks a served contract rule",
+      "plain": "A field the goal requires is missing, the code is above the size cap or is a module the served compile refuses, the initial state or metadata could not be held, a call's gas limit or argument bytes are above the call caps, a deploy's address is taken, or a call or upgrade names an address no contract holds; it is refused before the ledger is claimed, so nothing was consumed.",
+      "technical": "error_code: PROTOCOL_TX_INVALID"
     },
     {
       "id": "error.PROTOCOL_TX_TYPE_NOT_ALLOWED",
@@ -2418,7 +2450,8 @@
       ],
       "disallowedConditions": [
         "l0Verified=false",
-        "verificationMode=local_only"
+        "verificationMode=local_only",
+        "localEmbedded=true"
       ]
     },
     {
@@ -2434,6 +2467,22 @@
         "l0Verified=false"
       ],
       "disallowedConditions": []
+    },
+    {
+      "id": "assurance.local_embedded_l0",
+      "short": "Embedded L0 proofs verified (local-embedded)",
+      "plain": "Confirmed offline from Accumulate proofs of this run's own in-process network, under the pin you passed — not Kermit, and not durable beyond that network.",
+      "technical": "Proof level L4/G2 local-embedded: the embedded anchor, key-page and governance-execution chains verified against the relying party's local-embedded pin (--l0-pin); no live L0 lookup.",
+      "icon": "anchor",
+      "colorRole": "info",
+      "screenReader": "Embedded L0 proofs verified, local-embedded: confirmed against the run's own Accumulate network pin, not Kermit.",
+      "allowedConditions": [
+        "l0Verified=true",
+        "localEmbedded=true"
+      ],
+      "disallowedConditions": [
+        "l0Verified=false"
+      ]
     },
     {
       "id": "assurance.no_node_trust",
@@ -3463,6 +3512,26 @@
       "technical": "error_code: CLI_USAGE"
     },
     {
+      "code": "COMMERCIAL_GENERATION_STALE",
+      "title": "The commercial service does not serve the committed generation",
+      "plainMeaning": "A governed act committed a newer generation of the commercial store and the node's post-commit reload failed, so the service still holds an older generation.",
+      "fixes": [
+        {
+          "label": "Read the node's readiness: the commercial_generation and commercial_reload rows name the generation and the reload's error",
+          "command": "curl -s \u003cnode\u003e/v4/network/readiness",
+          "safeToRun": true
+        },
+        {
+          "label": "Retry the read after the next block close: the block-close sweep retries the reload until it succeeds",
+          "command": "curl -s -H 'Authorization: Bearer \u003ctenant-token\u003e' \u003cnode\u003e/v4/account/usage",
+          "safeToRun": true
+        }
+      ],
+      "retryGuidance": "This is often transient — wait a moment and try again.",
+      "docs": "docs/errors/commercial.md",
+      "technical": "error_code: COMMERCIAL_GENERATION_STALE"
+    },
+    {
       "code": "CONFIG_LOAD_FAILED",
       "title": "The production config could not be loaded",
       "plainMeaning": "Infrix could not read or parse the production config file you pointed it at.",
@@ -4454,6 +4523,20 @@
       "technical": "error_code: OBJECT_TRANSITION_INVALID"
     },
     {
+      "code": "OPERATOR_MATERIAL_REQUIRED",
+      "title": "The config needs external operator material",
+      "plainMeaning": "public-production-smoke booted every section that does not need external material; the config names material no harness can stand in for (a real KMS/Key Vault account, a live RPC of a chain the harness runs no in-process node of, or TEE hardware). The refusal lists each piece by config section.",
+      "fixes": [
+        {
+          "label": "Supply each named piece of operator material, then boot the node itself against it",
+          "command": "infrix node-validate --config \u003cfile\u003e",
+          "safeToRun": true
+        }
+      ],
+      "docs": "docs/errors/node-config.md",
+      "technical": "error_code: OPERATOR_MATERIAL_REQUIRED"
+    },
+    {
       "code": "OPSREAD_FORBIDDEN",
       "title": "The caller may not make this read",
       "plainMeaning": "The read needs an operator capability the caller does not hold, or visibility into the contract it names.",
@@ -4987,6 +5070,19 @@
       "retryGuidance": "This is often transient — wait a moment and try again.",
       "docs": "docs/errors/protocol-process.md",
       "technical": "error_code: PROTOCOL_SIGNER_UNAVAILABLE"
+    },
+    {
+      "code": "PROTOCOL_TX_INVALID",
+      "title": "The transaction breaks a served contract rule",
+      "plainMeaning": "A field the goal requires is missing, the code is above the size cap or is a module the served compile refuses, the initial state or metadata could not be held, a call's gas limit or argument bytes are above the call caps, a deploy's address is taken, or a call or upgrade names an address no contract holds; it is refused before the ledger is claimed, so nothing was consumed.",
+      "fixes": [
+        {
+          "label": "Read the message and the summary, correct what they name, and ask again.",
+          "safeToRun": false
+        }
+      ],
+      "docs": "docs/errors/protocol-process.md",
+      "technical": "error_code: PROTOCOL_TX_INVALID"
     },
     {
       "code": "PROTOCOL_TX_TYPE_NOT_ALLOWED",

@@ -66,24 +66,33 @@ export function sampleStatusTone() {
   }
 }
 
-/** sampleIsHonest reports whether the worked example respects the honesty rails:
- *  an offline proof must not claim L4 and must disclose that live L0 was not
- *  performed. This is the browser-side echo of the Go grounding guard. */
+/** sampleIsHonest reports whether the worked example respects the honesty rails
+ *  (the browser-side echo of the Go grounding guard): the sample is a local
+ *  run's proof, never green; it discloses that live L0 was not performed; and
+ *  an L4 claim is honest only on the local-embedded route (verified under the
+ *  run's own Accumulate network pin, brief 28bl row 1): every L4 line names
+ *  local-embedded and the sample says it is not a Kermit or mainnet claim. */
 export function sampleIsHonest() {
   const s = sample();
   if (!s) return true;
-  // No canClaim line may assert a current L4 proof.
+  if (s.status === 'verified') return false; // a local sample is never green
+  const cannot = s.cannotClaim || [];
+  if (!cannot.some((c) => /live accumulate l0 verification was not performed/i.test(c))) return false;
+  let l4 = false;
   for (const c of s.canClaim || []) {
-    if (/\bl4\b/i.test(c)) return false;
+    if (/\blive\b/i.test(c)) return false; // a local proof is never confirmed live
+    if (/\bl4\b/i.test(c)) {
+      if (!/local-embedded/i.test(c)) return false;
+      l4 = true;
+    }
   }
-  if (s.status === 'verified') return false; // the sample is an OFFLINE proof
-  return (s.cannotClaim || []).some((c) => /live accumulate l0 verification was not performed/i.test(c));
+  return !l4 || cannot.some((c) => /not a kermit or mainnet claim/i.test(c));
 }
 
 /** whyItMatters returns the encouraging "why this matters" copy. */
 export function whyItMatters() {
   return 'Every answer here is grounded in a real, parsed Infrix artifact and the canonical product ' +
     'copy — never a free-form guess. The tutor never claims a stronger assurance level than the ' +
-    'verifier supports (no L4 without a live L0 confirmation), never invents a proof claim, and never ' +
+    'verifier supports (no L4 without a confirmed L0 anchor, and it names whose pin confirmed it: a live Kermit check or a local run\'s own network), never invents a proof claim, and never ' +
     'tells you to bypass a gate. That is the point: learning and answers are honest end to end.';
 }
